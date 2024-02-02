@@ -315,24 +315,3 @@ aws_auth_roles = [
 # Default: "8Mi"
 #baloon_memory = "8Mi"
 
-
-# aws_region - AWS Region.
-# Type: ${string}
-# Required
-#aws_region = <REQUIRED-VALUE>
-
-# cluster_name - EKS cluster name.
-# Type: ${string}
-# Required
-cluster_name = "production"
-
-# cluster_endpoint - Endpoint for your Kubernetes API server.
-# Type: ${string}
-# Required
-#cluster_endpoint = <REQUIRED-VALUE>
-
-# cluster_certificate_authority_data - Base64 encoded certificate data required to communicate with the cluster.
-# Type: ${string}
-# Required
-#cluster_certificate_authority_data = <REQUIRED-VALUE>
-
