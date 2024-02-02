@@ -196,12 +196,12 @@ fallback_node_group_capacity_type = "SPOT"
 # iam_role_arn - Existing IAM role ARN for the cluster.
 # Type: ${string}
 # Default: null
-#iam_role_arn = "arn:aws:iam::111111111111:role/eks"
+#iam_role_arn = "arn:aws:iam::XXXXXXXXXXXX:role/eks"
 
 # kms_key_administrators - A list of IAM ARNs for [key administrators](https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-default.html#key-policy-default-allow-administrators). If no value is provided, the current caller identity is used to ensure at least one key admin is available
 # Type: ${list(string)}
 # Default: []
-#kms_key_administrators = ["arn:aws:iam::111111111111:user/development", "arn:aws:iam::111111111111:role/eks-admin", "arn:aws:iam::111111111111:role/getupcloud"]
+#kms_key_administrators = ["arn:aws:iam::XXXXXXXXXXXX:user/development", "arn:aws:iam::XXXXXXXXXXXX:role/eks-admin", "arn:aws:iam::XXXXXXXXXXXX:role/getupcloud"]
 
 # aws_auth_user_arns - List of user ARNs to add to the aws-auth configmap. K8s username will be the last component of the ARN.
 # Type: ${list(string)}
@@ -258,7 +258,7 @@ aws_auth_roles = [
 # aws_auth_node_iam_role_arns_non_windows - List of non-Windows based node IAM role ARNs to add to the aws-auth configmap
 # Type: ${list(string)}
 # Default: []
-#aws_auth_node_iam_role_arns_non_windows = ["arn:aws:iam::111111111111:role/", "arn:aws:iam::111111111111:role/eks-workers-role" ]
+#aws_auth_node_iam_role_arns_non_windows = ["arn:aws:iam::XXXXXXXXXXXX:role/", "arn:aws:iam::XXXXXXXXXXXX:role/eks-workers-role" ]
 
 # keda_namespace - Namespace where to install Keda.
 # Type: ${string}
