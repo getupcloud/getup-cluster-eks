@@ -1,0 +1,63 @@
+name: 'EKS - Apply'
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{  secrets.AWS_DEFAULT_REGION }}
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    # runs-on: my-runner
+    # environment: my-env
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.7
+
+    - name: Terraform Init
+      run: make init
+
+    - name: Terraform Validate
+      run: make validate
+
+    - name: Terraform Plan
+      run: make plan
+
+    - name: Approval
+      uses: trstringer/manual-approval@v1
+      with:
+        secret: ${{ github.TOKEN }}
+        approvers: sre,admin,user1,user2  ## Fill with your teams/users
+        minimum-approvals: 1
+        issue-title: "Commit: ${{ github.sha }}"
+        issue-body: ""
+        exclude-workflow-initiator-as-approver: false
+        additional-approved-words: 'Aprovar, Aprovado, Sim'
+        additional-denied-words: 'Negar, Negado, Cancelar'
+
+    - name: Terraform Apply
+      run: make apply

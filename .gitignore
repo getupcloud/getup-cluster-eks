@@ -1,0 +1,4 @@
+.terraform
+*.sw?
+terraform.log
+terraform.tfplan
