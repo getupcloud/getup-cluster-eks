@@ -1,5 +1,5 @@
 module "eks" {
-  source = "git@github.com:getupcloud/terraform-modules//modules/eks?ref=v0.2.1"
+  source = "git@github.com:getupcloud/terraform-modules//modules/eks?ref=v0.2.2"
 
   cluster_name                            = var.cluster_name
   kubernetes_version                      = var.kubernetes_version
@@ -60,7 +60,7 @@ module "eks" {
 }
 
 module "flux" {
-  source = "git@github.com:getupcloud/terraform-modules//modules/flux?ref=v0.2.1"
+  source = "git@github.com:getupcloud/terraform-modules//modules/flux?ref=v0.2.2"
 
   flux_aws_region                    = var.aws_region
   flux_cluster_name                  = module.eks.cluster_name
@@ -71,7 +71,7 @@ module "flux" {
 }
 
 module "istio" {
-  source = "git@github.com:getupcloud/terraform-modules//modules/istio?ref=v0.2.1"
+  source = "git@github.com:getupcloud/terraform-modules//modules/istio?ref=v0.2.2"
 
   istio_version   = var.istio_version
   istio_namespace = var.istio_namespace
