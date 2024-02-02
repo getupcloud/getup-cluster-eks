@@ -6,7 +6,7 @@
 TERRAFORM    ?= terraform
 TF_LOG_PATH  ?= terraform.log
 TF_LOG       ?= DEBUG
-CLUSTER_NAME ?= $(shell sed -ne 's|^\s*cluster_name\s*=\s*"\([^"]\+\)"|\1|p' terraform.tfvars 2>/dev/null)
+CLUSTER_NAME ?= $(shell sed -ne 's|^\s*cluster_name\s*=\s*"\([^"]\+\)"|\1|p' *.tfvars 2>/dev/null)
 LOCAL_IPS    ?= ["$(shell curl -s https://api.ipify.org)/32"]
 # TODO: Ler grupo usando terraform e injetar no configmap/aws-auth
 # AWS_AUTH_GROUP_NAME := Infra
