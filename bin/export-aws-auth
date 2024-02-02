@@ -1,0 +1,8 @@
+#!/bin/bash
+
+echo -n 'aws_auth_users = '
+kubectl --namespace=kube-system get configmap -o=json aws-auth | jq .data.mapUsers -r | yq e . -o json | cat
+
+echo
+echo -n 'aws_auth_roles = '
+kubectl --namespace=kube-system get configmap -o=json aws-auth | jq .data.mapRoles -r | yq e . -o json | cat
