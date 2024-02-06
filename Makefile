@@ -24,6 +24,9 @@ clean:
 init: validate-vars
 	$(TERRAFORM) init $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
 
+upgrade : validate-vars
+	$(TERRAFORM) init -upgrade $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
+
 validate: validate-vars
 	$(TERRAFORM) validate $(TERRAFORM_ARGS) $(TERRAFORM_VALIDATE_ARGS)
 
