@@ -1,0 +1,56 @@
+#!/bin/bash
+
+function udpate()
+{
+    local release=$1; shift
+    for obj; do
+        kubectl label -n istio-system $obj app.kubernetes.io/managed-by=Helm
+        kubectl annotate -n istio-system $obj meta.helm.sh/release-name=$release meta.helm.sh/release-namespace=istio-system
+    done
+}
+
+update istio-base \
+    customresourcedefinition.apiextensions.k8s.io/authorizationpolicies.security.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/destinationrules.networking.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/envoyfilters.networking.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/gateways.networking.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/istiooperators.install.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/peerauthentications.security.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/proxyconfigs.networking.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/requestauthentications.security.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/serviceentries.networking.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/sidecars.networking.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/telemetries.telemetry.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/virtualservices.networking.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/wasmplugins.extensions.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/workloadentries.networking.istio.io \
+    customresourcedefinition.apiextensions.k8s.io/workloadgroups.networking.istio.io
+
+update istiod \
+    ClusterRole/istiod-clusterrole-istio-system \
+    ClusterRole/istiod-gateway-controller-istio-system \
+    ClusterRole/istio-reader-clusterrole-istio-system \
+    ServiceAccount/istiod ConfigMap/istio \
+    ConfigMap/istio-sidecar-injector \
+    ClusterRole/istiod-clusterrole-istio-system \
+    ClusterRole/istiod-gateway-controller-istio-system \
+    ClusterRole/istio-reader-clusterrole-istio-system \
+    ClusterRoleBinding/istiod-clusterrole-istio-system \
+    ClusterRoleBinding/istiod-gateway-controller-istio-system \
+    ClusterRoleBinding/istio-reader-clusterrole-istio-system
+    Role/istiod \
+    RoleBinding/istiod \
+    Service/istiod \
+    Deployment/istiod \
+    HorizontalPodAutoscaler/istiod \
+    MutatingWebhookConfiguration/istio-sidecar-injector
+
+update istio-ingressgateway \
+    Service/istio-ingressgateway \
+    Deployment/istio-ingressgateway \
+    HorizontalPodAutoscaler/istio-ingressgateway
+
+update istio-egressgateway \
+    Service/istio-egressgateway \
+    Deployment/istio-egressgateway \
+    HorizontalPodAutoscaler/istio-egressgateway
