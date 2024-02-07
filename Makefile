@@ -15,8 +15,8 @@ LOCAL_IPS    ?= ["$(shell curl -s https://api.ipify.org)/32"]
 .ONESHELL:
 .EXPORT_ALL_VARIABLES:
 
-all:
-	@echo 'Usage: make [init|validate|fmt|plan|apply|output|kubeconfig]'
+all help:
+	@echo 'Usage: make [init|validate|fmt|plan|apply|output|kubeconfig|update-version]'
 
 clean:
 	rm -rf .terraform terraform.log
@@ -39,11 +39,11 @@ plan: validate-vars
 		-var cluster_endpoint_public_access_cidrs='$(LOCAL_IPS)' \
 		$(TERRAFORM_ARGS) $(TERRAFORM_PLAN_ARGS)
 
-# WARNING: NOT CONFIRMATION ON APPLY
+# WARNING: NO CONFIRMATION ON APPLY
 apply:
 	$(TERRAFORM) apply -auto-approve terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_APPLY_ARGS)
 
-# WARNING: NOT CONFIRMATION ON DESTROY
+# WARNING: NO CONFIRMATION ON DESTROY
 destroy:
 	$(TERRAFORM) destroy -auto-approve $(TERRAFORM_ARGS) $(TERRAFORM_DESTROY_ARGS)
 
@@ -52,6 +52,10 @@ output:
 
 kubeconfig:
 	aws eks update-kubeconfig --name=$(CLUSTER_NAME) $(AWS_EKS_ARGS)
+
+update-version:
+	read -p 'New module version: (ex: v1.2.3): ' v
+	sed -i -e '/source/s/ref=v[0-9]\.[0-9]\.[0-9]/ref='$$v'/g' main-*tf
 
 ###
 
