@@ -3,3 +3,7 @@ kind: Kustomization
 
 resources:
 - flux-system
+- base/repo.yaml
+- base/monitoring.yaml
+- base/cert-manager.yaml
+- base/ingress-nginx.yaml
