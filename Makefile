@@ -38,7 +38,7 @@ fmt:
 	$(TERRAFORM) fmt $(TERRAFORM_ARGS) $(TERRAFORM_FMT_ARGS)
 
 plan: validate-vars
-	$(TERRAFORM) plan -out terraform.tfplan -var cluster_name=$(CLUSTER_NAME) $(TERRAFORM_ARGS) $(TERRAFORM_PLAN_ARGS)
+	$(TERRAFORM) plan -out terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_PLAN_ARGS)
 
 # WARNING: NO CONFIRMATION ON APPLY
 apply:
