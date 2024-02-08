@@ -17,8 +17,18 @@
 
 # istio_base_set - Value block with custom values to be merged with the values yaml.
 # Type: ${list(object({"name": "${string}", "value": "${any}"}))}
-# Default: [{"name": "base.enableCRDTemplates", "value": true}]
-#istio_base_set = [{"name": "base.enableCRDTemplates", "value": true}]
+# Default: [
+#  {
+#    "name": "base.enableCRDTemplates",
+#    "value": true
+#  }
+#]
+#istio_base_set = [
+#  {
+#    "name": "base.enableCRDTemplates",
+#    "value": true
+#  }
+#]
 
 # istio_base_set_list - Value block with list of custom values to be merged with the values yaml.
 # Type: ${list(object({"name": "${string}", "value": "${list(any)}"}))}
@@ -47,8 +57,18 @@
 
 # ingress_gateway_set - Value block with custom values to be merged with the values yaml.
 # Type: ${list(object({"name": "${string}", "value": "${string}"}))}
-# Default: [{"name": "service.annotations.service\\\\.beta\\\\.kubernetes\\\\.io/aws-load-balancer-type", "value": "nlb"}]
-#ingress_gateway_set = [{"name": "service.annotations.service\\\\.beta\\\\.kubernetes\\\\.io/aws-load-balancer-type", "value": "nlb"}]
+# Default: [
+#  {
+#    "name": "service.annotations.service\\\\.beta\\\\.kubernetes\\\\.io/aws-load-balancer-type",
+#    "value": "nlb"
+#  }
+#]
+#ingress_gateway_set = [
+#  {
+#    "name": "service.annotations.service\\\\.beta\\\\.kubernetes\\\\.io/aws-load-balancer-type",
+#    "value": "nlb"
+#  }
+#]
 
 # ingress_gateway_set_list - Value block with list of custom values to be merged with the values yaml.
 # Type: ${list(object({"name": "${string}", "value": "${list(string)}"}))}
@@ -62,8 +82,18 @@
 
 # egress_gateway_set - Value block with custom values to be merged with the values yaml.
 # Type: ${list(object({"name": "${string}", "value": "${string}"}))}
-# Default: [{"name": "service.type", "value": "ClusterIP"}]
-#egress_gateway_set = [{"name": "service.type", "value": "ClusterIP"}]
+# Default: [
+#  {
+#    "name": "service.type",
+#    "value": "ClusterIP"
+#  }
+#]
+#egress_gateway_set = [
+#  {
+#    "name": "service.type",
+#    "value": "ClusterIP"
+#  }
+#]
 
 # egress_gateway_set_list - Value block with list of custom values to be merged with the values yaml.
 # Type: ${list(object({"name": "${string}", "value": "${list(string)}"}))}
