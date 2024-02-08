@@ -1,15 +1,17 @@
+# File auto-generated from ./bin/filter-vars
+
 #### Flux #####
 ###############
 
-variable "flux_aws_region" {
-  description = "AWS Region."
-  type        = string
-}
+#variable "flux_aws_region" {
+#  description = "AWS Region."
+#  type        = string
+#}
 
-variable "flux_cluster_name" {
-  description = "EKS cluster name."
-  type        = string
-}
+#variable "flux_cluster_name" {
+#  description = "EKS cluster name."
+#  type        = string
+#}
 
 variable "flux_github_token" {
   description = "GitHub OAuth / Personal Access Token. Can also by provided via the GITHUB_TOKEN environment variable."

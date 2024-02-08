@@ -1,10 +1,12 @@
+# File auto-generated from ./bin/filter-vars
+
 #### Istio #####
 ################
 
 variable "istio_version" {
   description = "Istio version."
   type        = string
-  default     = "1.18.2"
+  default     = "1.20.2"
 }
 
 variable "istio_namespace" {
@@ -51,12 +53,12 @@ variable "istiod_set" {
 
 variable "istiod_set_list" {
   description = "Value block with list of custom values to be merged with the values yaml."
-  type        = list(object({ name = string, value = list(any) }))
+  type        = list(object({ name = string, value = list(string) }))
   default     = []
 }
 
-## Ingresss Gateway
-###################
+## Ingress Gateway
+##################
 
 variable "ingress_gateway_values" {
   description = "Path to istio ingress-gateway values file. Start with / for absolute path or ./ to relative to root module. Set it to empty string to ignore."
@@ -66,18 +68,21 @@ variable "ingress_gateway_values" {
 
 variable "ingress_gateway_set" {
   description = "Value block with custom values to be merged with the values yaml."
-  type        = list(object({ name = string, value = any }))
-  default     = []
+  type        = list(object({ name = string, value = string }))
+  default = [{
+    "name" : "service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type",
+    "value" : "nlb",
+  }]
 }
 
 variable "ingress_gateway_set_list" {
   description = "Value block with list of custom values to be merged with the values yaml."
-  type        = list(object({ name = string, value = list(any) }))
+  type        = list(object({ name = string, value = list(string) }))
   default     = []
 }
 
-## Egresss Gateway
-##################
+## Egress Gateway
+#################
 
 variable "egress_gateway_values" {
   description = "Path to istio egress-gateway values file. Start with / for absolute path or ./ to relative to root module. Set it to empty string to ignore."
@@ -88,12 +93,12 @@ variable "egress_gateway_values" {
 # Egress is just a plain gateway without a load balancer.
 variable "egress_gateway_set" {
   description = "Value block with custom values to be merged with the values yaml."
-  type        = list(object({ name = string, value = any }))
+  type        = list(object({ name = string, value = string }))
   default     = [{ "name" : "service.type", "value" : "ClusterIP" }]
 }
 
 variable "egress_gateway_set_list" {
   description = "Value block with list of custom values to be merged with the values yaml."
-  type        = list(object({ name = string, value = list(any) }))
+  type        = list(object({ name = string, value = list(string) }))
   default     = []
 }

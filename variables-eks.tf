@@ -1,3 +1,5 @@
+# File auto-generated from ./bin/filter-vars
+
 #### Cluster ####
 #################
 
@@ -137,10 +139,10 @@ variable "fargate_profiles" {
   description = "List of fargate profiles to create. To disable fargate, set this value to `[]`."
   type        = any # list(object({namespace: string, labels: map(string)}))
   default = [
-    {
-      namespace = "kube-system"
-      labels    = {}
-    }
+    { namespace : "kube-system", labels : {} },
+    { namespace : "keda", labels : { "app.kubernetes.io/name" : "keda-operator" } },
+    { namespace : "karpenter", labels : { "app.kubernetes.io/name" : "karpenter" } },
+    { namespace : "getup", labels : { "app" : "teleport-agent" } },
   ]
 }
 
