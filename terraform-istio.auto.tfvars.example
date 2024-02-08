@@ -20,13 +20,13 @@
 # Default: [
 #  {
 #    "name": "base.enableCRDTemplates",
-#    "value": true
+#    "value": false
 #  }
 #]
 #istio_base_set = [
 #  {
 #    "name": "base.enableCRDTemplates",
-#    "value": true
+#    "value": false
 #  }
 #]
 

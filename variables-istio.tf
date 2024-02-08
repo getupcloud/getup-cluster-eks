@@ -27,7 +27,7 @@ variable "istio_base_values" {
 variable "istio_base_set" {
   description = "Value block with custom values to be merged with the values yaml."
   type        = list(object({ name = string, value = any }))
-  default     = [{ "name" : "base.enableCRDTemplates", "value" : true }]
+  default     = [{ "name" : "base.enableCRDTemplates", "value" : false }]
 }
 
 variable "istio_base_set_list" {

@@ -27,8 +27,8 @@
 
 # flux_path - Path relative to the repository root, when specified the cluster sync will be scoped to this path.
 # Type: ${string}
-# Default: ""
-#flux_path = ""
+# Default: "cluster"
+#flux_path = "cluster"
 
 # flux_version - Flux version.
 # Type: ${string}

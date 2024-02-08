@@ -35,7 +35,7 @@ variable "flux_github_repository" {
 variable "flux_path" {
   description = "Path relative to the repository root, when specified the cluster sync will be scoped to this path."
   type        = string
-  default     = ""
+  default     = "cluster"
 }
 
 variable "flux_version" {
