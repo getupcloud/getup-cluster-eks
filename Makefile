@@ -3,11 +3,15 @@
 # This is a suggestion, not a requirement.
 #
 
-TERRAFORM    ?= terraform
-TF_LOG_PATH  ?= terraform.log
-TF_LOG       ?= DEBUG
-CLUSTER_NAME ?= $(shell sed -ne 's|^\s*cluster_name\s*=\s*"\([^"]\+\)"|\1|p' *.tfvars 2>/dev/null)
-LOCAL_IPS    ?= ["$(shell curl -s https://api.ipify.org)/32"]
+TERRAFORM      ?= terraform
+TF_LOG_PATH    ?= terraform.log
+TF_LOG         ?= DEBUG
+CLUSTER_NAME   ?= $(shell sed -ne 's|^\s*cluster_name\s*=\s*"\([^"]\+\)"|\1|p' *.tfvars 2>/dev/null)
+
+ifeq ($(AUTO_LOCAL_IP),true)
+  TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -s https://api.ipify.org)/32"]'
+endif
+
 # TODO: Ler grupo usando terraform e injetar no configmap/aws-auth
 # AWS_AUTH_GROUP_NAME := Infra
 # AWS_AUTH_USER_ARNS ?= $(shell aws iam get-group --group-name $(AWS_AUTH_GROUP_NAME) | jq -cr '[.Users[].Arn]')
@@ -24,7 +28,7 @@ clean:
 init: validate-vars
 	$(TERRAFORM) init $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
 
-upgrade : validate-vars
+upgrade: validate-vars
 	$(TERRAFORM) init -upgrade $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
 
 validate: validate-vars
@@ -34,10 +38,7 @@ fmt:
 	$(TERRAFORM) fmt $(TERRAFORM_ARGS) $(TERRAFORM_FMT_ARGS)
 
 plan: validate-vars
-	$(TERRAFORM) plan -out terraform.tfplan \
-		-var cluster_name=$(CLUSTER_NAME) \
-		-var cluster_endpoint_public_access_cidrs='$(LOCAL_IPS)' \
-		$(TERRAFORM_ARGS) $(TERRAFORM_PLAN_ARGS)
+	$(TERRAFORM) plan -out terraform.tfplan -var cluster_name=$(CLUSTER_NAME) $(TERRAFORM_ARGS) $(TERRAFORM_PLAN_ARGS)
 
 # WARNING: NO CONFIRMATION ON APPLY
 apply:
