@@ -1,4 +1,4 @@
-# File auto-generated from bin/vars2tfvars
+# File auto-generated from ./bin/vars2tfvars
 
 # flux_aws_region - AWS Region.
 # Type: ${string}
@@ -9,11 +9,6 @@
 # Type: ${string}
 # Required
 #flux_cluster_name = <REQUIRED-VALUE>
-
-# flux_cluster_certificate_authority_data - Base64 encoded certificate data required to communicate with the cluster.
-# Type: ${string}
-# Required
-#flux_cluster_certificate_authority_data = <REQUIRED-VALUE>
 
 # flux_github_token - GitHub OAuth / Personal Access Token. Can also by provided via the GITHUB_TOKEN environment variable.
 # Type: ${string}
@@ -33,5 +28,9 @@
 # flux_path - Path relative to the repository root, when specified the cluster sync will be scoped to this path.
 # Type: ${string}
 # Default: ""
-flux_path = "cluster/"
+#flux_path = ""
 
+# flux_version - Flux version.
+# Type: ${string}
+# Default: "v2.2.3"
+#flux_version = "v2.2.3"
