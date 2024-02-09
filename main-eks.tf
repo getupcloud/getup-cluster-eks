@@ -1,7 +1,7 @@
 # File auto-generated from ./bin/vars2tf
 
 module "eks" {
-  source = "github.com/getupcloud/terraform-modules//modules/eks?ref=v0.6.4"
+  source = "github.com/getupcloud/terraform-modules//modules/eks?ref=v0.6.5"
 
   cluster_name                            = var.cluster_name
   kubernetes_version                      = var.kubernetes_version
@@ -29,6 +29,7 @@ module "eks" {
   fallback_node_group_platform            = var.fallback_node_group_platform
   fallback_node_group_disk_size           = var.fallback_node_group_disk_size
   fallback_node_group_disk_type           = var.fallback_node_group_disk_type
+  karpenter_enabled                       = var.karpenter_enabled
   karpenter_namespace                     = var.karpenter_namespace
   karpenter_version                       = var.karpenter_version
   karpenter_replicas                      = var.karpenter_replicas
