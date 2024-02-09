@@ -194,6 +194,12 @@ variable "fallback_node_group_disk_type" {
 #### Karpenter ####
 ###################
 
+variable "karpenter_enabled" {
+  description = "Install Karpenter."
+  type        = bool
+  default     = true
+}
+
 variable "karpenter_namespace" {
   description = "Namespace where to install Karpenter."
   type        = string
