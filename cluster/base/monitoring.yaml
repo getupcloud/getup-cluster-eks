@@ -74,7 +74,7 @@ spec:
             memory: 4Gi
           requests:
             cpu: 1
-            memory: 4Gi
+            memory: 2Gi
 
         externalLabels:
           cluster: production
@@ -643,7 +643,7 @@ spec:
     ###############################################
     kube-state-metrics:
       extraArgs:
-      - --metric-labels-allowlist=nodes=[eks.amazonaws.com/capacityType,]
+      - --metric-labels-allowlist=nodes=[eks.amazonaws.com/capacityType]
 
     ###############################################
     #nodeExporter:
