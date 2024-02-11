@@ -65,8 +65,7 @@ spec:
         scrapeInterval: 30s
         enableAdminAPI: true
 
-        enableFeatures:
-        - exemplar-storage
+        enableFeatures: []
 
         resources:
           limits:
