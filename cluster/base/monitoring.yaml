@@ -10,7 +10,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
-      version: "~> 56.6"
+      version: "55.11.0" # "~> 56.6" # 56 tem bug no grafana pra buscar log-volume
   install:
     createNamespace: true
     disableWait: false
@@ -74,7 +74,7 @@ spec:
             memory: 4Gi
           requests:
             cpu: 1
-            memory: 2Gi
+            memory: 4Gi
 
         externalLabels:
           cluster: production
@@ -104,8 +104,6 @@ spec:
               resources:
                 requests:
                   storage: 200Gi
-
-        enableRemoteWriteReceiver: true
 
         # enable istio scrape
         #additionalScrapeConfigs:
@@ -340,12 +338,6 @@ spec:
       adminUsername: admin
       adminPassword: prom-operator
 
-      sidecar:
-        datasources:
-          exemplarTraceIdDestinations:
-            datasourceUid: tempo
-            traceIdLabelName: traceID
-
       deploymentStrategy:
         type: Recreate
 
@@ -364,83 +356,18 @@ spec:
 
       env: {}
 
-      datasources:
-        datasources.yaml:
-          apiVersion: 1
-          datasources:
-          #######################################
-          #- name: Loki
-          #  type: loki
-          #  uid: loki
-          #  editable: true
-          #  url: http://loki.logging.svc:3100
-          #  basicAuth: false
-          #  access: proxy
-          #  isDefault: false
-          #  jsonData:
-          #    maxLines: 2000
-          #    manageAlerts: false
-          #    timeout: 60
-          #    derivedFields:
-          #    - datasourceUid: tempo
-          #      matcherRegex: "traceID=(\\w+)"
-          #      name: TraceID
-          #      url: "$$${__value.raw}"
-          #######################################
-          #- name: Tempo
-          #  type: tempo
-          #  uid: tempo
-          #  editable: true
-          #  url: http://tempo:3100
-          #  basicAuth: false
-          #  access: proxy
-          #  isDefault: false
-          #  jsonData:
-          #    timeout: 60
-          #    httpMethod: GET
-          #    tracesToLogs:
-          #      datasourceUid: loki
-          #      mapTagNamesEnabled: true
-          #      mappedTags:
-          #      - key: host.name
-          #        value: pod
-          #      spanStartTimeShift: '-15m'
-          #      spanEndTimeShift: '15m'
-          #      filterByTraceID: true
-          #      filterBySpanID: false
-          #    tracesToMetrics:
-          #      datasourceUid: prometheus
-          #      tags:
-          #      - key: host.name
-          #        value: pod
-          #      spanStartTimeShift: '-15m'
-          #      spanEndTimeShift: '15m'
-          #      queries:
-          #      - name: 'Pod CPU'
-          #        query: 'sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{$$$__tags, container!="POD"}) by (container)'
-          #      - name: 'Pod Memory'
-          #        query: 'sum(container_memory_working_set_bytes{$$$__tags, job="kubelet", metrics_path="/metrics/cadvisor", container!="POD", image!=""}) by (container)'
-          #    serviceMap:
-          #      datasourceUid: prometheus
-          #    search:
-          #      hide: false
-          #    nodeGraph:
-          #      enabled: true
-          #    lokiSearch:
-          #      datasourceUid: loki
-
       dashboardProviders:
         dashboardproviders.yaml:
           apiVersion: 1
           providers:
-          - name: 'default'
-            orgId: 1
-            folder: ''
-            type: file
-            disableDeletion: false
-            editable: true
-            options:
-              path: /var/lib/grafana/dashboards/default
+          #- name: 'default'
+          #  orgId: 1
+          #  folder: ''
+          #  type: file
+          #  disableDeletion: false
+          #  editable: true
+          #  options:
+          #    path: /var/lib/grafana/dashboards/default
 
           #- name: istio
           #  orgId: 1
@@ -568,9 +495,6 @@ spec:
         unified_alerting:
           enabled: true
 
-        feature_toggles:
-          traceToMetrics: true
-
         auth.anonymous:
           enabled: false
           org_name: Main Org.
@@ -666,3 +590,12 @@ spec:
         rollingUpdate:
           maxUnavailable: "20%"
 
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: eks.amazonaws.com/compute-type
+                operator: NotIn
+                values:
+                - fargate

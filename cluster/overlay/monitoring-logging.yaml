@@ -1,0 +1,29 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: monitoring
+  namespace: flux-system
+spec:
+  values:
+    ###############################################
+    grafana:
+      #######################################
+      additionalDatasources:
+      - name: Loki
+        type: loki
+        uid: loki
+        editable: true
+        url: http://loki.logging.svc:3100
+        basicAuth: false
+        access: proxy
+        isDefault: false
+        jsonData:
+          maxLines: 2000
+          manageAlerts: false
+          timeout: 60
+          derivedFields:
+          - datasourceUid: tempo
+            matcherRegex: "traceID=(\\w+)"
+            name: TraceID
+            url: "$$${__value.raw}"
+

@@ -1,0 +1,17 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: monitoring
+  namespace: flux-system
+spec:
+  values:
+    ###############################################
+    prometheus:
+      prometheusSpec:
+        resources:
+          limits:
+            cpu: 4
+            memory: 4Gi
+          requests:
+            cpu: 1
+            memory: 2Gi

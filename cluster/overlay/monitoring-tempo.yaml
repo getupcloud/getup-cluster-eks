@@ -1,0 +1,22 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: monitoring
+  namespace: flux-system
+spec:
+  values:
+    ###############################################
+    prometheus:
+      enableRemoteWriteReceiver: true
+
+    ###############################################
+    grafana:
+      sidecar:
+        datasources:
+          exemplarTraceIdDestinations:
+            datasourceUid: tempo
+            traceIdLabelName: traceID
+
+      grafana.ini:
+        feature_toggles:
+          traceToMetrics: true

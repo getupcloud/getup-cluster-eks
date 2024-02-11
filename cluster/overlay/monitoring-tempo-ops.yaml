@@ -1,0 +1,48 @@
+- op: add
+  path: /spec/values/prometheus/prometheusSpec/enableFeatures/-
+  value: "exemplar-storage"
+
+- op: add
+  path: /spec/values/grafana/additionalDatasources/-
+  value:
+    name: Tempo
+    type: tempo
+    uid: tempo
+    editable: true
+    url: http://tempo:3100
+    basicAuth: false
+    access: proxy
+    isDefault: false
+    jsonData:
+      timeout: 60
+      httpMethod: GET
+      tracesToLogs:
+        datasourceUid: loki
+        mapTagNamesEnabled: true
+        mappedTags:
+        - key: host.name
+          value: pod
+        spanStartTimeShift: '-15m'
+        spanEndTimeShift: '15m'
+        filterByTraceID: true
+        filterBySpanID: false
+      tracesToMetrics:
+        datasourceUid: prometheus
+        tags:
+        - key: host.name
+          value: pod
+        spanStartTimeShift: '-15m'
+        spanEndTimeShift: '15m'
+        queries:
+        - name: 'Pod CPU'
+          query: 'sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{$$$__tags, container!="POD"}) by (container)'
+        - name: 'Pod Memory'
+          query: 'sum(container_memory_working_set_bytes{$$$__tags, job="kubelet", metrics_path="/metrics/cadvisor", container!="POD", image!=""}) by (container)'
+      serviceMap:
+        datasourceUid: prometheus
+      search:
+        hide: false
+      nodeGraph:
+        enabled: true
+      lokiSearch:
+        datasourceUid: loki

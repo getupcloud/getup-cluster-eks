@@ -3,7 +3,26 @@ kind: Kustomization
 
 resources:
 - flux-system
-- base/repo.yaml
+#- base/repo.yaml
 #- base/monitoring.yaml
+#- base/logging.yaml
+#- base/tempo.yaml
 #- base/cert-manager.yaml
 #- base/ingress-nginx.yaml
+#- base/aws-load-balancer-controller.yaml
+
+#patches:
+#- path: overlay/monitoring.yaml
+#- path: overlay/monitoring-logging.yaml
+#- path: overlay/monitoring-tempo.yaml
+#- path: overlay/aws-load-balancer-controller.yaml
+
+#patchesJson6902:
+#- path: overlay/monitoring-tempo-ops.yaml
+#  target:
+#    group: helm.toolkit.fluxcd.io
+#    version: v2beta1
+#    kind: HelmRelease
+#    name: monitoring
+#    namespace: flux-system
+
