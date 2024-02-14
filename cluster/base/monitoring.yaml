@@ -21,6 +21,7 @@ spec:
     remediation:
       retries: -1
   interval: 10m
+  timeout: 30m
   releaseName: monitoring
   storageNamespace: monitoring
   targetNamespace: monitoring
@@ -46,7 +47,7 @@ spec:
     prometheus:
       ingress:
         enabled: false
-        ingressClassName: ingress-nginx
+        ingressClassName: nginx
         #annotations:
         #  cert-manager.io/cluster-issuer: staging-dns01
         #  nginx.ingress.kubernetes.io/auth-realm: Authentication Required - Monitoring
@@ -142,7 +143,7 @@ spec:
 
       ingress:
         enabled: false
-        ingressClassName: ingress-nginx
+        ingressClassName: nginx
         #annotations:
         #  cert-manager.io/cluster-issuer: staging-dns01
         #  nginx.ingress.kubernetes.io/auth-realm: Authentication Required - Monitoring
@@ -513,9 +514,10 @@ spec:
         #  admin_password: admin
 
       ingress:
-        enabled: false
-        ingressClassName: ingress-nginx
-        #annotations:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+        #  nginx.ingress.kubernetes.io/whitelist-source-range: 10.10.0.0/16,192.168.0.10
         #  cert-manager.io/cluster-issuer: staging-dns01
         #  nginx.ingress.kubernetes.io/auth-realm: Authentication Required - Monitoring
         #  nginx.ingress.kubernetes.io/auth-secret: monitoring-basic-auth

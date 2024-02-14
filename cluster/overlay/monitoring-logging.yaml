@@ -8,22 +8,21 @@ spec:
     ###############################################
     grafana:
       #######################################
-      additionalDatasources:
+      additionalDataSources:
       - name: Loki
         type: loki
         uid: loki
         editable: true
-        url: http://loki.logging.svc:3100
+        url: http://loki-gateway.logging.svc.cluster.local.:80
         basicAuth: false
         access: proxy
         isDefault: false
         jsonData:
-          maxLines: 2000
+          maxLines: 5000
           manageAlerts: false
-          timeout: 60
+          timeout: 120
           derivedFields:
           - datasourceUid: tempo
             matcherRegex: "traceID=(\\w+)"
             name: TraceID
             url: "$$${__value.raw}"
-

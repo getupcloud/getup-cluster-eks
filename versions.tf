@@ -1,11 +1,11 @@
 terraform {
   required_version = "~> 1.7.0"
 
-#  backend "s3" {
-#    bucket = "customer-terraform-eks"
-#    key    = "production/terraform.tfstate"
-#    region = "sa-east-1"
-#  }
+  #  backend "s3" {
+  #    bucket = "customer-terraform-eks"
+  #    key    = "production/terraform.tfstate"
+  #    region = "sa-east-1"
+  #  }
 
   required_providers {
     aws = {

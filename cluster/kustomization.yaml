@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
 - flux-system
 #- base/repo.yaml
+#- base/metrics-server.yaml
 #- base/monitoring.yaml
 #- base/logging.yaml
 #- base/tempo.yaml

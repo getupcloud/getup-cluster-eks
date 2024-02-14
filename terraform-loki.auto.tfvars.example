@@ -1,0 +1,25 @@
+# File auto-generated from ./bin/vars2tfvars
+
+# loki_cluster_oidc_issuer_url - The URL on the EKS cluster for the OpenID Connect identity provider
+# Type: ${string}
+# Required
+#loki_cluster_oidc_issuer_url = <REQUIRED-VALUE>
+
+# loki_tags - Tags to apply to all resources.
+# Type: ${any}
+# Default: {}
+#loki_tags = {}
+
+# loki_retention_days - Days to retain files in S3.
+# Type: ${number}
+# Default: 30
+#loki_retention_days = 30
+
+# loki_retention_prefixes - Prefixes to retain files in S3.
+# Type: ${list(string)}
+# Default: [
+#  "fake/"
+#]
+#loki_retention_prefixes = [
+#  "fake/"
+#]
