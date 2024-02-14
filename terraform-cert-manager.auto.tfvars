@@ -1,0 +1,11 @@
+# File auto-generated from ./bin/vars2tfvars
+
+# cert_manager_cluster_oidc_issuer_url - The URL on the EKS cluster for the OpenID Connect identity provider
+# Type: ${string}
+# Required
+#cert_manager_cluster_oidc_issuer_url = <REQUIRED-VALUE>
+
+# cert_manager_tags - Tags to apply to all resources.
+# Type: ${any}
+# Default: {}
+#cert_manager_tags = {}

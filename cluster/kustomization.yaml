@@ -5,17 +5,21 @@ resources:
 - flux-system
 #- base/repo.yaml
 #- base/metrics-server.yaml
+#- base/cert-manager.yaml
+#- base/cert-manager-issuers.yaml
 #- base/monitoring.yaml
 #- base/logging.yaml
 #- base/tempo.yaml
-#- base/cert-manager.yaml
 #- base/ingress-nginx.yaml
 #- base/aws-load-balancer-controller.yaml
 
 #patches:
+#- path: overlay/cert-manager.yaml
+#- path: overlay/cert-manager-issuers.yaml
 #- path: overlay/monitoring.yaml
 #- path: overlay/monitoring-logging.yaml
 #- path: overlay/monitoring-tempo.yaml
+#- path: overlay/logging.yaml
 #- path: overlay/aws-load-balancer-controller.yaml
 
 #patchesJson6902:

@@ -1,0 +1,54 @@
+## HTTP01
+
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging-http01
+spec:
+  acme:
+    #email: #letsencrypt_email#
+
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production-http01
+spec:
+  acme:
+    #email: #letsencrypt_email#
+
+## DNS01
+
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging-dns01
+spec:
+  acme:
+    #email: #letsencrypt_email#
+    solvers:
+    - dns01:
+        route53:
+          #region: #aws_region#
+      #selector:
+      #  dnsZones:
+      #  - #cert_manager_dns_zones#
+
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production-dns01
+spec:
+  acme:
+    #email: #letsencrypt_email#
+    solvers:
+    - dns01:
+        route53:
+          #region: #aws_region#
+      #selector:
+      #  dnsZones:
+      #  - #cert_manager_dns_zones#
+
