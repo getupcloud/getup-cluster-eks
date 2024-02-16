@@ -1,0 +1,14 @@
+# customer_name - Name of the customer.
+# Type: ${string}
+# Required
+#customer_name = <REQUIRED-VALUE>
+
+# cluster_provider - Cloud Provider or platform where cluster is running.
+# Type: ${string}
+# Required
+#cluster_provider = <REQUIRED-VALUE>
+
+# cluster_sla - SLA fot the cluster.
+# Type: ${string}
+# Required
+#cluster_sla = <REQUIRED-VALUE>

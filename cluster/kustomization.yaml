@@ -8,10 +8,12 @@ resources:
 #- base/cert-manager.yaml
 #- base/cert-manager-issuers.yaml
 #- base/monitoring.yaml
+#- base/monitoring-config.yaml
 #- base/logging.yaml
 #- base/tempo.yaml
 #- base/ingress-nginx.yaml
 #- base/aws-load-balancer-controller.yaml
+#- base/teleport.yaml
 
 #patches:
 #- path: overlay/cert-manager.yaml
@@ -21,6 +23,7 @@ resources:
 #- path: overlay/monitoring-tempo.yaml
 #- path: overlay/logging.yaml
 #- path: overlay/aws-load-balancer-controller.yaml
+#- path: overlay/teleport.yaml
 
 #patchesJson6902:
 #- path: overlay/monitoring-tempo-ops.yaml

@@ -1,0 +1,17 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: teleport-agent
+  namespace: flux-system
+spec:
+  values:
+    #authToken: #teleport_auth_token#
+
+    #kubeClusterName: #customer#-#cluster_name#
+
+    labels:
+      #customer: #customer_name#
+
+      #region: #aws_region#
+
+      #sla: #cluster_sla#
