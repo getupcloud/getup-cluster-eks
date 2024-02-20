@@ -13,6 +13,7 @@ resources:
 #- base/tempo.yaml
 #- base/ingress-nginx.yaml
 #- base/aws-load-balancer-controller.yaml
+#- base/flagger.yaml
 #- base/teleport.yaml
 
 #patches:
@@ -23,6 +24,7 @@ resources:
 #- path: overlay/monitoring-tempo.yaml
 #- path: overlay/logging.yaml
 #- path: overlay/aws-load-balancer-controller.yaml
+#- path: overlay/flagger.yaml
 #- path: overlay/teleport.yaml
 
 #patchesJson6902:

@@ -1,0 +1,50 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: flagger
+  namespace: flux-system
+spec:
+  #### Nginx ####
+  storageNamespace: ingress-nginx
+  targetNamespace: ingress-nginx
+
+  #### Istio ####
+  #storageNamespace: istio-system
+  #targetNamespace: istio-system
+
+  #### Linkerd ####
+  #storageNamespace: linkerd
+  #targetNamespace: linkerd
+
+  values:
+    #### Nginx ####
+    meshProvider: nginx
+    prometheus:
+      install: true
+    #ingressAnnotationsPrefix: nginx.ingress.kubernetes.io
+
+    #### Istio ####
+    #meshProvider: istio
+    #metricsServer: http://prometheus:9090
+
+    #### Linkerd ####
+    #meshProvider: linkerd
+    #metricsServer: http://prometheus.linkerd-viz:9090
+    #linkerdAuthPolicy:
+    #  create: true
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: ingress-nginx
+  namespace: flux-system
+spec:
+  values:
+    controller:
+      metrics:
+        enabled: true
+
+      podAnnotations:
+        # TODO: verify if this duplicates the ingested metrics
+        prometheus.io/scrape: "true"
+        prometheus.io/port: metrics
