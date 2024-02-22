@@ -37,3 +37,8 @@ output "cert_manager_iam_role_arn" {
   description = "Cert-Manager Role ARN."
   value       = module.cert-manager.cert_manager_iam_role_arn
 }
+
+output "ecr_credentials_sync_iam_role_arn" {
+  description = "ECR Credentials Sync Role ARN."
+  value       = module.ecr-credentials-sync.ecr_credentials_sync_iam_role_arn
+}
