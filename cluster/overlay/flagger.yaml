@@ -5,8 +5,8 @@ metadata:
   namespace: flux-system
 spec:
   #### Nginx ####
-  storageNamespace: ingress-nginx
-  targetNamespace: ingress-nginx
+  #storageNamespace: ingress-nginx
+  #targetNamespace: ingress-nginx
 
   #### Istio ####
   #storageNamespace: istio-system

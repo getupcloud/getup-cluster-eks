@@ -87,6 +87,12 @@ spec:
 
         #################################################################
         ## Receivers
+        ##
+        ## SLA must obey the following rules:
+        ##
+        ## high: prod/homolog/preprod
+        ##  low: dev/test
+        ## none: no-ops
         #################################################################
 
         receivers:
