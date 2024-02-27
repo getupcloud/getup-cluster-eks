@@ -49,14 +49,23 @@ destroy:
 	$(TERRAFORM) destroy -auto-approve $(TERRAFORM_ARGS) $(TERRAFORM_DESTROY_ARGS)
 
 output:
-	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS)
+	@$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS)
 
 kubeconfig:
 	aws eks update-kubeconfig --name=$(CLUSTER_NAME) $(AWS_EKS_ARGS)
 
 update-version:
-	read -p 'New module version: (ex: v1.2.3): ' v
-	sed -i -e '/source/s/ref=v[0-9]\.[0-9]\.[0-9]/ref='$$v'/g' main-*tf
+	latest=$$(timeout 3 curl -s https://raw.githubusercontent.com/getupcloud/terraform-modules/main/version.txt || echo 0.0.0)
+	latest=$${latest}
+	read -e -p "New module version: " -i "$$latest" v
+	sed -i -e '/source/s/ref=v[0-9]\+\.[0-9]\+\.[0-9]\+/ref=v'$$v'/g' main-*tf
+
+#update-manifests:
+#	@$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) | bin/output2sed > .output.sed
+#	find ./cluster -type f -name \*.yaml | xargs sed -i -f .output.sed
+
+show-vars:
+	grep -wrn -A 1 --color '#[a-zA-Z0-9_]\+#' cluster/overlay 2>/dev/null
 
 ###
 
