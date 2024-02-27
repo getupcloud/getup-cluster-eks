@@ -12,6 +12,8 @@ ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -s https://api.ipify.org)/32"]'
 endif
 
+KUSTOMIZE_BUILD := .kustomize_build.yaml
+
 # TODO: Ler grupo usando terraform e injetar no configmap/aws-auth
 # AWS_AUTH_GROUP_NAME := Infra
 # AWS_AUTH_USER_ARNS ?= $(shell aws iam get-group --group-name $(AWS_AUTH_GROUP_NAME) | jq -cr '[.Users[].Arn]')
@@ -23,7 +25,7 @@ all help:
 	@echo 'Usage: make [init|validate|fmt|plan|apply|output|kubeconfig|update-version]'
 
 clean:
-	rm -rf .terraform terraform.log
+	rm -rf .terraform terraform.log $(KUSTOMIZE_BUILD)
 
 init: validate-vars
 	$(TERRAFORM) init $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
@@ -66,6 +68,13 @@ update-version:
 
 show-vars:
 	grep -wrn -A 1 --color '#[a-zA-Z0-9_]\+#' cluster/overlay 2>/dev/null
+
+kustomize ks:
+	@echo Checking kustomization
+	if ! kubectl kustomize ./cluster -o $(KUSTOMIZE_BUILD); then
+		echo Generated output: $(KUSTOMIZE_BUILD)
+		exit 1
+	fi
 
 ###
 
