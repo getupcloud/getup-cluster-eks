@@ -1,4 +1,7 @@
-.terraform
 *.sw?
+.kubeconfig
+.kustomize_build.yaml
+.terraform
+errored.tfstate
 terraform.log
 terraform.tfplan
