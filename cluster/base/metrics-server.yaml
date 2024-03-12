@@ -26,6 +26,7 @@ spec:
   targetNamespace: kube-system
   storageNamespace: kube-system
   values:
+    containerPort: 4443
     metrics:
       enabled: true
     serviceMonitor:
