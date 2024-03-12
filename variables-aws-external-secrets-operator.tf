@@ -29,14 +29,14 @@ variable "aws_eso_aws_account_id" {
   default     = ""
 }
 
-variable "aws_eso_create_secrets_managers" {
-  description = "(Required) List of AWS Secrets Manager to create. Optional if aws_eso_secrets_managers is defined."
+variable "aws_eso_create_secrets" {
+  description = "(Required) List of secrets to create. Optional if aws_eso_secrets is defined."
   type        = list(string)
   default     = []
 }
 
-variable "aws_eso_secrets_managers" {
-  description = "(Required) List of existing AWS Secret Manager. Optional if aws_eso_create_secrets_managers is defined."
+variable "aws_eso_secrets" {
+  description = "(Required) List of existing secrets. Optional if aws_eso_create_secrets is defined."
   type        = list(string)
   default     = []
 }
