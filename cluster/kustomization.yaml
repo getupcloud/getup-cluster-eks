@@ -31,6 +31,7 @@ resources:
 #- path: overlay/otel-operator.yaml
 #- path: overlay/aws-load-balancer-controller.yaml
 #- path: overlay/aws-external-secrets-operator.yaml
+#- path: overlay/aws-external-secrets-config.yaml
 #- path: overlay/ecr-credentials-sync.yaml
 #- path: overlay/flagger.yaml
 #- path: overlay/teleport.yaml
