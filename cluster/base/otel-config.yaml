@@ -1,0 +1,95 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: otel-config
+  namespace: flux-system
+spec:
+  chart:
+    spec:
+      chart: templater
+      sourceRef:
+        kind: HelmRepository
+        name: getupcloud
+      version: "~> 1.1"
+  dependsOn:
+  - name: otel-operator
+  install:
+    createNamespace: true
+    disableWait: false
+    remediation:
+      retries: -1
+  upgrade:
+    remediation:
+      retries: -1
+  interval: 10m
+  releaseName: otel-config
+  storageNamespace: monitoring
+  targetNamespace: monitoring
+  values:
+    templates:
+    - apiVersion: opentelemetry.io/v1alpha1
+      kind: OpenTelemetryCollector
+      metadata:
+        name: otel
+        namespace: monitoring
+      spec:
+        config: |-
+          receivers:
+            otlp:
+              protocols:
+                grpc:
+                  endpoint: 0.0.0.0:4317
+                http:
+                  endpoint: 0.0.0.0:4318
+
+          processors:
+
+          exporters:
+            debug:
+              verbosity: detailed
+            otlphttp:
+              endpoint: http://tempo:4318
+
+          service:
+            pipelines:
+              traces:
+                receivers: [otlp]
+                processors: []
+                exporters: [debug,otlphttp]
+    - apiVersion: opentelemetry.io/v1alpha1
+      kind: Instrumentation
+      metadata:
+        name: otel
+        namespace: monitoring
+      spec:
+        exporter:
+          endpoint: http://otel-collector.monitoring.svc.cluster.local.:4317
+        propagators:
+          - tracecontext
+          - baggage
+          - b3
+        sampler:
+          # See https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_traces_sampler
+          type: always_on
+        python:
+          env:
+            # Required if endpoint is set to 4317.
+            # Python autoinstrumentation uses http/proto by default
+            # so data must be sent to 4318 instead of 4317.
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.monitoring.svc.cluster.local.:4318
+        dotnet:
+          env:
+            # Required if endpoint is set to 4317.
+            # Dotnet autoinstrumentation uses http/proto by default
+            # See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/888e2cd216c77d12e56b54ee91dafbc4e7452a52/docs/config.md#otlp
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.monitoring-system.svc.cluster.local.:4318
+        go:
+          env:
+            # Required if endpoint is set to 4317.
+            # Go autoinstrumentation uses http/proto by default
+            # so data must be sent to 4318 instead of 4317.
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.monitoring.svc.cluster.local.:4318
+

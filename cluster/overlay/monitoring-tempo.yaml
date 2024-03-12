@@ -7,7 +7,9 @@ spec:
   values:
     ###############################################
     prometheus:
-      enableRemoteWriteReceiver: true
+      prometheusSpec:
+        enableRemoteWriteReceiver: true
+        remoteWriteDashboards: true
 
     ###############################################
     grafana:
