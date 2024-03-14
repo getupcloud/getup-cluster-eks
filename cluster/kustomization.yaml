@@ -17,6 +17,7 @@ resources:
 #- base/ingress-nginx.yaml
 #- base/aws-load-balancer-controller.yaml
 #- base/aws-external-secrets-operator.yaml
+#- base/aws-external-secrets-config.yaml
 #- base/ecr-credentials-sync.yaml
 #- base/flagger.yaml
 #- base/teleport.yaml
