@@ -48,3 +48,8 @@ output "aws_eso_iam_role_arn" {
   value       = module.aws-external-secrets-operator.aws_eso_iam_role_arn
 }
 
+output "opencost_iam_role_arn" {
+  description = "OpenCost Role ARN."
+  value       = module.opencost.opencost_iam_role_arn
+}
+
