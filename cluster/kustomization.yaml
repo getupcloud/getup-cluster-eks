@@ -21,6 +21,7 @@ resources:
 #- base/ecr-credentials-sync.yaml
 #- base/flagger.yaml
 #- base/teleport.yaml
+#- base/opencost.yaml ## Experimental
 
 #patches:
 #- path: overlay/cert-manager.yaml
@@ -36,6 +37,7 @@ resources:
 #- path: overlay/ecr-credentials-sync.yaml
 #- path: overlay/flagger.yaml
 #- path: overlay/teleport.yaml
+#- path: overlay/opencost.yaml ## Experimental
 
 #patchesJson6902:
 #- path: overlay/monitoring-tempo-ops.yaml

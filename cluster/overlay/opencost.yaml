@@ -1,0 +1,22 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: opencost
+  namespace: flux-system
+spec:
+  values:
+    opencost:
+      customPricing:
+        costModel:
+          #awsSpotDataRegion: "#aws_region#"
+          #awsSpotDataBucket: "#opencost_spot_datafeed_bucket_name#"
+          #awsSpotDataPrefix: "#opencost_spot_datafeed_bucket_prefix#"
+          #projectID": "#aws_account_id#"
+      exporter:
+        #defaultClusterId: "#cluster_name#"
+        persistence:
+          #storageClass: "#storage_class_name#"
+    serviceAccount:
+      name: opencost
+      annotations:
+        #eks.amazonaws.com/role-arn: "#opencost_iam_role_arn#"
