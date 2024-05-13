@@ -61,6 +61,11 @@ spec:
 
       config:
         use-proxy-protocol: "true"
+
+        # Use ewma load-balancing for high-load envs. It avoids concentrating reqs into a small set of app pods.
+        # https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#load-balance
+        #load-balance: ewma
+        #
         #whitelist-source-range: 10.10.0.0/16,172.168.0.1
         #real-ip-header: proxy_protocol
         #set-real-ip-from: X.X.X.X
