@@ -7,8 +7,8 @@
 
 # kubernetes_version - Kubernetes controlplane version.
 # Type: ${string}
-# Default: "1.28"
-#kubernetes_version = "1.28"
+# Default: "1.29"
+#kubernetes_version = "1.29"
 
 # aws_region - AWS Region.
 # Type: ${string}
@@ -367,11 +367,6 @@
 # Type: ${list(any)}
 # Default: []
 #aws_auth_accounts = []
-
-# aws_auth_node_iam_role_arns_non_windows - List of non-Windows based node IAM role ARNs to add to the aws-auth configmap
-# Type: ${list(string)}
-# Default: []
-#aws_auth_node_iam_role_arns_non_windows = []
 
 # keda_namespace - Namespace where to install Keda.
 # Type: ${string}

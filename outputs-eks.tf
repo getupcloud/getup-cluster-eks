@@ -150,24 +150,19 @@ output "self_managed_node_groups_autoscaling_group_names" {
   value       = module.eks.self_managed_node_groups_autoscaling_group_names
 }
 
-output "aws_auth_configmap_yaml" {
-  description = "Formatted yaml output for base aws-auth configmap containing roles used in cluster node groups/fargate profiles"
-  value       = module.eks.aws_auth_configmap_yaml
-}
-
-output "karpenter_irsa_name" {
+output "karpenter_iam_role_name" {
   description = "The name of the IAM role for service accounts"
-  value       = module.eks.karpenter_irsa_name
+  value       = module.eks.karpenter_iam_role_name
 }
 
-output "karpenter_irsa_arn" {
+output "karpenter_iam_role_arn" {
   description = "The Amazon Resource Name (ARN) specifying the IAM role for service accounts"
-  value       = module.eks.karpenter_irsa_arn
+  value       = module.eks.karpenter_iam_role_arn
 }
 
-output "karpenter_irsa_unique_id" {
+output "karpenter_iam_role_unique_id" {
   description = "Stable and unique string identifying the IAM role for service accounts"
-  value       = module.eks.karpenter_irsa_unique_id
+  value       = module.eks.karpenter_iam_role_unique_id
 }
 
 output "karpenter_queue_arn" {
@@ -190,19 +185,19 @@ output "karpenter_event_rules" {
   value       = module.eks.karpenter_event_rules
 }
 
-output "karpenter_role_name" {
+output "karpenter_node_iam_role_name" {
   description = "The name of the IAM role"
-  value       = module.eks.karpenter_role_name
+  value       = module.eks.karpenter_node_iam_role_name
 }
 
-output "karpenter_role_arn" {
+output "karpenter_node_iam_role_arn" {
   description = "The Amazon Resource Name (ARN) specifying the IAM role"
-  value       = module.eks.karpenter_role_arn
+  value       = module.eks.karpenter_node_iam_role_arn
 }
 
-output "karpenter_role_unique_id" {
+output "karpenter_node_iam_role_unique_id" {
   description = "Stable and unique string identifying the IAM role"
-  value       = module.eks.karpenter_role_unique_id
+  value       = module.eks.karpenter_node_iam_role_unique_id
 }
 
 output "karpenter_instance_profile_arn" {
