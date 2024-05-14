@@ -1,7 +1,7 @@
 # File auto-generated from ./bin/vars2tf
 
 module "aws-external-secrets-operator" {
-  source = "github.com/getupcloud/terraform-modules//modules/aws-external-secrets-operator?ref=v0.15.2"
+  source = "github.com/getupcloud/terraform-modules//modules/aws-external-secrets-operator?ref=v0.15.3"
 
   aws_eso_cluster_oidc_issuer_url = module.eks.cluster_oidc_issuer_url
   aws_eso_namespace               = var.aws_eso_namespace

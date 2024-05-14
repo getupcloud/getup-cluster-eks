@@ -364,12 +364,6 @@ variable "aws_auth_accounts" {
   default     = []
 }
 
-variable "aws_auth_node_iam_role_arns_non_windows" {
-  description = "List of non-Windows based node IAM role ARNs to add to the aws-auth configmap"
-  type        = list(string)
-  default     = []
-}
-
 #### KEDA ####
 ##############
 

@@ -1,7 +1,7 @@
 # File auto-generated from ./bin/vars2tf
 
 module "opencost" {
-  source = "github.com/getupcloud/terraform-modules//modules/opencost?ref=v0.15.2"
+  source = "github.com/getupcloud/terraform-modules//modules/opencost?ref=v0.15.3"
 
   opencost_cluster_oidc_issuer_url      = module.eks.cluster_oidc_issuer_url
   opencost_namespace                    = var.opencost_namespace
