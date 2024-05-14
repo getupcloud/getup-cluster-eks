@@ -22,7 +22,7 @@ KUSTOMIZE_BUILD := .kustomize_build.yaml
 .EXPORT_ALL_VARIABLES:
 
 all help:
-	@echo 'Usage: make [init|validate|fmt|plan|apply|output|kubeconfig|update-version]'
+	@echo 'Usage: make [init|validate|fmt|plan|apply|output|kubeconfig|update-version|destroy]'
 
 clean:
 	rm -rf .terraform terraform.log $(KUSTOMIZE_BUILD)
@@ -46,8 +46,11 @@ plan: validate-vars
 apply:
 	$(TERRAFORM) apply -auto-approve terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_APPLY_ARGS)
 
-# WARNING: NO CONFIRMATION ON DESTROY
 destroy:
+	$(TERRAFORM) destroy $(TERRAFORM_ARGS) $(TERRAFORM_DESTROY_ARGS)
+
+# WARNING: NO CONFIRMATION ON DESTROY
+destroy-auto-approve:
 	$(TERRAFORM) destroy -auto-approve $(TERRAFORM_ARGS) $(TERRAFORM_DESTROY_ARGS)
 
 output:
