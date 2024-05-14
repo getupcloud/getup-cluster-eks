@@ -9,7 +9,7 @@ repo="customer-$CUSTOMER_NAME-$CLUSTER_NAME"
 
 git clone git@github.com:getupcloud/terraform-cluster.git $repo
 cd $repo
-git remote set-url origin git@github.com/getupcloud/${repo}.git
+git remote set-url origin git@github.com:getupcloud/${repo}.git
 cd ..
 
 echo
