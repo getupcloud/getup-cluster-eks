@@ -1,7 +1,7 @@
 # File auto-generated from ./bin/vars2tf
 
 module "eks" {
-  source = "github.com/getupcloud/terraform-modules//modules/eks?ref=v0.14.0"
+  source = "github.com/getupcloud/terraform-modules//modules/eks?ref=v0.15.0"
 
   cluster_name                            = var.cluster_name
   kubernetes_version                      = var.kubernetes_version
@@ -21,6 +21,7 @@ module "eks" {
   cluster_endpoint_public_access_cidrs    = var.cluster_endpoint_public_access_cidrs
   cluster_endpoint_public_access          = var.cluster_endpoint_public_access
   vpc_cni_enable_prefix_delegation        = var.vpc_cni_enable_prefix_delegation
+  kube_proxy                              = var.kube_proxy
   fargate_profiles                        = var.fargate_profiles
   fallback_node_group_desired_size        = var.fallback_node_group_desired_size
   fallback_node_group_capacity_type       = var.fallback_node_group_capacity_type

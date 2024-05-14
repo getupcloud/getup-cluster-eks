@@ -112,6 +112,11 @@
 # Default: true
 #vpc_cni_enable_prefix_delegation = true
 
+# kube_proxy - Kube-proxy addon configurations.
+# Type: ${object({"mode": "${optional(string,"iptables")}", "resources": "${optional(any,{})}", "ipvs": "${optional(object({\"scheduler\": \"${optional(string,"rr")}\"}),{})}"})}
+# Default: {}
+#kube_proxy = {}
+
 # fargate_profiles - List of fargate profiles to create. To disable fargate, set this value to `[]`.
 # Type: ${any}
 # Default: [
@@ -224,8 +229,8 @@
 
 # karpenter_version - Karpenter chart version.
 # Type: ${string}
-# Default: "v0.33.1"
-#karpenter_version = "v0.33.1"
+# Default: "v0.36.1"
+#karpenter_version = "v0.36.1"
 
 # karpenter_replicas - Number of pods for Karpenter controller.
 # Type: ${number}

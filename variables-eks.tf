@@ -132,6 +132,18 @@ variable "vpc_cni_enable_prefix_delegation" {
   default     = true
 }
 
+variable "kube_proxy" {
+  description = "Kube-proxy addon configurations."
+  type = object({
+    mode : optional(string, "iptables"),
+    resources : optional(any, {}),
+    ipvs : optional(object({
+      scheduler : optional(string, "rr")
+    }), {})
+  })
+  default = {}
+}
+
 #### Fargate ####
 #################
 
@@ -209,7 +221,7 @@ variable "karpenter_namespace" {
 variable "karpenter_version" {
   description = "Karpenter chart version."
   type        = string
-  default     = "v0.33.1"
+  default     = "v0.36.1"
 }
 
 variable "karpenter_replicas" {
