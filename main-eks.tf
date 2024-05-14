@@ -1,7 +1,7 @@
 # File auto-generated from ./bin/vars2tf
 
 module "eks" {
-  source = "github.com/getupcloud/terraform-modules//modules/eks?ref=v0.15.0"
+  source = "github.com/getupcloud/terraform-modules//modules/eks?ref=v0.15.1"
 
   cluster_name                            = var.cluster_name
   kubernetes_version                      = var.kubernetes_version
