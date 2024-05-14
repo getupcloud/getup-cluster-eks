@@ -86,3 +86,6 @@ validate-vars:
 		echo "Missing required var: CLUSTER_NAME"
 		exit 1
 	fi
+
+update-source:
+	cp ../terraform-modules/examples/*/{main,outputs,variables}-*.tf ../terraform-modules/examples/*/*.tfvars.example . -v

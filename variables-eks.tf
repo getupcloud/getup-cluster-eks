@@ -153,7 +153,8 @@ variable "fargate_profiles" {
   default = [
     { namespace : "kube-system", labels : {} },
     { namespace : "keda", labels : { "app.kubernetes.io/name" : "keda-operator" } },
-    { namespace : "karpenter", labels : { "app.kubernetes.io/name" : "karpenter" } },
+    # karpenter now requires EksPodIdentity, which is unavailable from fargate nodes
+    # { namespace : "karpenter", labels : { "app.kubernetes.io/name" : "karpenter" } },
     { namespace : "getup", labels : { "app" : "teleport-agent" } },
   ]
 }

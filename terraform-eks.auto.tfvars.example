@@ -132,12 +132,6 @@
 #  },
 #  {
 #    "labels": {
-#      "app.kubernetes.io/name": "karpenter"
-#    },
-#    "namespace": "karpenter"
-#  },
-#  {
-#    "labels": {
 #      "app": "teleport-agent"
 #    },
 #    "namespace": "getup"
@@ -153,12 +147,6 @@
 #      "app.kubernetes.io/name": "keda-operator"
 #    },
 #    "namespace": "keda"
-#  },
-#  {
-#    "labels": {
-#      "app.kubernetes.io/name": "karpenter"
-#    },
-#    "namespace": "karpenter"
 #  },
 #  {
 #    "labels": {
