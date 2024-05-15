@@ -18,8 +18,8 @@ fi
 
 git clone git@github.com:getupcloud/terraform-cluster.git $repo
 cd $repo
-git remote rename origin upstream
-git remote set-url --push upstream none # avoid acidental push to upstream
+
+git remote remove origin
 
 if ! gh auth status 2>/dev/null; then
   if ! gh auth login; then
