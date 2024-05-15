@@ -2,6 +2,7 @@
 **/.terraform
 *.tfstate
 *.tfplan
+*.tfstate.backup
 *.tfstate.*.backup
 terraform.log
 .kubeconfig
