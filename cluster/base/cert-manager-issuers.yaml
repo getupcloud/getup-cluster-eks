@@ -27,14 +27,8 @@ spec:
     remediation:
       retries: -1
   values:
-    # acme_email: account@example.com
-    cluster_issuer_dns01:
-      aws_access_key_id: ""
-      aws_region: ""
-      aws_zones: ""
-      enabled: false
+    ingress_class: nginx
     cluster_issuer_letsencrypt:
       enabled: true
     cluster_issuer_selfsigned:
       enabled: true
-    ingress_class: nginx
