@@ -121,7 +121,15 @@
 # Type: ${any}
 # Default: [
 #  {
-#    "labels": {},
+#    "labels": {
+#      "eks.amazonaws.com/component": "coredns"
+#    },
+#    "namespace": "kube-system"
+#  },
+#  {
+#    "labels": {
+#      "app.kubernetes.io/component": "csi-driver"
+#    },
 #    "namespace": "kube-system"
 #  },
 #  {
@@ -139,7 +147,15 @@
 #]
 #fargate_profiles = [
 #  {
-#    "labels": {},
+#    "labels": {
+#      "eks.amazonaws.com/component": "coredns"
+#    },
+#    "namespace": "kube-system"
+#  },
+#  {
+#    "labels": {
+#      "app.kubernetes.io/component": "csi-driver"
+#    },
 #    "namespace": "kube-system"
 #  },
 #  {

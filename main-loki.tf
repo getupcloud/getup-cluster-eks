@@ -1,7 +1,7 @@
 # File auto-generated from ./bin/vars2tf
 
 module "loki" {
-  source = "github.com/getupcloud/terraform-modules//modules/loki?ref=v0.15.10"
+  source = "github.com/getupcloud/terraform-modules//modules/loki?ref=v0.15.11"
 
   loki_cluster_oidc_issuer_url = module.eks.cluster_oidc_issuer_url
   loki_tags                    = var.loki_tags

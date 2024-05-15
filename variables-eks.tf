@@ -151,7 +151,8 @@ variable "fargate_profiles" {
   description = "List of fargate profiles to create. To disable fargate, set this value to `[]`."
   type        = any # list(object({namespace: string, labels: map(string)}))
   default = [
-    { namespace : "kube-system", labels : {} },
+    { namespace : "kube-system", labels : { "eks.amazonaws.com/component" : "coredns" } },
+    { namespace : "kube-system", labels : { "app.kubernetes.io/component" : "csi-driver" } },
     { namespace : "keda", labels : { "app.kubernetes.io/name" : "keda-operator" } },
     # karpenter now requires EksPodIdentity, which is unavailable from fargate nodes
     # { namespace : "karpenter", labels : { "app.kubernetes.io/name" : "karpenter" } },

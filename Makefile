@@ -22,7 +22,7 @@ KUSTOMIZE_BUILD := .kustomize_build.yaml
 .EXPORT_ALL_VARIABLES:
 
 all help:
-	@echo 'Usage: make [init|validate|fmt|plan|apply|output|kubeconfig|update-version|destroy]'
+	@echo 'Usage: make [init|validate|fmt|plan|apply|output|kubeconfig|update-version|destroy|update-source]'
 
 clean:
 	rm -rf .terraform terraform.log $(KUSTOMIZE_BUILD)
