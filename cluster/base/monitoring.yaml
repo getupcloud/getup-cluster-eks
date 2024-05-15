@@ -373,7 +373,7 @@ spec:
         #  admin_password: admin
 
       ingress:
-        enabled: true
+        enabled: false
         ingressClassName: nginx
         annotations:
         #  nginx.ingress.kubernetes.io/whitelist-source-range: 10.10.0.0/16,192.168.0.10
