@@ -1,5 +1,5 @@
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: eks
@@ -8,7 +8,7 @@ spec:
   interval: 1h
   url: https://aws.github.io/eks-charts
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: aws-ebs-csi-driver
@@ -17,7 +17,7 @@ spec:
   interval: 1h
   url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: aws-efs-csi-driver
@@ -26,7 +26,7 @@ spec:
   interval: 1h
   url: https://kubernetes-sigs.github.io/aws-efs-csi-driver
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: metrics-server
@@ -35,7 +35,7 @@ spec:
   interval: 12h
   url: https://kubernetes-sigs.github.io/metrics-server/
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: kyverno
@@ -44,7 +44,7 @@ spec:
   interval: 12h
   url: https://kyverno.github.io/kyverno/
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: aqua
@@ -53,7 +53,7 @@ spec:
   interval: 12h
   url: https://aquasecurity.github.io/helm-charts/
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: getupcloud
@@ -62,7 +62,7 @@ spec:
   interval: 12h
   url: https://charts.getup.io/getupcloud/
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: bitnami
@@ -71,7 +71,7 @@ spec:
   interval: 12h
   url: https://charts.bitnami.com/bitnami
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: autoscaler
@@ -80,7 +80,7 @@ spec:
   interval: 12h
   url: https://kubernetes.github.io/autoscaler
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: jetstack
@@ -89,7 +89,7 @@ spec:
   interval: 12h
   url: https://charts.jetstack.io
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: velero
@@ -98,7 +98,7 @@ spec:
   interval: 12h
   url: https://vmware-tanzu.github.io/helm-charts
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: ingress-nginx
@@ -107,7 +107,7 @@ spec:
   interval: 12h
   url: https://kubernetes.github.io/ingress-nginx
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: grafana
@@ -116,7 +116,7 @@ spec:
   interval: 12h
   url: https://grafana.github.io/helm-charts
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: prometheus-community
@@ -125,7 +125,7 @@ spec:
   interval: 12h
   url: https://prometheus-community.github.io/helm-charts
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: prometheus-msteams
@@ -134,7 +134,7 @@ spec:
   interval: 12h
   url: https://prometheus-msteams.github.io/prometheus-msteams/
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: elastic
@@ -143,7 +143,7 @@ spec:
   interval: 12h
   url: https://helm.elastic.co
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: harbor
@@ -152,7 +152,7 @@ spec:
   interval: 12h
   url: https://helm.goharbor.io
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: ot-helm
@@ -161,7 +161,7 @@ spec:
   interval: 12h
   url: https://ot-container-kit.github.io/helm-charts/
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: teleport
@@ -170,7 +170,7 @@ spec:
   interval: 12h
   url: https://charts.releases.teleport.dev
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: external-dns
@@ -179,7 +179,7 @@ spec:
   interval: 12h
   url: https://kubernetes-sigs.github.io/external-dns/
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: jenkins
@@ -188,7 +188,7 @@ spec:
   interval: 12h
   url: https://charts.jenkins.io
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: openebs
@@ -197,7 +197,7 @@ spec:
   interval: 12h
   url: https://openebs.github.io/charts
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: falcosecurity
@@ -206,7 +206,7 @@ spec:
   interval: 12h
   url: https://falcosecurity.github.io/charts
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: kong
@@ -215,7 +215,7 @@ spec:
   interval: 12h
   url: https://charts.konghq.com
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: linkerd
@@ -224,7 +224,7 @@ spec:
   interval: 12h
   url: https://helm.linkerd.io/stable
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: policy-reporter
@@ -233,7 +233,7 @@ spec:
   interval: 12h
   url: https://kyverno.github.io/policy-reporter
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: trivy-operator-polr-adapter
@@ -252,7 +252,7 @@ spec:
   type: oci
   url: oci://ghcr.io/weaveworks/charts
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: datadog
@@ -261,7 +261,7 @@ spec:
   interval: 12h
   url: https://helm.datadoghq.com
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: gitlab
@@ -270,7 +270,7 @@ spec:
   interval: 12h
   url: https://charts.gitlab.io
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: istio
@@ -279,7 +279,7 @@ spec:
   interval: 12h
   url: https://istio-release.storage.googleapis.com/charts
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: kiali
@@ -288,7 +288,7 @@ spec:
   interval: 12h
   url: https://kiali.org/helm-charts
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: metallb
@@ -297,7 +297,7 @@ spec:
   interval: 12h
   url: https://metallb.github.io/metallb
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: flagger
@@ -306,7 +306,7 @@ spec:
   interval: 12h
   url: https://flagger.app
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: external-secrets
@@ -315,7 +315,7 @@ spec:
   interval: 12h
   url: https://charts.external-secrets.io
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: open-telemetry
