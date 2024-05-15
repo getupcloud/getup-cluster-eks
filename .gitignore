@@ -1,7 +1,8 @@
 *.sw?
+**/.terraform
+*.tfstate
+*.tfplan
+*.tfstate.*.backup
+terraform.log
 .kubeconfig
 .kustomize_build.yaml
-.terraform
-errored.tfstate
-terraform.log
-terraform.tfplan
