@@ -22,7 +22,9 @@ KUSTOMIZE_BUILD := .kustomize_build.yaml
 .EXPORT_ALL_VARIABLES:
 
 all help:
-	@echo 'Usage: make [init|validate|fmt|plan|apply|output|kubeconfig|update-version|destroy|update-source]'
+	@echo Targets:
+	echo
+	printf -- "- %s\n" init validate fmt plan apply overaly output kubeconfig update-version update-source clean destroy
 
 clean:
 	rm -rf .terraform terraform.log $(KUSTOMIZE_BUILD)
@@ -54,7 +56,7 @@ destroy-auto-approve:
 	$(TERRAFORM) destroy -auto-approve $(TERRAFORM_ARGS) $(TERRAFORM_DESTROY_ARGS)
 
 output:
-	@$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS)
+	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) > output.json
 
 kubeconfig:
 	aws eks update-kubeconfig --name=$(CLUSTER_NAME) $(AWS_EKS_ARGS)
@@ -64,10 +66,6 @@ update-version:
 	latest=$${latest}
 	read -e -p "New module version: " -i "$$latest" v
 	sed -i -e '/source/s/ref=v[0-9]\+\.[0-9]\+\.[0-9]\+/ref=v'$$v'/g' main-*tf
-
-#update-manifests:
-#	@$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) | bin/output2sed > .output.sed
-#	find ./cluster -type f -name \*.yaml | xargs sed -i -f .output.sed
 
 show-vars:
 	grep -wrn -A 1 --color '#[a-zA-Z0-9_]\+#' cluster/overlay 2>/dev/null
@@ -79,7 +77,14 @@ kustomize ks:
 		exit 1
 	fi
 
-###
+overlay:
+	@echo Generating output.json
+	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) > output.json
+	echo Generating overlays
+	find cluster/overlay -type f | while read file; do
+		echo $$file
+		python bin/overlay.py output.json $$file >$${file}.tmp && mv $${file}.tmp $$file || exit 1
+	done
 
 validate-vars:
 	@if [ -z "$(CLUSTER_NAME)" ]; then

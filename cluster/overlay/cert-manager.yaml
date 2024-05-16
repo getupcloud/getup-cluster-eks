@@ -7,5 +7,5 @@ spec:
   values:
     serviceAccount:
       annotations:
-        #eks.amazonaws.com/role-arn: "#cert_manager_iam_role_arn#"
+        eks.amazonaws.com/role-arn: #output:{cert_manager_iam_role_arn}
 

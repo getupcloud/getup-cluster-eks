@@ -34,3 +34,32 @@
 # Type: ${string}
 # Default: "v2.2.3"
 #flux_version = "v2.2.3"
+
+# flux_overlay - Map of variables to inject into overlay files.
+# Type: ${map(string)}
+# Default: {
+#  "aws_eso_iam_role_arn": "",
+#  "cronitor_ping_url": "",
+#  "ecr_credential_sync_region": "",
+#  "msteams_channel_url": "",
+#  "opencost_spot_datafeed_bucket_name": "",
+#  "opencost_spot_datafeed_bucket_prefix": "",
+#  "opsgenie_integration_api_key": "",
+#  "pagerduty_service_key": "",
+#  "slack_api_url": "",
+#  "slack_channel": "",
+#  "teleport_auth_token": ""
+#}
+#flux_overlay = {
+#  "aws_eso_iam_role_arn": "",
+#  "cronitor_ping_url": "",
+#  "ecr_credential_sync_region": "",
+#  "msteams_channel_url": "",
+#  "opencost_spot_datafeed_bucket_name": "",
+#  "opencost_spot_datafeed_bucket_prefix": "",
+#  "opsgenie_integration_api_key": "",
+#  "pagerduty_service_key": "",
+#  "slack_api_url": "",
+#  "slack_channel": "",
+#  "teleport_auth_token": ""
+#}

@@ -104,7 +104,7 @@ spec:
         #############################
         #- name: cronitor
         #  webhook_configs:
-        #  #- url: #cronitor_ping_url#
+        #  - url: #output:{cronitor_ping_url}
         #    send_resolved: false
 
         #############################
@@ -113,8 +113,8 @@ spec:
         #- name: slack
         #  slack_configs:
         #  - send_resolved: true
-        #    #api_url: #slack_api_url#
-        #    #channel: "#slack_channel#"
+        #    api_url: #output:{slack_api_url}
+        #    channel: #output:{slack_channel}
         #    color: |-
         #      {{- if eq .Status "firing" -}}
         #        {{- if eq (index .Alerts 0).Labels.severity "critical" -}}
@@ -144,15 +144,15 @@ spec:
         #############################
         #- name: msteams
         #  webhook_configs:
-        #  #- url: #msteams_channel_url#
+        #  - url: #output:{msteams_channel_url}
 
         #############################
         # Opsgenie
         #############################
         #- name: opsgenie
         #  opsgenie_configs:
-        #  #- api_key: #opsgenie_integration_api_key#
-        #    #tags: #customer_name#, #cluster_name#, #cluster_provider#, #cluster_sla#
+        #  - api_key: #output:{opsgenie_integration_api_key}
+        #    tags: #output:{customer_name}, {cluster_name}, {cluster_provider}, {cluster_sla}
         #    # Choose priority according to SLA: high=[P1|P2], low=[P3|P4|P5]
         #    priority: P1
 
@@ -161,5 +161,5 @@ spec:
         #############################
         #- name: pagerduty
         #  pagerduty_configs:
-        #  #- service_key: #pagerduty_service_key#
-        #    #group: sla-#cluster_sla#
+        #  - service_key: #output:{pagerduty_service_key}
+        #    group: #output:sla-{cluster_sla}

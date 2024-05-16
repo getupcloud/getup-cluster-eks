@@ -5,10 +5,10 @@ metadata:
   namespace: flux-system
 spec:
   values:
-    #clusterName: "#cluster_name#"
+    clusterName: #output:{cluster_name}
 
     replicaCount: 1
 
     serviceAccount:
       annotations:
-        #eks.amazonaws.com/role-arn: "#aws_load_balancer_controller_iam_role_arn#"
+        eks.amazonaws.com/role-arn: #output:{aws_load_balancer_controller_iam_role_arn}

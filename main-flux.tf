@@ -10,4 +10,5 @@ module "flux" {
   flux_github_repository = var.flux_github_repository
   flux_path              = var.flux_path
   flux_version           = var.flux_version
+  flux_overlay           = var.flux_overlay
 }

@@ -4,6 +4,7 @@
 *.tfplan
 *.tfstate.backup
 *.tfstate.*.backup
+output.json
 terraform.log
 .kubeconfig
 .kustomize_build.yaml
