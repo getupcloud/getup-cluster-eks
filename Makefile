@@ -93,11 +93,13 @@ update-version:
 	sed -i -e '/source/s/ref=v[0-9]\+\.[0-9]\+\.[0-9]\+/ref=v'$$v'/g' main-*tf
 
 is-tree-clean:
+ifneq ($(force), true)
 	@if git status --porcelain | grep '^[^?]'; then
 		git status;
 		echo -e "\n>>> Tree is not clean. Please commit and try again <<<\n";
 		exit 1;
 	fi
+endif
 
 update-source: update-remote-source
 
@@ -105,14 +107,14 @@ update-remote-source:
 	# TODO
 
 update-local-source: from ?= ../terraform-cluster/
-update-local-source: patterns = $(wildcard bin *.tf terraform-*.auto.tfvars.example)
+update-local-source: patterns = $(filter-out versions.tf providers.tf,$(wildcard bin *.tf terraform-*.auto.tfvars.example))
 update-local-source: sources = $(addprefix $(from)/, $(patterns))
 update-local-source: is-tree-clean
-	shopt -s nullglob
+	@shopt -s nullglob
 	cp -rv $(sources) ./
 
 show-overlay-vars:
-	grep -wrn -A 1 --color '#output:.*' cluster/overlay 2>/dev/null
+	@grep -wrn -A 1 --color '#output:.*' cluster/overlay 2>/dev/null
 
 kustomize ks:
 	@echo Checking kustomization
