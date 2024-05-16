@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   values:
-    # acme_email: account@example.com
+    acme_email: #output:{certmanager_acme_email}
     # cluster_issuer_dns01:
     #   aws_access_key_id: ""
     #   aws_region: ""

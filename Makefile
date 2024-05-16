@@ -3,16 +3,23 @@
 # This is a suggestion, not a requirement.
 #
 
-TERRAFORM      ?= terraform
-TF_LOG_PATH    ?= terraform.log
-TF_LOG         ?= DEBUG
-CLUSTER_NAME   ?= $(shell sed -ne 's|^\s*cluster_name\s*=\s*"\([^"]\+\)"|\1|p' *.tfvars 2>/dev/null)
+TERRAFORM           ?= terraform
+TF_LOG_PATH         ?= terraform.log
+TF_LOG              ?= DEBUG
+CUSTOMERNAME        ?= $(shell sed -ne 's|^\s*customer_name\s*=\s*"\([^"]\+\)"|\1|p' *.tfvars 2>/dev/null)
+CLUSTER_NAME        ?= $(shell sed -ne 's|^\s*cluster_name\s*=\s*"\([^"]\+\)"|\1|p' *.tfvars 2>/dev/null)
+GIT_REMOTE          ?= origin
+GIT_BRANCH          ?= main
+GIT_COMMIT_MESSAGE  ?= Auto-generated commit
+FLOW_RECONCILE      := plan apply overlay commit push
+FLOW_FULL_RECONCILE := pull init validate plan apply kubeconfig overlay commit push
+KUSTOMIZE_BUILD     := .kustomize_build.yaml
+OUTPUT_JSON         := .output.json
 
 ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -s https://api.ipify.org)/32"]'
 endif
 
-KUSTOMIZE_BUILD := .kustomize_build.yaml
 
 # TODO: Ler grupo usando terraform e injetar no configmap/aws-auth
 # AWS_AUTH_GROUP_NAME := Infra
@@ -25,6 +32,24 @@ all help:
 	@echo Targets:
 	echo
 	printf -- "- %s\n" init validate fmt plan apply overaly output kubeconfig update-version update-source clean destroy
+	echo
+	echo Reconcile flows:
+	echo
+	echo '- reconcile: $(FLOW_RECONCILE)'
+	echo '- full-reconcile: $(FLOW_FULL_RECONCILE)'
+
+reconcile: $(FLOW_RECONCILE)
+
+full-reconcile: $(FLOW_FULL_RECONCILE)
+
+pull:
+	git pull origin main
+
+commit:
+	git commit -a -m "$(GIT_COMMIT_MESSAGE)"
+
+push:
+	git push $(GIT_REMOTE) $(GIT_BRANCH)
 
 clean:
 	rm -rf .terraform terraform.log $(KUSTOMIZE_BUILD)
@@ -56,7 +81,7 @@ destroy-auto-approve:
 	$(TERRAFORM) destroy -auto-approve $(TERRAFORM_ARGS) $(TERRAFORM_DESTROY_ARGS)
 
 output:
-	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) > output.json
+	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS)
 
 kubeconfig:
 	aws eks update-kubeconfig --name=$(CLUSTER_NAME) $(AWS_EKS_ARGS)
@@ -67,8 +92,27 @@ update-version:
 	read -e -p "New module version: " -i "$$latest" v
 	sed -i -e '/source/s/ref=v[0-9]\+\.[0-9]\+\.[0-9]\+/ref=v'$$v'/g' main-*tf
 
-show-vars:
-	grep -wrn -A 1 --color '#[a-zA-Z0-9_]\+#' cluster/overlay 2>/dev/null
+is-tree-clean:
+	@if git status --porcelain | grep '^[^?]'; then
+		git status;
+		echo -e "\n>>> Tree is not clean. Please commit and try again <<<\n";
+		exit 1;
+	fi
+
+update-source: update-remote-source
+
+update-remote-source:
+	# TODO
+
+update-local-source: from ?= ../terraform-cluster/
+update-local-source: patterns = $(wildcard bin *.tf terraform-*.auto.tfvars.example)
+update-local-source: sources = $(addprefix $(from)/, $(patterns))
+update-local-source: is-tree-clean
+	shopt -s nullglob
+	cp -rv $(sources) ./
+
+show-overlay-vars:
+	grep -wrn -A 1 --color '#output:.*' cluster/overlay 2>/dev/null
 
 kustomize ks:
 	@echo Checking kustomization
@@ -77,13 +121,15 @@ kustomize ks:
 		exit 1
 	fi
 
-overlay:
-	@echo Generating output.json
-	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) > output.json
+$(OUTPUT_JSON): *.tf *.tfvars
+	echo Generating $(OUTPUT_JSON)
+	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) > $(OUTPUT_JSON)
+
+overlay: $(OUTPUT_JSON)
 	echo Generating overlays
-	find cluster/overlay -type f | while read file; do
+	find cluster/overlay -type f -iregex '.*\.ya?ml' | while read file; do
 		echo $$file
-		python bin/overlay.py output.json $$file >$${file}.tmp && mv $${file}.tmp $$file || exit 1
+		python bin/overlay.py $(OUTPUT_JSON) $$file >$${file}.tmp && mv $${file}.tmp $$file || exit 1
 	done
 
 validate-vars:
@@ -91,6 +137,3 @@ validate-vars:
 		echo "Missing required var: CLUSTER_NAME"
 		exit 1
 	fi
-
-update-source:
-	cp ../terraform-modules/examples/*/{main,outputs,variables}-*.tf ../terraform-modules/examples/*/*.tfvars.example . -v

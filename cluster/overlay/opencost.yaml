@@ -11,7 +11,7 @@ spec:
           awsSpotDataRegion: #output:{aws_region}
           awsSpotDataBucket: #output:{opencost_spot_datafeed_bucket_name}
           awsSpotDataPrefix: #output:{opencost_spot_datafeed_bucket_prefix}
-          projectID": #output:{aws_account_id}
+          projectID": #output:"{aws_account_id}"
       exporter:
         defaultClusterId: #output:{cluster_name}
         persistence:

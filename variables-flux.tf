@@ -49,6 +49,7 @@ variable "flux_overlay" {
   type        = map(string)
   default = {
     aws_eso_iam_role_arn : ""
+    certmanager_acme_email : ""
     cronitor_ping_url : ""
     ecr_credential_sync_region : ""
     msteams_channel_url : ""
