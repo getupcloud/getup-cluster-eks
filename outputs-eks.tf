@@ -5,6 +5,11 @@ output "aws_account_id" {
   value       = module.eks.aws_account_id
 }
 
+output "aws_region" {
+  description = "AWS Region."
+  value       = module.eks.aws_region
+}
+
 output "cluster_arn" {
   description = "The Amazon Resource Name (ARN) of the cluster"
   value       = module.eks.cluster_arn
