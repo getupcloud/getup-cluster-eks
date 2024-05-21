@@ -1,0 +1,105 @@
+# File auto-generated from ./bin/vars2tfvars
+
+# rds_name - Name of the RDS instance
+# Type: ${string}
+# Required
+#rds_name = <REQUIRED-VALUE>
+
+# rds_engine - Engine type for RDS instance
+# Type: ${string}
+# Default: "postgres"
+#rds_engine = "postgres"
+
+# rds_db_name - Name of the RDS database. Uses rds_name if not specified.
+# Type: ${string}
+# Default: null
+#rds_db_name = null
+
+# rds_username - Username of the RDS database. Use rds_db_name if not specified.
+# Type: ${string}
+# Default: null
+#rds_username = null
+
+# rds_password - Username of the RDS database. Set it to null to let RDS manage the password via SecretsManager.
+# Type: ${string}
+# Default: null
+#rds_password = null
+
+# rds_storage_size - Initial size in Gi for allocated storage. Will grow up to 5x this value.
+# Type: ${number}
+# Default: 20
+#rds_storage_size = 20
+
+# rds_engine_version - RDS engine version.
+# Type: ${string}
+# Default: "14"
+#rds_engine_version = "14"
+
+# rds_family - RDS family.
+# Type: ${string}
+# Default: "postgres14"
+#rds_family = "postgres14"
+
+# rds_major_engine_version - RDS major engine version.
+# Type: ${string}
+# Default: "14"
+#rds_major_engine_version = "14"
+
+# rds_instance_class - RDS instance class.
+# Type: ${string}
+# Default: "db.t4g.large"
+#rds_instance_class = "db.t4g.large"
+
+# rds_public - Creates RDS on a public subnet for internet access
+# Type: ${bool}
+# Default: false
+#rds_public = false
+
+# rds_vpc_name - VPC name for the RDS. Will use rds_name if not specified.
+# Type: ${string}
+# Default: null
+#rds_vpc_name = null
+
+# rds_vpc_cidr - CIDR for the RDS VPC
+# Type: ${string}
+# Default: "10.99.0.0/24"
+#rds_vpc_cidr = "10.99.0.0/24"
+
+# rds_eks_vpc_cidr - Allow CIDR from EKS VPC to access RDS.
+# Type: ${string}
+# Default: null
+#rds_eks_vpc_cidr = null
+
+# rds_ingress_vpc_cidrs - Append CIDRs to allow ingress access to RDS. Defaults to EKS"s CIDR only.
+# Type: ${list(string)}
+# Default: []
+#rds_ingress_vpc_cidrs = []
+
+# rds_azs - AZs for the RDS VPC
+# Type: ${list(string)}
+# Default: [
+#  "use1-az1",
+#  "use1-az2"
+#]
+#rds_azs = [
+#  "use1-az1",
+#  "use1-az2"
+#]
+
+# rds_deletion_protection - Enable accidental deletion protection for the database.
+# Type: ${bool}
+# Default: true
+#rds_deletion_protection = true
+
+# Type: ${string}
+# Default: null
+#rds_vpc_peering_peer_vpc_id = null
+
+# Type: ${list(string)}
+# Default: []
+#rds_vpc_peering_peer_route_table_ids = []
+
+# rds_tags - (Optional) Tags to apply to all resources.
+# Type: ${any}
+# Default: {}
+#rds_tags = {}

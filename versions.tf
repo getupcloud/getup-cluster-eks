@@ -1,16 +1,18 @@
+# File auto-generated from ./bin/versions
+
 terraform {
   required_version = "~> 1.7.0"
 
-  #  backend "s3" {
-  #    bucket = "customer-terraform-eks"
-  #    key    = "production/terraform.tfstate"
-  #    region = "sa-east-1"
-  #  }
+  backend "s3" {
+    bucket = "BUCKET_NAME"
+    key    = "CLUSTER_NAME/terraform.tfstate"
+    region = "CLUSTER_REGION"
+  }
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 5.40"
+      version = "~> 5.34"
     }
 
     kubernetes = {
@@ -35,7 +37,7 @@ terraform {
 
     flux = {
       source  = "fluxcd/flux"
-      version = "~>1.2"
+      version = "~> 1.2"
     }
 
     github = {

@@ -101,17 +101,23 @@ ifneq ($(force), true)
 	fi
 endif
 
-update-source: update-remote-source
+#update-source: update-from-remote-source
+#
+#update-from-remote-source:
+#	# TODO
 
-update-remote-source:
-	# TODO
-
-update-local-source: from ?= ../terraform-cluster/
-update-local-source: patterns = $(filter-out versions.tf providers.tf,$(wildcard bin *.tf terraform-*.auto.tfvars.example))
-update-local-source: sources = $(addprefix $(from)/, $(patterns))
-update-local-source: is-tree-clean
+update-from-local-cluster: from ?= ../terraform-cluster/
+update-from-local-cluster: patterns = $(filter-out versions.tf providers.tf,$(wildcard bin *.tf terraform-*.auto.tfvars.example))
+update-from-local-cluster: sources = $(addprefix $(from)/, $(patterns))
+update-from-local-cluster: is-tree-clean
 	@shopt -s nullglob
 	cp -rv $(sources) ./
+
+update-from-local-examples: from ?= ../terraform-modules/examples
+update-from-local-examples: sources = $(wildcard $(from)/*/*.tf $(from)/*/*.example $(from)/versions.tf)
+update-from-local-examples: # is-tree-clean
+	#@shopt -s nullglob
+	cp -v $(sources) ./
 
 show-overlay-vars:
 	@grep -wrn -A 1 --color '#output:.*' cluster/overlay 2>/dev/null

@@ -1,0 +1,22 @@
+# File auto-generated from ./bin/vars2tfvars
+
+# Type: ${string}
+# Required
+#vpc_peering_owner_vpc_id = <REQUIRED-VALUE>
+
+# Type: ${list(string)}
+# Default: []
+#vpc_peering_owner_route_table_ids = []
+
+# Type: ${string}
+# Required
+#vpc_peering_peer_vpc_id = <REQUIRED-VALUE>
+
+# Type: ${list(string)}
+# Default: []
+#vpc_peering_peer_route_table_ids = []
+
+# vpc_peering_tags - (Optional) Tags to apply to all resources.
+# Type: ${any}
+# Default: {}
+#vpc_peering_tags = {}

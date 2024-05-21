@@ -60,6 +60,11 @@ output "cluster_vpc_id" {
   value       = module.eks.cluster_vpc_id
 }
 
+output "cluster_vpc_private_route_table_ids" {
+  description = "Route table IDs from the cluster private subnets."
+  value       = module.eks.cluster_vpc_private_route_table_ids
+}
+
 output "cluster_security_group_arn" {
   description = "Amazon Resource Name (ARN) of the cluster security group"
   value       = module.eks.cluster_security_group_arn
