@@ -5,13 +5,10 @@ metadata:
   namespace: flux-system
 spec:
   values:
-    #authToken: #teleport_auth_token#
-
-    #kubeClusterName: #customer#-#cluster_name#
+    authToken: #output:{overlay["teleport_auth_token"]}
+    kubeClusterName: #output:{customer_name}-{cluster_name}
 
     labels:
-      #customer: #customer_name#
-
-      #region: #aws_region#
-
-      #sla: #cluster_sla#
+      customer: #output:{customer_name}
+      region: #output:{aws_region}
+      sla: #output:{cluster_sla}

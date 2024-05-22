@@ -15,6 +15,8 @@ FLOW_RECONCILE      := plan apply overlay commit push
 FLOW_FULL_RECONCILE := pull init validate plan apply kubeconfig overlay commit push
 KUSTOMIZE_BUILD     := .kustomize_build.yaml
 OUTPUT_JSON         := .output.json
+OUTPUT_OVERLAY_JSON := .overlay.output.json
+TFVARS_OVERLAY_JSON := .overlay.tfvars.json
 
 ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -s https://api.ipify.org)/32"]'
@@ -115,22 +117,30 @@ update-from-local-cluster: is-tree-clean
 
 update-from-local-examples: from ?= ../terraform-modules/examples
 update-from-local-examples: sources = $(wildcard $(from)/*/*.tf $(from)/*/*.example $(from)/versions.tf)
-update-from-local-examples: # is-tree-clean
-	#@shopt -s nullglob
+update-from-local-examples: is-tree-clean
+	@shopt -s nullglob
 	cp -v $(sources) ./
-
-$(OUTPUT_JSON): *.tf *.tfvars
-	echo Generating $(OUTPUT_JSON)
-	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) > $(OUTPUT_JSON)
 
 show-overlay-vars:
 	@grep -wrn -A 1 --color '#output:.*' cluster/overlay 2>/dev/null
 
-overlay: $(OUTPUT_JSON)
-	@echo Generating overlays
+$(OUTPUT_JSON): *.tf *.tfvars
+	@echo Generating $@
+	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) > $(OUTPUT_JSON)
+
+$(OUTPUT_OVERLAY_JSON): $(OUTPUT_JSON)
+	@echo Generating $@
+	bin/output2overlay $^ > $@
+
+$(TFVARS_OVERLAY_JSON): *.tfvars
+	@echo Generating $@
+	bin/tfvars2overlay $^ > $@
+
+overlay: $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
+	@echo Processing overlays
 	find cluster/overlay -type f -iregex '.*\.ya?ml' | while read file; do
-		echo $$file
-		python bin/overlay.py $(OUTPUT_JSON) $$file >$${file}.tmp && mv $${file}.tmp $$file || exit 1
+		echo "-> $$file"
+		python bin/overlay "$$file" $^ >"$${file}.tmp" && mv "$${file}.tmp" "$$file" || exit 1
 	done
 
 validate-vars:

@@ -9,14 +9,14 @@ spec:
       customPricing:
         costModel:
           awsSpotDataRegion: #output:{aws_region}
-          awsSpotDataBucket: #output:{opencost_spot_datafeed_bucket_name}
-          awsSpotDataPrefix: #output:{opencost_spot_datafeed_bucket_prefix}
+          awsSpotDataBucket: #output:{overlay["opencost_spot_datafeed_bucket_name"]}
+          awsSpotDataPrefix: #output:{overlay["opencost_spot_datafeed_bucket_prefix"]}
           projectID": #output:"{aws_account_id}"
       exporter:
         defaultClusterId: #output:{cluster_name}
         persistence:
-          storageClass: #output:{storage_class_name}
+          storageClass: #output:{overlay["opencost_storage_class_name"]}
     serviceAccount:
       name: opencost
       annotations:
-        eks.amazonaws.com/role-arn: #output:{opencost_iam_role_arn}
+        eks.amazonaws.com/role-arn: #output:{overlay["opencost_iam_role_arn"]}

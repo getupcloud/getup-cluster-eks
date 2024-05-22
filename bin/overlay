@@ -1,18 +1,21 @@
 #!/usr/bin/env python
-
+#
+# Usage: ./overlay [overlay] [tfvars|output]...
+#
 import re
 import sys
 import json
 
 output_re = re.compile('^(\s*)([^\s]+):\s+(.*)#output:(.+)$')
+overlay_file = sys.argv[1]
+input_files = sys.argv[2:]
 
-with open(sys.argv[1], 'r') as f:
-    data = json.load(f)
+data = {}
+for infile in input_files:
+    with open(infile, 'r') as f:
+        data.update(json.load(f))
 
-for k, v in data.items():
-    data[k] = v["value"]
-
-with open(sys.argv[2], 'r') as f:
+with open(overlay_file, 'r') as f:
     for line in f.readlines():
         if '#output:' not in line:
             print(line, end='')
@@ -25,6 +28,7 @@ with open(sys.argv[2], 'r') as f:
 
         try:
             indent, name, _, tpl = match.groups()
+            #TODO: add libs (ex: base64)
             value = eval(f"f'{tpl}'", data)
             print(f'{indent}{name}: {value} #output:{tpl}')
         except NameError:

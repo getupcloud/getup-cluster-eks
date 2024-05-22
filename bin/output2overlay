@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+#
+# Convert terraform output json into overlay-data {"key": "value", ...}
+#
+
+import sys
+import json
+
+data = {}
+
+for t in sys.argv[1:]:
+    with open(t, 'r') as f:
+        data.update({ k: v['value'] for k, v in json.load(f).items() })
+
+print(json.dumps(data, indent=3))
