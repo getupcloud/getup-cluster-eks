@@ -1,7 +1,7 @@
 # File auto-generated from ./bin/vars2tf
 
 module "vpc_peering" {
-  source = "github.com/getupcloud/terraform-modules//modules/vpc_peering?ref=v0.16.6"
+  source = "github.com/getupcloud/terraform-modules//modules/vpc_peering?ref=v0.16.7"
 
   vpc_peering_owner_vpc_id          = var.vpc_peering_owner_vpc_id
   vpc_peering_owner_route_table_ids = var.vpc_peering_owner_route_table_ids

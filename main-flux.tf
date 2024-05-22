@@ -1,7 +1,7 @@
 # File auto-generated from ./bin/vars2tf
 
 module "flux" {
-  source = "github.com/getupcloud/terraform-modules//modules/flux?ref=v0.16.6"
+  source = "github.com/getupcloud/terraform-modules//modules/flux?ref=v0.16.7"
 
   flux_aws_region        = var.aws_region
   flux_cluster_name      = module.eks.cluster_name

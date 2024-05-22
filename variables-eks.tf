@@ -32,7 +32,6 @@ variable "overlay" {
   description = "Map of variables to inject into overlay files."
   type        = map(string)
   default = {
-    aws_eso_iam_role_arn : ""
     certmanager_acme_email : ""
     cronitor_ping_url : ""
     ecr_credential_sync_region : ""

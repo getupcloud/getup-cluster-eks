@@ -27,7 +27,6 @@
 # overlay - Map of variables to inject into overlay files.
 # Type: ${map(string)}
 # Default: {
-#  "aws_eso_iam_role_arn": "",
 #  "certmanager_acme_email": "",
 #  "cronitor_ping_url": "",
 #  "ecr_credential_sync_region": "",
@@ -42,7 +41,6 @@
 #  "teleport_auth_token": ""
 #}
 #overlay = {
-#  "aws_eso_iam_role_arn": "",
 #  "certmanager_acme_email": "",
 #  "cronitor_ping_url": "",
 #  "ecr_credential_sync_region": "",

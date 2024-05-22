@@ -1,7 +1,7 @@
 # File auto-generated from ./bin/vars2tf
 
 module "istio" {
-  source = "github.com/getupcloud/terraform-modules//modules/istio?ref=v0.16.6"
+  source = "github.com/getupcloud/terraform-modules//modules/istio?ref=v0.16.7"
 
   istio_version            = var.istio_version
   istio_namespace          = var.istio_namespace
