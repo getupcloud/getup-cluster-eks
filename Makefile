@@ -119,22 +119,15 @@ update-from-local-examples: # is-tree-clean
 	#@shopt -s nullglob
 	cp -v $(sources) ./
 
-show-overlay-vars:
-	@grep -wrn -A 1 --color '#output:.*' cluster/overlay 2>/dev/null
-
-kustomize ks:
-	@echo Checking kustomization
-	if ! kubectl kustomize ./cluster -o $(KUSTOMIZE_BUILD); then
-		echo Generated output: $(KUSTOMIZE_BUILD)
-		exit 1
-	fi
-
 $(OUTPUT_JSON): *.tf *.tfvars
 	echo Generating $(OUTPUT_JSON)
 	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) > $(OUTPUT_JSON)
 
+show-overlay-vars:
+	@grep -wrn -A 1 --color '#output:.*' cluster/overlay 2>/dev/null
+
 overlay: $(OUTPUT_JSON)
-	echo Generating overlays
+	@echo Generating overlays
 	find cluster/overlay -type f -iregex '.*\.ya?ml' | while read file; do
 		echo $$file
 		python bin/overlay.py $(OUTPUT_JSON) $$file >$${file}.tmp && mv $${file}.tmp $$file || exit 1
@@ -145,3 +138,11 @@ validate-vars:
 		echo "Missing required var: CLUSTER_NAME"
 		exit 1
 	fi
+
+kustomize ks:
+	@echo Checking kustomization
+	if ! kubectl kustomize ./cluster -o $(KUSTOMIZE_BUILD); then
+		echo Generated output: $(KUSTOMIZE_BUILD)
+		exit 1
+	fi
+
