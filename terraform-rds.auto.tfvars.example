@@ -91,13 +91,25 @@
 # Default: true
 #rds_deletion_protection = true
 
+# rds_vpc_peering_peer_vpc_id - VPC ID for the peering (client-side) to consume this RDS.
 # Type: ${string}
 # Default: null
 #rds_vpc_peering_peer_vpc_id = null
 
+# rds_vpc_peering_peer_route_table_ids - VPC route table IDs for the peering (client-side) to consume this RDS.
 # Type: ${list(string)}
 # Default: []
 #rds_vpc_peering_peer_route_table_ids = []
+
+# performance_insights_enabled - Specifies whether Performance Insights are enabled.
+# Type: ${bool}
+# Default: true
+#performance_insights_enabled = true
+
+# performance_insights_retention_period - The amount of time in days to retain Performance Insights data. Valid values are 7, 731 (2 years) or a multiple of 31.
+# Type: ${number}
+# Default: 7
+#performance_insights_retention_period = 7
 
 # rds_tags - (Optional) Tags to apply to all resources.
 # Type: ${any}

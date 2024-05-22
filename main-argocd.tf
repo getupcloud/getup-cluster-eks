@@ -1,7 +1,7 @@
 # File auto-generated from ./bin/vars2tf
 
 module "argocd" {
-  source = "github.com/getupcloud/terraform-modules//modules/argocd?ref=v0.16.1"
+  source = "github.com/getupcloud/terraform-modules//modules/argocd?ref=v0.16.3"
 
   argocd_repository = var.argocd_repository
   argocd_version    = var.argocd_version

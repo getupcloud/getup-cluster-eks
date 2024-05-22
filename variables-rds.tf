@@ -113,15 +113,28 @@ variable "rds_deletion_protection" {
 }
 
 #variable "rds_vpc_peering_peer_vpc_id" {
-#  type    = string
-#  default = null
+#  description = "VPC ID for the peering (client-side) to consume this RDS."
+#  type        = string
+#  default     = null
 #}
 
 #variable "rds_vpc_peering_peer_route_table_ids" {
-#  type    = list(string)
-#  default = []
+#  description = "VPC route table IDs for the peering (client-side) to consume this RDS."
+#  type        = list(string)
+#  default     = []
 #}
 
+variable "performance_insights_enabled" {
+  description = "Specifies whether Performance Insights are enabled."
+  type        = bool
+  default     = true
+}
+
+variable "performance_insights_retention_period" {
+  description = "The amount of time in days to retain Performance Insights data. Valid values are 7, 731 (2 years) or a multiple of 31."
+  type        = number
+  default     = 7
+}
 
 variable "rds_tags" {
   description = "(Optional) Tags to apply to all resources."
