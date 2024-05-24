@@ -33,7 +33,7 @@ endif
 all help:
 	@echo Targets:
 	echo
-	printf -- "- %s\n" init validate fmt plan apply overaly output kubeconfig update-version update-source clean destroy
+	printf -- "- %s\n" init validate fmt plan apply overaly output kubeconfig update-version clean destroy migrate-state
 	echo
 	echo Reconcile flows:
 	echo
@@ -70,6 +70,9 @@ fmt:
 
 plan: validate-vars
 	$(TERRAFORM) plan -out terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_PLAN_ARGS)
+
+migrate-state:
+	$(TERRAFORM) init -migrate-state
 
 # WARNING: NO CONFIRMATION ON APPLY
 apply:
