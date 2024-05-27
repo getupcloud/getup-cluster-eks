@@ -1,4 +1,4 @@
-# File auto-generated from ./bin/versions
+# File auto-generated from ./bin/make-versions
 
 terraform {
   required_version = "~> 1.7.0"
