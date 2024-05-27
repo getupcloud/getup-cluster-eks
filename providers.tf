@@ -1,14 +1,10 @@
 provider "aws" {
   region = var.aws_region
+  allowed_account_ids = [ var.aws_account_id ]
 
   default_tags {
     tags = var.tags
   }
-}
-
-provider "aws" {
-  region = "us-east-1"
-  alias  = "us-east-1"
 }
 
 provider "kubernetes" {
