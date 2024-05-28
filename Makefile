@@ -18,6 +18,9 @@ OUTPUT_JSON         := .output.json
 OUTPUT_OVERLAY_JSON := .overlay.output.json
 TFVARS_OVERLAY_JSON := .overlay.tfvars.json
 
+UPDATE_FILES_MODULES = main-*.tf variables-*.tf outputs-*.tf terraform-*.auto.tfvars.example
+UPDATE_FILES_CLUSTER = bin providers.tf $(UPDATE_FILES_MODULES)
+
 ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -s https://api.ipify.org)/32"]'
 endif
@@ -112,8 +115,7 @@ endif
 #	# TODO
 
 update-from-local-cluster: from ?= ../terraform-cluster/
-update-from-local-cluster: patterns = $(filter-out versions.tf providers.tf,$(wildcard bin *.tf terraform-*.auto.tfvars.example))
-update-from-local-cluster: sources = $(addprefix $(from)/, $(patterns))
+update-from-local-cluster: sources ?= $(wildcard $(addprefix $(from)/,$(UPDATE_FILES_CLUSTER)))
 update-from-local-cluster: is-tree-clean
 	@shopt -s nullglob
 	cp -rv $(sources) ./
@@ -122,7 +124,7 @@ update-from-local-examples: from ?= ../terraform-modules/examples
 update-from-local-examples: sources = $(wildcard $(from)/*/*.tf $(from)/*/*.example $(from)/versions.tf)
 update-from-local-examples: is-tree-clean
 	@shopt -s nullglob
-	cp -v $(sources) ./
+	cp -rv $(sources) ./
 
 show-overlay-vars:
 	@grep -wrn -A 1 --color '#output:.*' cluster/overlay 2>/dev/null
