@@ -42,8 +42,18 @@
 
 # istiod_set - Value block with custom values to be merged with the values yaml.
 # Type: ${list(object({"name": "${string}", "value": "${any}"}))}
-# Default: []
-#istiod_set = []
+# Default: [
+#  {
+#    "name": "defaults.pilot.resources.requests.memory",
+#    "value": "1Gi"
+#  }
+#]
+#istiod_set = [
+#  {
+#    "name": "defaults.pilot.resources.requests.memory",
+#    "value": "1Gi"
+#  }
+#]
 
 # istiod_set_list - Value block with list of custom values to be merged with the values yaml.
 # Type: ${list(object({"name": "${string}", "value": "${list(string)}"}))}

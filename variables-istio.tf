@@ -48,7 +48,12 @@ variable "istiod_values" {
 variable "istiod_set" {
   description = "Value block with custom values to be merged with the values yaml."
   type        = list(object({ name = string, value = any }))
-  default     = []
+  default = [
+    {
+      name : "defaults.pilot.resources.requests.memory"
+      value : "1Gi"
+    }
+  ]
 }
 
 variable "istiod_set_list" {
