@@ -1,0 +1,97 @@
+#!/bin/bash
+
+set -eu
+
+join()
+{
+    local IFS="$1"
+    shift
+    echo -n "$*"
+}
+
+cluster_name=$1
+
+echo This is informative only. No action is being taken.
+echo
+
+echo terraform import \'module.eks.aws_eks_cluster.this[0]\' $cluster_name
+
+caller_identity=$(aws sts get-caller-identity)
+account=$(jq -r .Account <<<$caller_identity)
+
+cluster=$(aws eks describe-cluster --name $cluster_name)
+addons=$(aws eks list-addons --cluster-name $cluster_name)
+addons_len=$(jq -r '.addons|length' <<<$addons)
+if [ $addons_len -gt 0 ]; then
+    for addon_idx in $(seq 0 $(($addons_len - 1)) ); do
+        addon_name=$(jq -r .addons[$addon_idx] <<<$addons)
+        if [ $addon_name == vpc-cni ]; then
+            echo terraform import \'module.eks.aws_eks_addon.before_compute[\"$addon_name\"]\' $cluster_name:$addon_name
+        else
+            echo terraform import \'module.eks.aws_eks_addon.this[\"$addon_name\"]\' $cluster_name:$addon_name
+        fi
+    done
+fi
+
+vpc_id=$(jq -r .cluster.resourcesVpcConfig.vpcId <<<"$cluster")
+subnet_ids=$(jq -r .cluster.resourcesVpcConfig.subnetIds[] <<<"$cluster")
+echo terraform import \'module.vpc[0].aws_vpc.this[0]\' ${vpc_id}
+
+cluster_security_group_id=$(jq -r .cluster.resourcesVpcConfig.clusterSecurityGroupId <<<"$cluster")
+security_group_ids=$(jq -r .cluster.resourcesVpcConfig.securityGroupIds[] <<<"$cluster")
+echo terraform import \'module.eks.aws_security_group.cluster[0]\' $cluster_security_group_id
+echo terraform import \'module.vpc[0].aws_default_security_group.this[0]\' $cluster_security_group_id
+
+cluster_oidc=$(jq -r .cluster.identity.oid.issuer//empty <<<$cluster)
+if [ -n "$cluster_oidc" ]; then
+    cluster_oidc_arn=arn:aws:iam::${accounnt}:oidc-provider/${openid_connect_provider#*://}
+    echo terraform import \'module.eks.aws_iam_openid_connect_provider.oidc_provider[0]\' $cluster_oidc_arn
+fi
+
+internet_gateways=$(aws ec2 describe-internet-gateways --filter Name=attachment.vpc-id,Values=$vpc_id)
+internet_gateway_id=$(jq -r ".InternetGateways[0]|.InternetGatewayId" <<<$internet_gateways)
+echo terraform import \'module.vpc[0].aws_internet_gateway.this[0]\' $internet_gateway_id
+
+subnets=$(aws ec2 describe-subnets --subnet-ids $subnet_ids)
+subnets_len=$(jq '.Subnets|length' <<<$subnets)
+
+for subnet_idx in $(seq 0 $(($subnets_len - 1)) ); do
+    subnet_id=$(jq -r ".Subnets[$subnet_idx].SubnetId" <<<$subnets)
+
+    nat_gateways=$(aws ec2 describe-nat-gateways --filter Name=subnet-id,Values=$subnet_id)
+    nat_gateways_len=$(jq '.NatGateways|length' <<<$nat_gateways)
+    for nat_gateway_idx in $(seq 0 $(($nat_gateways_len - 1)) ); do
+        nat_gateway_id=$(jq -r ".NatGateways[$nat_gateway_idx].NatGatewayId" <<<$nat_gateways)
+        nat_gateway_conn_type=$(jq -r ".NatGateways[$nat_gateway_idx].ConnectivityType" <<<$nat_gateways)
+    done
+
+    if [ $nat_gateways_len -gt 0 ]; then
+        echo terraform import \'module.vpc[0].aws_subnet.private[$subnet_idx]\' $subnet_id
+    else
+        echo terraform import \'module.vpc[0].aws_subnet.public[$subnet_idx]\' $subnet_id
+    fi
+
+    route_tables=$(aws ec2 describe-route-tables --filter Name=association.subnet-id,Values=$subnet_id)
+    route_tables_len=$(jq '.RouteTables|length' <<<$route_tables)
+    for route_table_idx in $(seq 0 $(($route_tables_len - 1)) ); do
+        route_table_id=$(jq -r ".RouteTables.[$route_table_idx].RouteTableId" <<<$route_tables)
+    done
+done
+
+nodegroups=$(aws eks list-nodegroups --cluster-name $cluster_name)
+nodegroups_len=$(jq -r '.nodegroups|length' <<<$nodegroups)
+if [ $nodegroups_len -gt 0 ]; then
+    echo -n aws_auth_node_iam_role_arns_non_windows = [
+    nodegroup_arns=()
+    for nodegroup_idx in $(seq 0 $(($nodegroups_len - 1)) ); do
+        nodegroup_name=$(jq -r .nodegroups[$nodegroup_idx] <<<$nodegroups)
+        nodegroup=$(aws eks describe-nodegroup --cluster-name $cluster_name --nodegroup-name $nodegroup_name)
+        nodegroup_arn=$(jq -r .nodegroup.nodeRole <<<$nodegroup)
+        #echo -n "\"$nodegroup_arn\","
+        nodegroup_arns+=(\"$nodegroup_arn\")
+    done
+    join , "${nodegroup_arns[@]}"
+    echo ]
+fi
+
+echo Use: make init validate plan

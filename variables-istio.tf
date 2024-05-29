@@ -50,7 +50,7 @@ variable "istiod_set" {
   type        = list(object({ name = string, value = any }))
   default = [
     {
-      name : "defaults.pilot.resources.requests.memory"
+      name : "pilot.resources.requests.memory"
       value : "1Gi"
     }
   ]

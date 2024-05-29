@@ -44,13 +44,13 @@
 # Type: ${list(object({"name": "${string}", "value": "${any}"}))}
 # Default: [
 #  {
-#    "name": "defaults.pilot.resources.requests.memory",
+#    "name": "pilot.resources.requests.memory",
 #    "value": "1Gi"
 #  }
 #]
 #istiod_set = [
 #  {
-#    "name": "defaults.pilot.resources.requests.memory",
+#    "name": "pilot.resources.requests.memory",
 #    "value": "1Gi"
 #  }
 #]
