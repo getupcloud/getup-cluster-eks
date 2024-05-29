@@ -18,8 +18,7 @@ OUTPUT_JSON         := .output.json
 OUTPUT_OVERLAY_JSON := .overlay.output.json
 TFVARS_OVERLAY_JSON := .overlay.tfvars.json
 
-UPDATE_FILES_MODULES = main-*.tf variables-*.tf outputs-*.tf terraform-*.auto.tfvars.example
-UPDATE_FILES_CLUSTER = bin providers.tf $(UPDATE_FILES_MODULES)
+UPDATE_FILES_CLUSTER = bin/ providers.tf main-*.tf variables-*.tf outputs-*.tf terraform-*.auto.tfvars.example
 
 ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -s https://api.ipify.org)/32"]'
@@ -91,8 +90,9 @@ destroy-auto-approve:
 output:
 	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS)
 
+kubeconfig: AWS_REGION ?= $(shell awk '/^aws_region/{print $$3}' terraform-eks.auto.tfvars | tr -d '"')
 kubeconfig:
-	aws eks update-kubeconfig --name=$(CLUSTER_NAME) $(AWS_EKS_ARGS)
+	aws eks update-kubeconfig --name=$(CLUSTER_NAME) $(AWS_EKS_ARGS) --region=$(AWS_REGION)
 
 update-version:
 	latest=$$(timeout 3 curl -s https://raw.githubusercontent.com/getupcloud/terraform-modules/main/version.txt || echo 0.0.0)
@@ -114,9 +114,17 @@ endif
 #update-from-remote-source:
 #	# TODO
 
+# copy only locally existing files from source
 update-from-local-cluster: from ?= ../terraform-cluster/
-update-from-local-cluster: sources ?= $(wildcard $(addprefix $(from)/,$(UPDATE_FILES_CLUSTER)))
+update-from-local-cluster: sources ?= $(addprefix $(from)/,$(wildcard $(UPDATE_FILES_CLUSTER)))
 update-from-local-cluster: is-tree-clean
+	@shopt -s nullglob
+	cp -rv $(sources) ./
+
+# copy all existing files from source
+upgrade-from-local-cluster: from ?= ../terraform-cluster/
+upgrade-from-local-cluster: sources ?= $(wildcard $(addprefix $(from)/,$(UPDATE_FILES_CLUSTER)))
+upgrade-from-local-cluster: is-tree-clean
 	@shopt -s nullglob
 	cp -rv $(sources) ./
 
@@ -145,7 +153,7 @@ overlay: $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
 	@echo Processing overlays
 	find cluster/overlay -type f -iregex '.*\.ya?ml' | while read file; do
 		echo "-> $$file"
-		python bin/overlay "$$file" $^ >"$${file}.tmp" && mv "$${file}.tmp" "$$file" || exit 1
+		bin/overlay "$$file" $^ >"$${file}.tmp" && mv "$${file}.tmp" "$$file" || exit 1
 	done
 
 validate-vars:

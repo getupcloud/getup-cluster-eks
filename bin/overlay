@@ -31,5 +31,5 @@ with open(overlay_file, 'r') as f:
             #TODO: add libs (ex: base64)
             value = eval(f"f'{tpl}'", data)
             print(f'{indent}{name}: {value} #output:{tpl}')
-        except NameError:
+        except (NameError, KeyError):
             print(line, end='')
