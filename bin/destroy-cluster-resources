@@ -98,14 +98,20 @@ def service_load_balancer_delete(svc):
 
 for_each_resource('kubectl get service -A -o json', service_load_balancer_delete)
 
-def ec2nodeclass_delete(nc):
+def nodepool_delete(nc):
     name, _ = get_nn(nc)
-    run(f'{dryrun} kubectl delete ec2nodeclass {name}')
+    run(f'{dryrun} kubectl delete nodepools {name}')
 
-for_each_resource('kubectl get ec2nodeclass -o json', ec2nodeclass_delete)
+for_each_resource('kubectl get nodepools -A -o json', nodepool_delete)
 
 def nodeclaim_delete(nc):
     name, _ = get_nn(nc)
     run(f'{dryrun} kubectl delete nodeclaim {name}')
 
 for_each_resource('kubectl get nodeclaim -A -o json', nodeclaim_delete)
+
+def ec2nodeclass_delete(nc):
+    name, _ = get_nn(nc)
+    run(f'{dryrun} kubectl delete ec2nodeclass {name}')
+
+for_each_resource('kubectl get ec2nodeclass -o json', ec2nodeclass_delete)
