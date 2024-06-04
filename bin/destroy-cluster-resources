@@ -101,10 +101,10 @@ def ec2nodeclass_delete(nc):
     name, _ = get_nn(nc)
     run(f'{dryrun} kubectl delete ec2nodeclass {name}')
 
-for_each_resource('kubeclt get ec2nodeclass -o json', ec2nodeclass_delete)
+for_each_resource('kubectl get ec2nodeclass -o json', ec2nodeclass_delete)
 
 def nodeclaim_delete(nc):
     name, _ = get_nn(nc)
     run(f'{dryrun} kubectl delete nodeclaim {name}')
 
-for_each_resource('kubeclt get nodeclaim -A -o json', nodeclaim_delete)
+for_each_resource('kubectl get nodeclaim -A -o json', nodeclaim_delete)

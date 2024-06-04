@@ -89,6 +89,7 @@ destroy-eks:
 	$(TERRAFORM) destroy $(TERRAFORM_ARGS) $(TERRAFORM_DESTROY_ARGS)
 
 destroy: destroy-cluster-resources destroy-eks
+	@echo 'Use "$(MAKE) destroy-cluster-resources-auto-approve" to destroy without asking.'
 
 #################################################################################################
 
