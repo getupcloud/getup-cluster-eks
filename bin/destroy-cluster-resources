@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import json
+import time
+import subprocess
+
+dryrun = '' if '--confirm-delete-cluster-resources' in sys.argv else 'echo'
+
+if dryrun:
+    print("\033[1m>> This is a dry-run operation by default.\033[0m")
+    print("\033[1m>> Use the flag --confirm-delete-cluster-resources to delete kubernetes resources\033[0m")
+    print()
+else:
+    print('\033[1;33;7;5m!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ATTENTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\033[0m')
+    print('\033[1;33;7m!!! THIS PROCESS WILL DELETE ALL RESOURCES FROM THIS KUBERNETES CLUSTER !!!\033[0m')
+    print('\033[1;33;7m!!! THIS PROCESS WILL DELETE ALL RESOURCES FROM THIS KUBERNETES CLUSTER !!!\033[0m')
+    print('\033[1;33;7m!!! THIS PROCESS WILL DELETE ALL RESOURCES FROM THIS KUBERNETES CLUSTER !!!\033[0m')
+    print('\033[1;33;7;5m!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ATTENTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\033[0m')
+    print()
+    print('\033[1m-->> PRESS CTRL+C TO CANCEL <<--\033[0m')
+    print()
+    for i in range(30, -1, -1):
+        print(f'\033[1m{i}\033[0m', end=' ')
+        sys.stdout.flush()
+        time.sleep(1)
+    print()
+
+################################
+
+def run(cmd):
+    print('>', cmd.strip())
+    return subprocess.run(cmd.strip().split(), capture_output=True).stdout.decode('utf8')
+
+def run_json(cmd):
+    return json.loads(run(cmd))
+
+def for_each_resource(cmd, func, root='items'):
+    resources = run_json(cmd)
+    if root:
+        resources = resources[root]
+    for res in resources:
+        func(res)
+
+def get_nn(res):
+    if 'metadata' in res:
+        try:
+            return res['metadata']['name'], res['metadata']['namespace']
+        except KeyError:
+            return res['metadata']['name'], None
+    else:
+        try:
+            return res['name'], res['namespace']
+        except KeyError:
+            return res['name'], None
+
+def show_helmrelease(hr):
+    print(hr['metadata']['name'])
+
+def flux_suspend(kind, res):
+    name, namespace = get_nn(res)
+    run(f'{dryrun} flux suspend {kind} {name} --namespace {namespace}')
+
+for_each_resource('kubectl get gitrepository -o json -A', lambda gr: flux_suspend('source git', gr))
+for_each_resource('kubectl get kustomizations -o json -A', lambda ks: flux_suspend('kustomization', ks))
+# for_each_resource('kubectl get helmreleases -o json -A', lambda hr: flux_suspend('helmrelease', hr))
+
+total_deleted = 0
+def flux_delete(kind, res):
+    name, namespace = get_nn(res)
+    run(f'{dryrun} flux delete {kind} {name} --namespace {namespace} --silent')
+    global total_deleted
+    total_deleted += 1
+
+for_each_resource('kubectl get helmreleases -o json -A', lambda hr: flux_delete('helmrelease', hr))
+for_each_resource('kubectl get kustomizations -o json -A', lambda ks: flux_delete('kustomization', ks))
+for_each_resource('kubectl get gitrepository -o json -A', lambda gr: flux_delete('source git', gr))
+
+if total_deleted and not dryrun:
+    total_remaining = total_deleted
+    while total_remaining:
+        print(f'Waiting {total_remaining} resource(s) to be deleted...')
+        time.sleep(2)
+        total_remaining = len(run_json('kubectl get helmreleases,kustomizations,gitrepository -o json -A')['items'])
+
+def helm_uninstall(rel):
+    name, namespace = get_nn(rel)
+    run(f'{dryrun} helm uninstall {name} --namespace {namespace}')
+
+for_each_resource('helm ls -n istio-system -o json', helm_uninstall, None)
+
+def service_load_balancer_delete(svc):
+    if svc['spec']['type'] == 'LoadBalancer':
+        name, namespace = get_nn(svc)
+        run(f'{dryrun} kubectl delete service {name} --namespace {namespace}')
+
+for_each_resource('kubectl get service -A -o json', service_load_balancer_delete)
+
+def ec2nodeclass_delete(nc):
+    name, _ = get_nn(nc)
+    run(f'{dryrun} kubectl delete ec2nodeclass {name}')
+
+for_each_resource('kubeclt get ec2nodeclass -o json', ec2nodeclass_delete)
+
+def nodeclaim_delete(nc):
+    name, _ = get_nn(nc)
+    run(f'{dryrun} kubectl delete nodeclaim {name}')
+
+for_each_resource('kubeclt get nodeclaim -A -o json', nodeclaim_delete)

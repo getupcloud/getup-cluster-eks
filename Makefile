@@ -80,19 +80,43 @@ migrate-state:
 apply:
 	$(TERRAFORM) apply -auto-approve terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_APPLY_ARGS)
 
-destroy:
+#################################################################################################
+
+destroy-cluster-resources:
+	python bin/destroy-cluster-resources
+
+destroy-eks:
 	$(TERRAFORM) destroy $(TERRAFORM_ARGS) $(TERRAFORM_DESTROY_ARGS)
 
+destroy: destroy-cluster-resources destroy-eks
+
+#################################################################################################
+
 # WARNING: NO CONFIRMATION ON DESTROY
-destroy-auto-approve:
+destroy-cluster-resources-auto-approve:
+	python bin/destroy-cluster-resources --confirm-delete-cluster-resources
+
+# WARNING: NO CONFIRMATION ON DESTROY
+destroy-eks-auto-approve: AWS_REGION ?= $(shell awk '/^aws_region/{print $$3}' terraform-eks.auto.tfvars | tr -d '"')
+destroy-eks-auto-approve:
+	SG_ID=$$(aws ec2 describe-security-groups --filters 'Name=tag:aws:eks:cluster-name,Values=$(CLUSTER_NAME)' --region $(AWS_REGION) \
+		| jq -r '.SecurityGroups[]|.GroupId // empty')
+	if [ -n "$$SG_ID" ]; then
+		aws ec2 delete-security-group --group-id  "$$SG_ID" --region $(AWS_REGION)
+	fi
 	$(TERRAFORM) destroy -auto-approve $(TERRAFORM_ARGS) $(TERRAFORM_DESTROY_ARGS)
+
+# WARNING: NO CONFIRMATION ON DESTROY
+destroy-auto-approve: destroy-cluster-resources-auto-approve destroy-eks-auto-approve
+
+#################################################################################################
 
 output:
 	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS)
 
 kubeconfig: AWS_REGION ?= $(shell awk '/^aws_region/{print $$3}' terraform-eks.auto.tfvars | tr -d '"')
 kubeconfig:
-	aws eks update-kubeconfig --name=$(CLUSTER_NAME) $(AWS_EKS_ARGS) --region=$(AWS_REGION)
+	aws eks update-kubeconfig --name=$(CLUSTER_NAME) $(AWS_EKS_ARGS) --region $(AWS_REGION)
 
 update-version:
 	latest=$$(timeout 3 curl -s https://raw.githubusercontent.com/getupcloud/terraform-modules/main/version.txt || echo 0.0.0)
