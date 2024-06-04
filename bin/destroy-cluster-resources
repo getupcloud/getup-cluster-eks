@@ -30,7 +30,8 @@ else:
 ################################
 
 def run(cmd):
-    print('>', cmd.strip())
+    global dryrun
+    print('>', cmd.strip().lstrip(dryrun).lstrip())
     return subprocess.run(cmd.strip().split(), capture_output=True).stdout.decode('utf8')
 
 def run_json(cmd):
