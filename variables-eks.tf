@@ -207,6 +207,27 @@ variable "fallback_node_group_ami_type" {
   description = "Type of Amazon Machine Image (AMI) associated with the EKS Node Group. Valid values are `AL2_x86_64`, `AL2_x86_64_GPU`, `AL2_ARM_64`, `CUSTOM`, `BOTTLEROCKET_ARM_64`, `BOTTLEROCKET_x86_64`."
   type        = string
   default     = "BOTTLEROCKET_x86_64"
+  validation {
+    condition = contains(
+      [
+        "AL2_x86_64",
+        "AL2_x86_64_GPU",
+        "AL2_ARM_64",
+        "CUSTOM",
+        "BOTTLEROCKET_ARM_64",
+        "BOTTLEROCKET_x86_64",
+        "BOTTLEROCKET_ARM_64_NVIDIA",
+        "BOTTLEROCKET_x86_64_NVIDIA",
+        #"WINDOWS_CORE_2019_x86_64",
+        #"WINDOWS_FULL_2019_x86_64",
+        #"WINDOWS_CORE_2022_x86_64",
+        #"WINDOWS_FULL_2022_x86_64",
+        "AL2023_x86_64_STANDARD",
+        "AL2023_ARM_64_STANDARD"
+      ],
+    var.fallback_node_group_ami_type)
+    error_message = "Invalid value: fallback_node_group_ami_type"
+  }
 }
 
 variable "fallback_node_group_platform" {
@@ -260,8 +281,8 @@ variable "karpenter_node_class_ami_family" {
   default     = "Bottlerocket"
 
   validation {
-    condition     = contains(["Bottlerocket", "AL2"], var.karpenter_node_class_ami_family)
-    error_message = "Invalid value: karpenter_node_class_ami_family must be one of \"Bottlerocket\" or \"AL2\""
+    condition     = contains(["Bottlerocket", "AL2", "AL2023", "Ubuntu"], var.karpenter_node_class_ami_family)
+    error_message = "Invalid value: karpenter_node_class_ami_family"
   }
 }
 
