@@ -195,7 +195,7 @@ variable "fallback_node_group_min_size" {
 variable "fallback_node_group_max_size" {
   description = "Max number of instances/nodes."
   type        = number
-  default     = 0
+  default     = 1
   nullable    = false
 }
 
