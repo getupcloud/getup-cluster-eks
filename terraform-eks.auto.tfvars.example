@@ -143,7 +143,7 @@
 #vpc_cni_enable_prefix_delegation = true
 
 # kube_proxy - Kube-proxy addon configurations.
-# Type: ${object({"mode": "${optional(string,"iptables")}", "resources": "${optional(any,{})}", "ipvs": "${optional(object({\"scheduler\": \"${optional(string,"rr")}\"}),{})}"})}
+# Type: ${object({"mode": "${optional(string, "iptables")}", "resources": "${optional(any, {})}", "ipvs": "${optional(object({\"scheduler\": \"${optional(string, "rr")}\"}), {})}"})}
 # Default: {}
 #kube_proxy = {}
 
@@ -358,6 +358,16 @@
 # Type: ${list(string)}
 # Default: []
 #kms_key_administrators = []
+
+# create_aws_auth_configmap - Determines whether to create the aws-auth configmap. NOTE - this is only intended for scenarios where the configmap does not exist (i.e. - when using only self-managed node groups). Most users should use `manage_aws_auth_configmap`
+# Type: ${bool}
+# Default: false
+#create_aws_auth_configmap = false
+
+# manage_aws_auth_configmap - Determines whether to manage the aws-auth configmap
+# Type: ${bool}
+# Default: true
+#manage_aws_auth_configmap = true
 
 # aws_auth_user_arns - List of user ARNs to add to the aws-auth configmap. K8s username will be the last component of the ARN.
 # Type: ${list(string)}
