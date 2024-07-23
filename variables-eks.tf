@@ -185,10 +185,25 @@ variable "fargate_profiles" {
 #### Fallback (Static) Node Group ####
 ######################################
 
+variable "fallback_node_group_min_size" {
+  description = "Min number of instances/nodes."
+  type        = number
+  default     = 0
+  nullable    = false
+}
+
+variable "fallback_node_group_max_size" {
+  description = "Max number of instances/nodes."
+  type        = number
+  default     = 0
+  nullable    = false
+}
+
 variable "fallback_node_group_desired_size" {
   description = "Desired number of instances/nodes."
   type        = number
   default     = 0
+  nullable    = false
 }
 
 variable "fallback_node_group_capacity_type" {

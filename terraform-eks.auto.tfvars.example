@@ -202,6 +202,16 @@
 #  }
 #]
 
+# fallback_node_group_min_size - Min number of instances/nodes.
+# Type: ${number}
+# Default: 0
+#fallback_node_group_min_size = 0
+
+# fallback_node_group_max_size - Max number of instances/nodes.
+# Type: ${number}
+# Default: 0
+#fallback_node_group_max_size = 0
+
 # fallback_node_group_desired_size - Desired number of instances/nodes.
 # Type: ${number}
 # Default: 0
