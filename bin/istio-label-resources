@@ -1,11 +1,11 @@
 #!/bin/bash
 
-function udpate()
+function update()
 {
     local release=$1; shift
     for obj; do
-        kubectl label -n istio-system $obj app.kubernetes.io/managed-by=Helm
-        kubectl annotate -n istio-system $obj meta.helm.sh/release-name=$release meta.helm.sh/release-namespace=istio-system
+        kubectl label -n istio-system $obj app.kubernetes.io/managed-by=Helm --overwrite
+        kubectl annotate -n istio-system $obj meta.helm.sh/release-name=$release meta.helm.sh/release-namespace=istio-system --overwrite
     done
 }
 
@@ -37,7 +37,7 @@ update istiod \
     ClusterRole/istio-reader-clusterrole-istio-system \
     ClusterRoleBinding/istiod-clusterrole-istio-system \
     ClusterRoleBinding/istiod-gateway-controller-istio-system \
-    ClusterRoleBinding/istio-reader-clusterrole-istio-system
+    ClusterRoleBinding/istio-reader-clusterrole-istio-system \
     Role/istiod \
     RoleBinding/istiod \
     Service/istiod \
@@ -50,7 +50,17 @@ update istio-ingressgateway \
     Deployment/istio-ingressgateway \
     HorizontalPodAutoscaler/istio-ingressgateway
 
+update istio-ingress \
+    Service/istio-ingress \
+    Deployment/istio-ingress \
+    HorizontalPodAutoscaler/istio-ingress
+
 update istio-egressgateway \
     Service/istio-egressgateway \
     Deployment/istio-egressgateway \
     HorizontalPodAutoscaler/istio-egressgateway
+
+update istio-egress \
+    Service/istio-egress \
+    Deployment/istio-egress \
+    HorizontalPodAutoscaler/istio-egress
