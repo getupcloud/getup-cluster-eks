@@ -6,8 +6,7 @@
 TERRAFORM           ?= terraform
 TF_LOG_PATH         ?= terraform.log
 TF_LOG              ?= DEBUG
-CUSTOMERNAME        ?= $(shell sed -ne 's|^\s*customer_name\s*=\s*"\([^"]\+\)"|\1|p' *.tfvars 2>/dev/null)
-CLUSTER_NAME        ?= $(shell sed -ne 's|^\s*cluster_name\s*=\s*"\([^"]\+\)"|\1|p' *.tfvars 2>/dev/null)
+CLUSTER_NAME        ?= $(shell sed -n 's|^\s*cluster_name\s*=\s*"\([^"]\+\)"|\1|p' *.tfvars 2>/dev/null)
 GIT_REMOTE          ?= origin
 GIT_BRANCH          ?= main
 GIT_COMMIT_MESSAGE  ?= Auto-generated commit
