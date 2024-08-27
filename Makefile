@@ -121,8 +121,8 @@ kubeconfig:
 update-version:
 	latest=$$(timeout 3 curl -s https://raw.githubusercontent.com/getupcloud/terraform-modules/main/version.txt || echo 0.0.0)
 	latest=$${latest}
-	read -e -p "New module version: " -i "$$latest" v
-	sed -i -e '/source/s/ref=v[0-9]\+\.[0-9]\+\.[0-9]\+/ref=v'$$v'/g' main-*tf
+	read -e -p "New module version: " -i "$$latest" v 2>/dev/null || read -e -p "New module version: [current=$$latest]: " v
+	sed -i '/source/s/ref=v[0-9]\+\.[0-9]\+\.[0-9]\+/ref=v'$$v'/g' main-*tf
 
 is-tree-clean:
 ifneq ($(force), true)
