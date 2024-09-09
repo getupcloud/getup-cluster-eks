@@ -10,8 +10,8 @@ CLUSTER_NAME        ?= $(shell sed -n -e 's|^[[:space:]]*cluster_name[[:space:]]
 GIT_REMOTE          ?= origin
 GIT_BRANCH          ?= main
 GIT_COMMIT_MESSAGE  ?= Auto-generated commit
-FLOW_RECONCILE      := plan apply overlay commit push
-FLOW_FULL_RECONCILE := pull init validate plan apply kubeconfig overlay commit push
+FLOW_RECONCILE      := clean-output plan apply overlay commit push
+FLOW_FULL_RECONCILE := clean-output pull init validate plan apply kubeconfig overlay commit push
 KUSTOMIZE_BUILD     := .kustomize_build.yaml
 OUTPUT_JSON         := .output.json
 OUTPUT_OVERLAY_JSON := .overlay.output.json
@@ -34,7 +34,7 @@ endif
 all help:
 	@echo Targets:
 	echo
-	printf -- "- %s\n" init validate fmt plan apply overlay output kubeconfig update-version clean destroy migrate-state
+	printf -- "- %s\n" init validate fmt plan apply overlay output kubeconfig update-version clean clean-output destroy migrate-state
 	echo
 	echo Reconcile flows:
 	echo
@@ -56,6 +56,9 @@ push:
 
 clean:
 	rm -rf .terraform terraform.log $(KUSTOMIZE_BUILD)
+
+clean-output:
+	rm -f $(OUTPUT_JSON) $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
 
 init: validate-vars
 	$(TERRAFORM) init $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
