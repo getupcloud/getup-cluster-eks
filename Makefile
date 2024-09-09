@@ -6,7 +6,7 @@
 TERRAFORM           ?= terraform
 TF_LOG_PATH         ?= terraform.log
 TF_LOG              ?= DEBUG
-CLUSTER_NAME        ?= $(shell sed -n 's|^\s*cluster_name\s*=\s*"\([^"]\+\)"|\1|p' *.tfvars 2>/dev/null)
+CLUSTER_NAME        ?= $(shell sed -n -e 's|^[[:space:]]*cluster_name[[:space:]]*=[[:space:]]*"\([^"]*\)".*|\1|p' *.tfvars 2>/dev/null)
 GIT_REMOTE          ?= origin
 GIT_BRANCH          ?= main
 GIT_COMMIT_MESSAGE  ?= Auto-generated commit
@@ -34,7 +34,7 @@ endif
 all help:
 	@echo Targets:
 	echo
-	printf -- "- %s\n" init validate fmt plan apply overaly output kubeconfig update-version clean destroy migrate-state
+	printf -- "- %s\n" init validate fmt plan apply overlay output kubeconfig update-version clean destroy migrate-state
 	echo
 	echo Reconcile flows:
 	echo
@@ -175,7 +175,7 @@ $(TFVARS_OVERLAY_JSON): *.tfvars
 
 overlay: $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
 	@echo Processing overlays
-	find cluster/overlay -type f -iregex '.*\.ya?ml' | while read file; do
+	find cluster/overlay -type f -name '*.yaml' -o -name '*.yml' | sort -u | while read file; do
 		echo "-> $$file"
 		bin/overlay "$$file" $^ >"$${file}.tmp" && mv "$${file}.tmp" "$$file" || exit 1
 	done
