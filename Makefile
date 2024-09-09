@@ -49,7 +49,7 @@ pull:
 	git pull origin main
 
 commit:
-	git status --porcelain | grep -vE '^(\?\?|!!)' && git commit -a -m "$(GIT_COMMIT_MESSAGE)"
+	git status --porcelain | grep -vE '^(\?\?|!!)' && git commit -a -m "$(GIT_COMMIT_MESSAGE)" || true
 
 push:
 	git push $(GIT_REMOTE) $(GIT_BRANCH)
