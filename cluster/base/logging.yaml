@@ -11,7 +11,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: grafana
-      version: 5.42.2
+      version: "~> 6.12"
   install:
     createNamespace: true
     disableWait: false
@@ -22,22 +22,56 @@ spec:
     remediation:
       retries: -1
   interval: 10m
-  timeout: 30m
+  timeout: 10m
   releaseName: loki
   storageNamespace: logging
   targetNamespace: logging
   values:
-    singleBinary:
-      replicas: 1
-      persistence:
-        enableStatefulSetAutoDeletePVC: false
-        size: 10Gi
+    deploymentMode: SimpleScalable
 
-#    write:
-#      replicas: 3
-#
-#    read:
-#      replicas: 3
+    write:
+      replicas: 2
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 200m
+          memory: 512Mi
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 6
+        targetCPUUtilizationPercentage: 90
+        targetMemoryUtilizationPercentage: 90
+
+    read:
+      replicas: 2
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 200m
+        memory: 512Mi
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 6
+        targetCPUUtilizationPercentage: 90
+
+    backend:
+      replicas: 2
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 200m
+        memory: 512Mi
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 6
+        targetCPUUtilizationPercentage: 90
 
     loki:
       auth_enabled: false
@@ -46,12 +80,22 @@ spec:
         type: s3
 #        type: filesystem
 
+      schemaConfig:
+        configs:
+          - from: "2024-09-11"
+            store: tsdb
+            object_store: s3
+            schema: v13
+            index:
+              prefix: loki_index_
+              period: 24h
+
       commonConfig:
         replication_factor: 1
-        ring:
-          kvstore:
-            store: inmemory
-            #store: memberlist
+        #ring:
+        #  kvstore:
+        #    #store: inmemory
+        #    store: memberlist
 
       limits_config:
         reject_old_samples: true
@@ -81,24 +125,17 @@ spec:
         chunk_idle_period: 1h
         chunk_retain_period: 15s
         wal:
-          replay_memory_ceiling: 1G
+          replay_memory_ceiling: 400MB # should be smaller than resources.limits.memory
         #lifecycler:
         #  ring:
         #    kvstore:
         #      store: inmemory
 
-      # table manager is not used anymoree
-      #tableManager:
-      #  enabled: true
-      #  retention_deletes_enabled: true
-      #  retention_period: 720h
-
       compactor:
-        shared_store: s3
-        #working_directory: /var/loki/boltdb-shipper-compactor
         #compaction_interval: 5m
         retention_enabled: true
         retention_delete_delay: 2h
+        delete_request_store: s3
         #retention_delete_worker_count: 150
         #compactor_ring:
         #  kvstore:
@@ -113,9 +150,29 @@ spec:
       query_range:
         parallelise_shardable_queries: true
 
+    lokiCanary:
+      enabled: false
+
+    # -- DEPRECATED Monitoring section determines which monitoring features to enable, this section is being replaced
+    # by https://github.com/grafana/meta-monitoring-chart
     monitoring:
-      lokiCanary:
-        enabled: false
+      dashboards:
+        # -- If enabled, create configmap with dashboards for monitoring Loki
+        enabled: true
+
+      rules:
+        # -- If enabled, create PrometheusRule resource with Loki recording rules
+        enabled: true
+        alerting: true
+
+      serviceMonitor:
+        # -- If enabled, ServiceMonitor resources for Prometheus Operator are created
+        enabled: true
+
+      selfMonitoring:
+        enabled: false # Disables grafana-agent-opera
+        grafanaAgent:
+          installOperator: false
 
     test:
       #prometheusAddress: http://monitoring-kube-prometheus-prometheus.monitoring.cluster.local:9090
@@ -130,6 +187,12 @@ spec:
 
     #ingress:
     #  enabled: false
+    gateway:
+      enabled: true
+
+    #resources:
+    #  limits:
+    #    cpu: 1
 
     #resources:
     #  limits:
@@ -157,7 +220,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: grafana
-      version: "~> 6.15"
+      version: "~> 6.16"
   dependsOn:
   - name: loki
   install:
