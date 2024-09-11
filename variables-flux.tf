@@ -41,5 +41,5 @@ variable "flux_path" {
 variable "flux_version" {
   description = "Flux version."
   type        = string
-  default     = "v2.2.3"
+  default     = "v2.3.0"
 }

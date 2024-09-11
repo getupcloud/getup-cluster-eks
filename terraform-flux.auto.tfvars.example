@@ -32,5 +32,5 @@
 
 # flux_version - Flux version.
 # Type: ${string}
-# Default: "v2.2.3"
-#flux_version = "v2.2.3"
+# Default: "v2.3.0"
+#flux_version = "v2.3.0"
