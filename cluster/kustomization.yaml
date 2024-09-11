@@ -43,7 +43,7 @@ resources:
 #- path: overlay/monitoring-tempo-ops.yaml
 #  target:
 #    group: helm.toolkit.fluxcd.io
-#    version: v2beta1
+#    version: v2
 #    kind: HelmRelease
 #    name: monitoring
 #    namespace: flux-system
