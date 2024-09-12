@@ -10,7 +10,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: grafana
-      version: "~> 1.7.1"
+      version: "~> 1.10.3"
   install:
     createNamespace: true
     disableWait: false
@@ -27,7 +27,7 @@ spec:
   values:
     persistence:
       enabled: true
-      size: 200Gi
+      size: 10Gi
 
     serviceMonitor:
       enabled: true
@@ -39,3 +39,7 @@ spec:
       metricsGenerator:
         enabled: true
         remoteWriteUrl: "http://monitoring-kube-prometheus-prometheus:9090/api/v1/write"
+      storage:
+        trace:
+          empty_tenant_deletion_enabled: true
+          backend: s3

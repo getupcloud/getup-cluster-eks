@@ -1,0 +1,17 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tempo
+  namespace: flux-system
+spec:
+  values:
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: #output:{tempo_iam_role_arn}
+    tempo:
+      storage:
+        trace:
+          s3:
+            bucket: #output:{tempo_s3_bucket_name}
+            region: #output:{aws_region}
+            endpoint: #output:s3.dualstack.{aws_region}.amazonaws.com
