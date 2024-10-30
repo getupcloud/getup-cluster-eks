@@ -70,6 +70,7 @@ echo
 echo "# Edit the files and run"
 echo "$COLOR_BOLD"
 echo make init
+echo make validate
 echo make plan
 echo make apply
 echo make overlay

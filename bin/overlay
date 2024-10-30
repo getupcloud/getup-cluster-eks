@@ -3,10 +3,12 @@
 # Usage: ./overlay [overlay] [tfvars|output]...
 #
 import re
+import os
 import sys
 import json
 
-output_re = re.compile('^(?P<indent>\\s*)(?P<name>\\S+):(?P<value>[^#]+)#output:(?P<tpl>.+)\\s*$')
+regex = os.environ.get('OVERLAY_LINE_REGEX', '^(\\s*)([^\\s]+):\\s+(.*)#output:(.+)$')
+output_re = re.compile(regex)
 overlay_file = sys.argv[1]
 input_files = sys.argv[2:]
 
@@ -24,6 +26,9 @@ with open(overlay_file, 'r') as f:
 
         match = output_re.match(line)
         if not match:
+            print("WARN: Unmatching output line:", out=sys.stderr)
+            print("line: {line}", out=sys.stderr)
+            print("expr: {regex}", out=sys.stderr)
             print(line, end='')
             continue
 

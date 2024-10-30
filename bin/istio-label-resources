@@ -1,5 +1,11 @@
 #!/bin/bash
 
+function backup()
+{
+  kubectl get -n istio-system $obj -o yaml $1
+}
+
+
 function update()
 {
     local release=$1; shift

@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
 - flux-system
+#- ../apps/
 #- base/repo.yaml
 #- base/metrics-server.yaml
 #- base/cert-manager.yaml
