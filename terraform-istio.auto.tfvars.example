@@ -46,12 +46,28 @@
 #  {
 #    "name": "pilot.resources.requests.memory",
 #    "value": "1Gi"
+#  },
+#  {
+#    "name": "pilot.replicaCount",
+#    "value": "2"
+#  },
+#  {
+#    "name": "pilot.autoscaleMin",
+#    "value": "2"
 #  }
 #]
 #istiod_set = [
 #  {
 #    "name": "pilot.resources.requests.memory",
 #    "value": "1Gi"
+#  },
+#  {
+#    "name": "pilot.replicaCount",
+#    "value": "2"
+#  },
+#  {
+#    "name": "pilot.autoscaleMin",
+#    "value": "2"
 #  }
 #]
 
@@ -71,12 +87,28 @@
 #  {
 #    "name": "service.annotations.service\\\\.beta\\\\.kubernetes\\\\.io/aws-load-balancer-type",
 #    "value": "nlb"
+#  },
+#  {
+#    "name": "replicaCount",
+#    "value": "2"
+#  },
+#  {
+#    "name": "autoscaling.minReplicas",
+#    "value": "2"
 #  }
 #]
 #ingress_gateway_set = [
 #  {
 #    "name": "service.annotations.service\\\\.beta\\\\.kubernetes\\\\.io/aws-load-balancer-type",
 #    "value": "nlb"
+#  },
+#  {
+#    "name": "replicaCount",
+#    "value": "2"
+#  },
+#  {
+#    "name": "autoscaling.minReplicas",
+#    "value": "2"
 #  }
 #]
 

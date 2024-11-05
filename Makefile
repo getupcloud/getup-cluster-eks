@@ -179,7 +179,6 @@ $(TFVARS_OVERLAY_JSON): *.tfvars
 overlay: clean-output $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
 	echo Processing overlays
 	find cluster/overlay -type f -name '*.yaml' -o -name '*.yml' | sort -u | while read file; do
-		echo "-> $$file"
 		bin/overlay "$$file" $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON) >"$${file}.tmp" && mv "$${file}.tmp" "$$file" || exit 1
 	done
 

@@ -19,6 +19,7 @@ for infile in input_files:
 
 count = 0
 with open(overlay_file, 'r') as f:
+    print(f'--> {overlay_file}: ', end='', file=sys.stderr)
     for line in f.readlines():
         if '#output:' not in line:
             print(line, end='')
@@ -26,9 +27,13 @@ with open(overlay_file, 'r') as f:
 
         match = output_re.match(line)
         if not match:
-            print("WARN: Unmatching output line:", out=sys.stderr)
-            print("line: {line}", out=sys.stderr)
-            print("expr: {regex}", out=sys.stderr)
+            # warn if not line is not commented out
+            xline = line.split('#')
+            if xline:
+                if xline[0].strip():
+                    print("WARN: Unmatching output line:", file=sys.stderr)
+                    print(f"line: {line}", file=sys.stderr, end='')
+                    print(f"expr: {regex}", file=sys.stderr)
             print(line, end='')
             continue
 
@@ -36,9 +41,13 @@ with open(overlay_file, 'r') as f:
             indent, name, _, tpl = match.groups()
             #TODO: add libs (ex: base64)
             value = eval(f"f'{tpl}'", data)
-            print(f'{indent}{name}: {value} #output:{tpl}')
+            if value:
+                print(f'{indent}{name}: {value} #output:{tpl}')
+            else:
+                print(f'{indent}{name}: #output:{tpl}')
             count = count + 1
         except (NameError, KeyError) as ex:
             print(line, end='')
-            print(f'Error: {ex}', file=sys.stderr)
-    print(f'Total replaces: {count}', file=sys.stderr)
+            #print(f'ERROR: {ex}', file=sys.stderr)
+
+    print(f'{count}', file=sys.stderr)

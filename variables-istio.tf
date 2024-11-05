@@ -52,6 +52,14 @@ variable "istiod_set" {
     {
       name : "pilot.resources.requests.memory"
       value : "1Gi"
+    },
+    {
+      name : "pilot.replicaCount",
+      value : "2"
+    },
+    {
+      name : "pilot.autoscaleMin",
+      value : "2"
     }
   ]
 }
@@ -74,10 +82,20 @@ variable "ingress_gateway_values" {
 variable "ingress_gateway_set" {
   description = "Value block with custom values to be merged with the values yaml."
   type        = list(object({ name = string, value = string }))
-  default = [{
-    "name" : "service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type",
-    "value" : "nlb",
-  }]
+  default = [
+    {
+      name : "service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type",
+      value : "nlb",
+    },
+    {
+      name : "replicaCount",
+      value : "2"
+    },
+    {
+      name : "autoscaling.minReplicas",
+      value : "2"
+    }
+  ]
 }
 
 variable "ingress_gateway_set_list" {

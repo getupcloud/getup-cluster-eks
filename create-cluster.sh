@@ -38,6 +38,10 @@ gh repo create $org/$repo \
   --disable-issues=true \
   --disable-wiki=true
 
+echo Pushing to remote for the first time: git@github.com:$org/$repo
+git remote set-url origin git@github.com:$org/$repo
+git push origin main
+
 teams=( $(gh api /orgs/${org}/teams | jq -r '.[]|.slug') )
 
 if [ ${#teams[*]} -gt 0 ]; then
