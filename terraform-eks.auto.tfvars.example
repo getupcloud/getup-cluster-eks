@@ -7,8 +7,8 @@
 
 # kubernetes_version - Kubernetes controlplane version.
 # Type: ${string}
-# Default: "1.29"
-#kubernetes_version = "1.29"
+# Default: "1.30"
+#kubernetes_version = "1.30"
 
 # aws_region - AWS Region.
 # Type: ${string}
@@ -273,8 +273,8 @@
 
 # karpenter_version - Karpenter chart version.
 # Type: ${string}
-# Default: "0.36.1"
-#karpenter_version = "0.36.1"
+# Default: "0.37.6"
+#karpenter_version = "0.37.6"
 
 # karpenter_replicas - Number of pods for Karpenter controller.
 # Type: ${number}

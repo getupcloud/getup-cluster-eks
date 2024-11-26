@@ -11,7 +11,7 @@ variable "cluster_name" {
 variable "kubernetes_version" {
   description = "Kubernetes controlplane version."
   type        = string
-  default     = "1.29"
+  default     = "1.30"
 }
 
 variable "aws_region" {
@@ -281,7 +281,7 @@ variable "karpenter_namespace" {
 variable "karpenter_version" {
   description = "Karpenter chart version."
   type        = string
-  default     = "0.36.1"
+  default     = "0.37.6"
 }
 
 variable "karpenter_replicas" {
