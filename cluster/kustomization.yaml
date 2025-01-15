@@ -16,6 +16,7 @@ resources:
 #- base/otel-config.yaml
 #- base/otel-demo.yaml
 #- base/ingress-nginx.yaml
+#- base/aws-efs-storageclass.yaml
 #- base/aws-load-balancer-controller.yaml
 #- base/aws-external-secrets-operator.yaml
 #- base/aws-external-secrets-config.yaml
