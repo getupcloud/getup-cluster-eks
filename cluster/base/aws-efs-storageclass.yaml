@@ -10,7 +10,7 @@ volumeBindingMode: Immediate
 parameters:
   basePath: /dynamic_provisioning
   directoryPerms: "700"
-  fileSystemId: #output:{aws_efs_filesystem_id}
+  fileSystemId: #output:{overlay["aws_efs_filesystem_id"]}
   gidRangeEnd: "2000"
   gidRangeStart: "1000"
   provisioningMode: efs-ap
