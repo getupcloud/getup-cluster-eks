@@ -36,6 +36,12 @@ variable "cluster_log_retention_days" {
   default     = 3
 }
 
+variable "ebs_reclaim_policy" {
+  description = "(Optional) Reclaim policy for StorageClasses gp2 and gp3."
+  type        = string
+  default     = "Retain"
+}
+
 variable "tags" {
   description = "Tags to apply to all resources."
   type        = any

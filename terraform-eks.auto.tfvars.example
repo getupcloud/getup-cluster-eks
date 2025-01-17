@@ -34,6 +34,11 @@
 # Default: 3
 #cluster_log_retention_days = 3
 
+# ebs_reclaim_policy - (Optional) Reclaim policy for StorageClasses gp2 and gp3.
+# Type: ${string}
+# Default: "Retain"
+#ebs_reclaim_policy = "Retain"
+
 # tags - Tags to apply to all resources.
 # Type: ${any}
 # Default: {
