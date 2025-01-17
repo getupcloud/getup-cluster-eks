@@ -58,7 +58,7 @@ clean:
 	rm -rf .terraform terraform.log $(KUSTOMIZE_BUILD)
 
 clean-output:
-	rm -f $(OUTPUT_JSON) $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
+	@rm -f $(OUTPUT_JSON) $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
 
 init: validate-vars
 	$(TERRAFORM) init $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
@@ -177,7 +177,7 @@ $(TFVARS_OVERLAY_JSON): *.tfvars
 	bin/tfvars2overlay $^ > $@
 
 overlay: clean-output $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
-	echo Processing overlays
+	@echo Processing overlays
 	find cluster/overlay -type f -name '*.yaml' -o -name '*.yml' | sort -u | while read file; do
 		bin/overlay "$$file" $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON) >"$${file}.tmp" && mv "$${file}.tmp" "$$file" || exit 1
 	done
