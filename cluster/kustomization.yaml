@@ -16,6 +16,7 @@ resources:
 #- base/otel-config.yaml
 #- base/otel-demo.yaml
 #- base/ingress-nginx.yaml
+#- base/velero.yaml
 #- base/aws-efs-storageclass.yaml
 #- base/aws-load-balancer-controller.yaml
 #- base/aws-external-secrets-operator.yaml
@@ -33,6 +34,7 @@ resources:
 #- path: overlay/monitoring-tempo.yaml
 #- path: overlay/logging.yaml
 #- path: overlay/otel-operator.yaml
+#- path: overlay/velero.yaml
 #- path: overlay/aws-load-balancer-controller.yaml
 #- path: overlay/aws-external-secrets-operator.yaml
 #- path: overlay/aws-external-secrets-config.yaml
