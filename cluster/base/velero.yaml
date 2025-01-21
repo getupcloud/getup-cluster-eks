@@ -54,6 +54,58 @@ spec:
         memory: 1Gi
         cpu: 500m
 
+    schedules:
+      volumes:
+        schedule: '0 3 * * *'
+        template:
+          storageLocation: default
+          ttl: 168h0m0s
+
+          # Please note labelSelector can't be empty
+          # https://github.com/vmware-tanzu/velero/issues/2083
+          #labelSelector:
+          #  app: web
+
+          snapshotVolumes: true
+          includeClusterResources: true
+
+          excludedNamespaces:
+          - kube-system
+          - kube-public
+          - velero
+          #- monitoring        # comment this line to include grafana's volumes
+          - logging
+
+          includedNamespaces:
+          - '*'
+
+          includedResources:
+          - persistentvolumes
+          - persistentvolumeclaims
+
+          volumeSnapshotLocations:
+          - default
+
+      resources:
+        schedule: '0 */12 * * *'
+        template:
+          storageLocation: default
+          ttl: 720h0m0s
+
+          # Please note labelSelector can't be empty
+          # https://github.com/vmware-tanzu/velero/issues/2083
+          #labelSelector:
+          #  app: web
+
+          snapshotVolumes: false
+          includeClusterResources: true
+
+          includedNamespaces:
+          - "*"
+          includedResources:
+          - "*"
+
+
     metrics:
       enabled: true
       serviceMonitor:
