@@ -23,6 +23,7 @@ ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -s https://api.ipify.org)/32"]'
 endif
 
+-include .env
 
 # TODO: Ler grupo usando terraform e injetar no configmap/aws-auth
 # AWS_AUTH_GROUP_NAME := Infra
