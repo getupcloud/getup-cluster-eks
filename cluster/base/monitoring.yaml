@@ -162,15 +162,34 @@ spec:
 
         inhibit_rules:
         # Inhibit same alert with lower severity of an already firing alert
-        - equal: ['alertname']
-          source_match:
-            severity: critical
-          target_match:
-            severity: warning
+        - equal:
+          - alertname
+          source_matchers: # existing alert
+            - severity = critical
+          target_matchers: # new/entering alert
+            - severity = warning
+
+        - equal:
+          - service # monitoring-kube-state-metrics
+          - node    # matches same node
+        - source_matchers: # existing alert
+          - alertname =~ KubeNodeUnreachable|KubeNodeNotReady|KubeletDown
+          target_matchers: # new/entering alert
+          - alertname =~ KubeDaemonSetRolloutStuck|KubeStatefulSetReplicasMismatch|KubeDeploymentReplicasMismatch
+
+        - equal:
+          - service # only from monitoring-kube-state-metrics
+          - node    # matches same nodes
+          source_matchers: # existing alert
+          - alertname = ToBeDeletedByClusterAutoscaler
+          target_matchers: # new/entering alert
+          - alertname =~ KubeNodeUnreachable|KubeNodeNotReady|KubeletDown|KubeDaemonSetRolloutStuck|KubeStatefulSetReplicasMismatch|KubeDeploymentReplicasMismatch
 
         route:
           receiver: blackhole
-          group_by: ["cluster", "alertname"]
+          group_by:
+          - cluster
+          - alertname
           group_wait: 15s
           group_interval: 5m
           repeat_interval: 3h
@@ -178,19 +197,12 @@ spec:
           #################################################################
           ## Routes are define in overlay/monitoring.yaml
           #################################################################
-          routes:
-          # ignored all alerts by default
-          - receiver: blackhole
-            match_re:
-              alertname: .*
-            continue: false
+          # routes: {}
 
         #################################################################
         ## Receivers are define in overlay/monitoring.yaml
         #################################################################
-        receivers:
-        # does nothing
-        - name: blackhole
+        # receivers: {}
 
     ###############################################
     grafana:
