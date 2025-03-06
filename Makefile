@@ -142,10 +142,18 @@ endif
 #update-from-remote-source:
 #	# TODO
 
+
 # copy only locally existing files from source
 update-from-local-cluster: from ?= ../terraform-cluster/
 update-from-local-cluster: sources ?= $(addprefix $(from)/,$(wildcard $(UPDATE_FILES_CLUSTER)))
 update-from-local-cluster: is-tree-clean
+	@shopt -s nullglob
+	cp -rv $(sources) ./
+
+# copy all existing files from source
+upgrade-from-local-cluster: from ?= ../terraform-cluster/
+upgrade-from-local-cluster: sources ?= $(wildcard $(addprefix $(from)/,$(UPDATE_FILES_CLUSTER)))
+upgrade-from-local-cluster: is-tree-clean
 	@shopt -s nullglob
 	cp -rv $(sources) ./
 
