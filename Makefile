@@ -17,7 +17,7 @@ OUTPUT_JSON         := .output.json
 OUTPUT_OVERLAY_JSON := .overlay.output.json
 TFVARS_OVERLAY_JSON := .overlay.tfvars.json
 
-UPDATE_FILES_CLUSTER = bin/ providers.tf main-*.tf variables-*.tf outputs-*.tf terraform-*.auto.tfvars.example
+UPDATE_FILES_CLUSTER = Makefile bin/ providers.tf main-*.tf variables-*.tf outputs-*.tf terraform-*.auto.tfvars.example
 
 ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -s https://api.ipify.org)/32"]'
