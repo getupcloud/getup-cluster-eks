@@ -388,6 +388,16 @@
 # Default: []
 #kms_key_administrators = []
 
+# access_entries - Map of access entries to add to the cluster. See https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/README.md#cluster-access-entry for details
+# Type: ${any}
+# Default: {}
+#access_entries = {}
+
+# enable_cluster_creator_admin_permissions - Indicates whether or not to add the cluster creator (the identity used by Terraform) as an administrator via access entry
+# Type: ${bool}
+# Default: true
+#enable_cluster_creator_admin_permissions = true
+
 # create_aws_auth_configmap - Determines whether to create the aws-auth configmap. NOTE - this is only intended for scenarios where the configmap does not exist (i.e. - when using only self-managed node groups). Most users should use `manage_aws_auth_configmap`
 # Type: ${bool}
 # Default: false
@@ -395,8 +405,8 @@
 
 # manage_aws_auth_configmap - Determines whether to manage the aws-auth configmap
 # Type: ${bool}
-# Default: true
-#manage_aws_auth_configmap = true
+# Default: false
+#manage_aws_auth_configmap = false
 
 # aws_auth_user_arns - List of user ARNs to add to the aws-auth configmap. K8s username will be the last component of the ARN.
 # Type: ${list(string)}
