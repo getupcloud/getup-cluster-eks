@@ -21,7 +21,9 @@ cd $repo
 
 git remote remove origin
 
-if ! gh auth status 2>/dev/null; then
+if [ -v GITHUB_TOKEN ]; then
+  echo Using environment variable GITHUB_TOKEN to authenticate to Github.
+elif ! gh auth status 2>/dev/null; then
   if ! gh auth login; then
     echo Github login failed
     exit 1

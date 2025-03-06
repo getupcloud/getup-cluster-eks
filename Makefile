@@ -149,13 +149,6 @@ update-from-local-cluster: is-tree-clean
 	@shopt -s nullglob
 	cp -rv $(sources) ./
 
-# copy all existing files from source
-upgrade-from-local-cluster: from ?= ../terraform-cluster/
-upgrade-from-local-cluster: sources ?= $(wildcard $(addprefix $(from)/,$(UPDATE_FILES_CLUSTER)))
-upgrade-from-local-cluster: is-tree-clean
-	@shopt -s nullglob
-	cp -rv $(sources) ./
-
 update-from-local-examples: from ?= ../terraform-modules/examples
 update-from-local-examples: sources = $(wildcard $(from)/*/*.tf $(from)/*/*.example $(from)/versions.tf)
 update-from-local-examples: is-tree-clean
