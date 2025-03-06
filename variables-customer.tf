@@ -4,7 +4,7 @@ variable "customer_name" {
 }
 
 variable "cluster_provider" {
-  description = "Cloud Provider or platform where cluster is running. On of: eks, aks, doks, gke, oke, on-prem, okd, okd3, rancher, none."
+  description = "Cloud Provider or platform where cluster is running. One of: eks, aks, doks, gke, oke, on-prem, okd, okd3, rancher, none."
   type        = string
 
   validation {
