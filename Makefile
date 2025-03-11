@@ -164,8 +164,8 @@ upgrade-from-local-cluster: #is-tree-clean
 #
 # used only to update upstream cluster repo, not to be meant to be used by end-users.
 #
-update-from-local-examples: from ?= ../terraform-modules/examples
-update-from-local-examples: #is-tree-clean
+upgrade-from-local-examples: from ?= ../terraform-modules/examples
+upgrade-from-local-examples: #is-tree-clean
 	@shopt -s nullglob
 	echo Updating examples from $(from):
 	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %n' --relative $(UPDATE_EXAMPLES) $(ROOT_DIR)
