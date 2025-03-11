@@ -1,0 +1,10 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: datadog
+  namespace: flux-system
+spec:
+  values:
+    datadog:
+      clusterName: #output:{cluster_name}
+      apiKey: #output:{overlay["datadog_api_key"]}

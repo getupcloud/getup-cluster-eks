@@ -39,7 +39,7 @@ variable "overlay" {
     slack_api_url : ""
     slack_channel : ""
     teleport_auth_token : "",
-    datadog_api_token : ""
+    datadog_api_key : ""
   }
 }
 
