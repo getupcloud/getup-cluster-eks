@@ -18,7 +18,7 @@ OUTPUT_OVERLAY_JSON := .overlay.output.json
 TFVARS_OVERLAY_JSON := .overlay.tfvars.json
 ROOT_DIR            := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 
-UPDATE_FILES_CLUSTER := bin cluster/base/* providers.tf main-*.tf variables-*.tf outputs-*.tf terraform-*.auto.tfvars.example
+UPDATE_CLUSTER_FILES := Makefile bin cluster/base/* providers.tf main-*.tf variables-*.tf outputs-*.tf terraform-*.auto.tfvars.example
 UPDATE_EXAMPLES      := */*.tf */*.example versions.tf
 
 ifeq ($(AUTO_LOCAL_IP),true)
@@ -139,36 +139,29 @@ ifneq ($(force), true)
 	fi
 endif
 
-#update-source: update-from-remote-source
-#
-#update-from-remote-source:
-#	# TODO
-
-#update-from-local-cluster: sources ?= $(addprefix $(from)/,$(wildcard $(UPDATE_FILES_CLUSTER)))
-
 # copy only locally existing files from source
 update-from-local-cluster: from   ?= ../terraform-cluster/
-update-from-local-cluster: locals  = $(wildcard $(UPDATE_FILES_CLUSTER))
-update-from-local-cluster: #is-tree-clean
+update-from-local-cluster: locals  = $(wildcard $(UPDATE_CLUSTER_FILES))
+update-from-local-cluster: is-tree-clean
 	@shopt -s nullglob
 	echo Updating local files only from $(from):
 	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %n' --relative $(locals) $(ROOT_DIR)
 
 # copy all existing files from source
 upgrade-from-local-cluster: from ?= ../terraform-cluster/
-upgrade-from-local-cluster: #is-tree-clean
+upgrade-from-local-cluster: is-tree-clean
 	@shopt -s nullglob
 	echo Updating all files from $(from):
-	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %n' --relative $(UPDATE_FILES_CLUSTER) $(ROOT_DIR)
+	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %n' --relative $(UPDATE_CLUSTER_FILES) $(ROOT_DIR)
 
 #
 # used only to update upstream cluster repo, not to be meant to be used by end-users.
 #
 upgrade-from-local-examples: from ?= ../terraform-modules/examples
-upgrade-from-local-examples: #is-tree-clean
+upgrade-from-local-examples: is-tree-clean
 	@shopt -s nullglob
 	echo Updating examples from $(from):
-	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %n' --relative $(UPDATE_EXAMPLES) $(ROOT_DIR)
+	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %n' $(UPDATE_EXAMPLES) $(ROOT_DIR)
 
 show-overlay-vars:
 	@grep -wrn -A 1 --color '#output:.*' cluster/overlay 2>/dev/null
