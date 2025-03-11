@@ -25,6 +25,7 @@ resources:
 #- base/flagger.yaml
 #- base/teleport.yaml
 #- base/opencost.yaml ## Experimental
+#- base/datadog.yaml
 
 #patches:
 #- path: overlay/cert-manager.yaml
@@ -43,6 +44,7 @@ resources:
 #- path: overlay/teleport.yaml
 #- path: overlay/tempo.yaml
 #- path: overlay/opencost.yaml ## Experimental
+#- path: overlay/datadog.yaml
 
 #patchesJson6902:
 #- path: overlay/monitoring-tempo-ops.yaml

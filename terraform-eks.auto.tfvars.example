@@ -48,37 +48,6 @@
 #  "managed-by": "terraform"
 #}
 
-# overlay - Map of variables to inject into overlay files.
-# Type: ${map(string)}
-# Default: {
-#  "certmanager_acme_email": "",
-#  "cronitor_ping_url": "",
-#  "ecr_credential_sync_region": "",
-#  "msteams_channel_url": "",
-#  "opencost_spot_datafeed_bucket_name": "",
-#  "opencost_spot_datafeed_bucket_prefix": "",
-#  "opencost_storage_class_name": "",
-#  "opsgenie_integration_api_key": "",
-#  "pagerduty_service_key": "",
-#  "slack_api_url": "",
-#  "slack_channel": "",
-#  "teleport_auth_token": ""
-#}
-#overlay = {
-#  "certmanager_acme_email": "",
-#  "cronitor_ping_url": "",
-#  "ecr_credential_sync_region": "",
-#  "msteams_channel_url": "",
-#  "opencost_spot_datafeed_bucket_name": "",
-#  "opencost_spot_datafeed_bucket_prefix": "",
-#  "opencost_storage_class_name": "",
-#  "opsgenie_integration_api_key": "",
-#  "pagerduty_service_key": "",
-#  "slack_api_url": "",
-#  "slack_channel": "",
-#  "teleport_auth_token": ""
-#}
-
 # cluster_encryption_config - Configuration block with encryption configuration for the cluster. To disable secret encryption, set this value to `{}`
 # Type: ${any}
 # Default: {

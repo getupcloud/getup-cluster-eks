@@ -142,6 +142,22 @@ endif
 #update-from-remote-source:
 #	# TODO
 
+update-tfvars-via-meld: tool  ?= meld
+update-tfvars-via-meld: files ?= $(wildcard *.tfvars)
+update-tfvars-via-meld: update-tfvars-via-tool
+
+update-tfvars-via-vimdiff: tool  ?= vimdiff
+update-tfvars-via-vimdiff: files ?= $(wildcard *.tfvars)
+update-tfvars-via-vimdiff: update-tfvars-via-tool
+
+update-tfvars-via-tool:
+	for file in $(files); do
+		if [ -e $$file ] && [ -e $$file.example ]; then
+			if ! diff -q $$file $$file.example; then
+				$(tool) $$file $$file.example
+			fi
+		fi
+	done
 
 # copy only locally existing files from source
 update-from-local-cluster: from ?= ../terraform-cluster/

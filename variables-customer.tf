@@ -22,3 +22,24 @@ variable "cluster_sla" {
     error_message = "The Cluster SLA is invalid."
   }
 }
+
+variable "overlay" {
+  description = "Map of variables to inject into overlay files."
+  type        = map(string)
+  default = {
+    certmanager_acme_email : ""
+    cronitor_ping_url : ""
+    ecr_credential_sync_region : ""
+    msteams_channel_url : ""
+    opencost_spot_datafeed_bucket_name : ""
+    opencost_spot_datafeed_bucket_prefix : ""
+    opencost_storage_class_name : ""
+    opsgenie_integration_api_key : ""
+    pagerduty_service_key : ""
+    slack_api_url : ""
+    slack_channel : ""
+    teleport_auth_token : "",
+    datadog_api_token : ""
+  }
+}
+
