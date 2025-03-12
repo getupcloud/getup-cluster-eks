@@ -92,8 +92,9 @@ spec:
         privileged: true
         podSecurityPolicy:
           create: true
-        securityContextConstraints:
-          create: true
+        ## OKD
+        #securityContextConstraints:
+        #  create: true
         #seLinuxContext:
         #  rule: MustRunAs
         #  seLinuxOptions:
