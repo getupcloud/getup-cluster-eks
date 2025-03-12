@@ -85,7 +85,7 @@ spec:
         rollingUpdate:
           maxUnavailable: "100%"
 
-      priorityClassCreate: true
+      #priorityClassCreate: true
       priorityClassName: system-cluster-critical
 
       podSecurity:
