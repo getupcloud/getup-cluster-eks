@@ -30,15 +30,15 @@
 # Default: false
 #opencost_create_spot_datafeed_bucket = false
 
-# opencost_spot_datafeed_bucket_name - Bucket name for Spot Instance Data Feed. Must there be only one bucket configured to receibe spot usage data.
+# opencost_spot_datafeed_bucket_name - Bucket name for Spot Instance Data Feed. Must there be only one bucket configured to receive spot usage data.
 # Type: ${string}
 # Required
 #opencost_spot_datafeed_bucket_name = <REQUIRED-VALUE>
 
-# opencost_spot_datafeed_prefix - (Optional) Prefix to retain Spot Instance Data Feed files in S3.
+# opencost_spot_datafeed_bucket_prefix - (Optional) Prefix to retain Spot Instance Data Feed files in S3.
 # Type: ${string}
 # Default: "spot-datafeed"
-#opencost_spot_datafeed_prefix = "spot-datafeed"
+#opencost_spot_datafeed_bucket_prefix = "spot-datafeed"
 
 # opencost_spot_datafeed_retention_days - (Optional) Days to retain Spot Instance Data Feed files in S3.
 # Type: ${number}

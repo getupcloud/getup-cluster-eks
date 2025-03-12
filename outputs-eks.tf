@@ -65,6 +65,11 @@ output "cluster_vpc_private_route_table_ids" {
   value       = module.eks.cluster_vpc_private_route_table_ids
 }
 
+output "default_storage_class_name" {
+  description = "Default StorageClass name"
+  value       = module.eks.default_storage_class_name
+}
+
 output "cluster_security_group_arn" {
   description = "Amazon Resource Name (ARN) of the cluster security group"
   value       = module.eks.cluster_security_group_arn

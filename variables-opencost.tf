@@ -38,11 +38,11 @@ variable "opencost_create_spot_datafeed_bucket" {
 
 variable "opencost_spot_datafeed_bucket_name" {
   # https://www.opencost.io/docs/configuration/aws#aws-spot-instance-data-feed
-  description = "Bucket name for Spot Instance Data Feed. Must there be only one bucket configured to receibe spot usage data."
+  description = "Bucket name for Spot Instance Data Feed. Must there be only one bucket configured to receive spot usage data."
   type        = string
 }
 
-variable "opencost_spot_datafeed_prefix" {
+variable "opencost_spot_datafeed_bucket_prefix" {
   # https://www.opencost.io/docs/configuration/aws#aws-spot-instance-data-feed
   description = "(Optional) Prefix to retain Spot Instance Data Feed files in S3."
   type        = string
