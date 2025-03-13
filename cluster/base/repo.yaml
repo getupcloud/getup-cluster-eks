@@ -323,3 +323,12 @@ metadata:
 spec:
   interval: 12h
   url: https://open-telemetry.github.io/opentelemetry-helm-charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: openconst
+  namespace: flux-system
+spec:
+  interval: 12h
+  url: https://opencost.github.io/opencost-helm-chart

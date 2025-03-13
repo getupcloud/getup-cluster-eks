@@ -4,9 +4,9 @@ terraform {
   required_version = "~> 1.7.0"
 
   backend "s3" {
-    bucket = "BUCKET_NAME"
-    key    = "CLUSTER_NAME/terraform.tfstate"
-    region = "CLUSTER_REGION"
+    bucket = "-- DEFINE BUCKET NAME HERE --"
+    key    = "-- DEFINE KEY PREFIX HERE --/terraform.tfstate"
+    region = "-- DEFINE BUCKET _REGION HERE --"
   }
 
   required_providers {
