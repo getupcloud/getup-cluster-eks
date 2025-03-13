@@ -327,7 +327,7 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: openconst
+  name: opencost
   namespace: flux-system
 spec:
   interval: 12h
