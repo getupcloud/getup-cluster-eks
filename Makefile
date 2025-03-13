@@ -18,8 +18,10 @@ OUTPUT_OVERLAY_JSON := .overlay.output.json
 TFVARS_OVERLAY_JSON := .overlay.tfvars.json
 ROOT_DIR            := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 
-UPDATE_CLUSTER_FILES := Makefile bin cluster/base/* providers.tf main-*.tf variables-*.tf outputs-*.tf terraform-*.auto.tfvars.example
-UPDATE_EXAMPLES      := */*.tf */*.example versions.tf
+UPSTREAM_CLUSTER_DIR  ?= ../getup-cluster-eks/
+UPSTREAM_EXAMPLES_DIR ?= ../getup-modules/examples
+UPDATE_CLUSTER_FILES  := Makefile bin cluster/base/* providers.tf main-*.tf variables-*.tf outputs-*.tf terraform-*.auto.tfvars.example
+UPDATE_EXAMPLES       := */*.tf */*.example versions.tf
 
 ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -s https://api.ipify.org)/32"]'
@@ -140,7 +142,7 @@ ifneq ($(force), true)
 endif
 
 # copy only locally existing files from source
-update-from-local-cluster: from   ?= ../terraform-cluster/
+update-from-local-cluster: from   ?= $(UPSTREAM_CLUSTER_DIR)
 update-from-local-cluster: locals  = $(wildcard $(UPDATE_CLUSTER_FILES))
 update-from-local-cluster: is-tree-clean
 	@shopt -s nullglob
@@ -148,7 +150,7 @@ update-from-local-cluster: is-tree-clean
 	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %n' --relative $(locals) $(ROOT_DIR)
 
 # copy all existing files from source
-upgrade-from-local-cluster: from ?= ../terraform-cluster/
+upgrade-from-local-cluster: from ?= $(UPSTREAM_CLUSTER_DIR)
 upgrade-from-local-cluster: is-tree-clean
 	@shopt -s nullglob
 	echo Updating all files from $(from):
@@ -157,7 +159,7 @@ upgrade-from-local-cluster: is-tree-clean
 #
 # used only to update upstream cluster repo, not to be meant to be used by end-users.
 #
-upgrade-from-local-examples: from ?= ../terraform-modules/examples
+upgrade-from-local-examples: from ?= $(UPSTREAM_EXAMPLES_DIR)
 upgrade-from-local-examples: is-tree-clean
 	@shopt -s nullglob
 	echo Updating examples from $(from):
