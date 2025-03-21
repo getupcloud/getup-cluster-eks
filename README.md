@@ -10,7 +10,7 @@
 Run the command below and follow the instructions.
 
 ```
-curl -OLs https://github.com/getupcloud/terraform-cluster/raw/main/create-cluster.sh
+curl -OLs https://github.com/getupcloud/getup-cluster-eks/raw/main/create-cluster.sh
 bash ./create-cluster.sh
 ```
 
