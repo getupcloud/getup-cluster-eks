@@ -3,6 +3,7 @@
 # This is a suggestion, not a requirement.
 #
 
+FLAVOR              := eks
 TERRAFORM           ?= terraform
 TF_LOG_PATH         ?= terraform.log
 TF_LOG              ?= DEBUG
@@ -18,10 +19,15 @@ OUTPUT_OVERLAY_JSON := .overlay.output.json
 TFVARS_OVERLAY_JSON := .overlay.tfvars.json
 ROOT_DIR            := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 
-UPSTREAM_CLUSTER_DIR  ?= ../getup-cluster-eks/
-UPSTREAM_EXAMPLES_DIR ?= ../getup-modules/examples/eks
-UPDATE_CLUSTER_FILES  := Makefile bin cluster/base/* providers.tf main-*.tf variables-*.tf outputs-*.tf terraform-*.auto.tfvars.example
-UPDATE_EXAMPLES       := */*.tf */*.example versions.tf
+KUBECONFIG_RETRIEVE_COMMAND ?= AWS_REGION=$(shell awk '/^aws_region/{print $$3}' terraform-eks.auto.tfvars | tr -d '"') \
+                               aws eks update-kubeconfig --name=$(CLUSTER_NAME) $(AWS_EKS_ARGS) --region $(AWS_REGION)
+
+UPSTREAM_CLUSTER_DIR          ?= ../getup-cluster-$(FLAVOR)/
+UPSTREAM_EXAMPLES_COMMON_DIR  ?= ../getup-modules/examples/common
+UPSTREAM_EXAMPLES_CLUSTER_DIR ?= ../getup-modules/examples/$(FLAVOR)
+UPDATE_CLUSTER_FILES          := Makefile bin cluster/base/* *.tf *.example
+UPDATE_EXAMPLES_CLUSTER_FILES := *.tf *.example */*.tf */*.example
+UPDATE_EXAMPLES_COMMON_FILES  := *.tf *.example
 
 ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -s https://api.ipify.org)/32"]'
@@ -115,7 +121,7 @@ output:
 
 kubeconfig: REGION ?= $(shell awk '/^region/{print $$3}' terraform-*.auto.tfvars | tr -d '"')
 kubeconfig:
-	doctl kubernetes cluster kubeconfig save
+	$(KUBECONFIG_RETRIEVE_COMMAND)
 
 update-version:
 	latest=$$(timeout 3 curl -s https://raw.githubusercontent.com/getupcloud/getup-modules/main/version.txt || echo 0.0.0)
@@ -150,11 +156,17 @@ upgrade-from-local-cluster: #is-tree-clean
 #
 # used only to update upstream cluster repo, not to be meant to be used by end-users.
 #
-upgrade-from-local-examples: from ?= $(UPSTREAM_EXAMPLES_DIR)
-upgrade-from-local-examples: #is-tree-clean
-	@shopt -s nullglob
+upgrade-from-local-examples-common: from ?= $(UPSTREAM_EXAMPLES_COMMON_DIR)
+upgrade-from-local-examples-common: #is-tree-clean
+	shopt -s nullglob
 	echo Updating examples from $(from):
-	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' $(UPDATE_EXAMPLES) $(ROOT_DIR)
+	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' $(UPDATE_EXAMPLES_COMMON_FILES) $(ROOT_DIR)
+
+upgrade-from-local-examples: from ?= $(UPSTREAM_EXAMPLES_CLUSTER_DIR)
+upgrade-from-local-examples: upgrade-from-local-examples-common #is-tree-clean
+	shopt -s nullglob
+	echo Updating examples from $(from):
+	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' $(UPDATE_EXAMPLES_CLUSTER_FILES) $(ROOT_DIR)
 
 show-overlay-vars:
 	@grep -wrn -A 1 --color '#output:.*' cluster/overlay 2>/dev/null
@@ -189,4 +201,3 @@ kustomize ks:
 		echo Generated output: $(KUSTOMIZE_BUILD)
 		exit 1
 	fi
-
