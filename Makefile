@@ -11,16 +11,16 @@ CLUSTER_NAME        ?= $(shell sed -n -e 's|^[[:space:]]*cluster_name[[:space:]]
 GIT_REMOTE          ?= origin
 GIT_BRANCH          ?= main
 GIT_COMMIT_MESSAGE  ?= Auto-generated commit
-FLOW_RECONCILE      := clean-output plan apply overlay commit push
-FLOW_FULL_RECONCILE := clean-output pull init validate plan apply kubeconfig overlay commit push
+FLOW_RECONCILE      := plan apply overlay commit push
+FLOW_FULL_RECONCILE := pull init validate plan apply kubeconfig overlay commit push
 KUSTOMIZE_BUILD     := .kustomize_build.yaml
 OUTPUT_JSON         := .output.json
 OUTPUT_OVERLAY_JSON := .overlay.output.json
 TFVARS_OVERLAY_JSON := .overlay.tfvars.json
 ROOT_DIR            := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 
-KUBECONFIG_RETRIEVE_COMMAND ?= AWS_REGION=$(shell awk '/^aws_region/{print $$3}' terraform-eks.auto.tfvars | tr -d '"') \
-                               aws eks update-kubeconfig --name=$(CLUSTER_NAME) $(AWS_EKS_ARGS) --region $(AWS_REGION)
+KUBECONFIG_RETRIEVE_COMMAND = AWS_REGION=$(shell awk '/^aws_region/{print $$3}' *.tfvars 2>/dev/null | tr -d '"') && \
+                               aws eks update-kubeconfig --name=$(CLUSTER_NAME) $(AWS_EKS_ARGS) --region $$AWS_REGION
 
 UPSTREAM_CLUSTER_DIR          ?= ../getup-cluster-$(FLAVOR)/
 UPSTREAM_EXAMPLES_COMMON_DIR  ?= ../getup-modules/examples/common
@@ -39,14 +39,24 @@ endif
 .EXPORT_ALL_VARIABLES:
 
 all help:
-	@echo Targets:
+	@echo Available targets
 	echo
-	printf -- "- %s\n" init validate fmt plan apply overlay output kubeconfig update-version clean clean-output destroy migrate-state
+	echo "Terraform commands"
+	echo "  init          Executes 'terraform init'"
+	echo "  validate      Executes 'terraform validate'"
+	echo "  fmt           Executes 'terraform fmt'"
+	echo "  apply         Executes 'terraform apply'"
+	echo "  validate      Executes 'terraform validate'"
 	echo
-	echo Reconcile flows:
+	echo "Git comands"
+	echo "  overlay      Updates ./clustetr/overlay using data from terraform output and tfvars"
+	echo "  commit       Executes 'git commit' using default message"
+	echo "  push         Executes 'git push'"
 	echo
-	echo '- reconcile: $(FLOW_RECONCILE)'
-	echo '- full-reconcile: $(FLOW_FULL_RECONCILE)'
+	echo "Pre-defined reconcile flows"
+	echo
+	echo "  reconcile        $(FLOW_RECONCILE)"
+	echo "  full-reconcile   $(FLOW_FULL_RECONCILE)"
 
 reconcile: $(FLOW_RECONCILE)
 

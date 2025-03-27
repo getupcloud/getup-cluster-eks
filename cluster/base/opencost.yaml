@@ -32,7 +32,6 @@ spec:
         enabled: false
       customPricing:
         enabled: true
-        provider: aws
       dataRetention:
         dailyResolutionDays: 180
       exporter:
