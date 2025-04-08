@@ -33,6 +33,27 @@ spec:
       enabled: true
       interval: 60s
 
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+            - key: node-role.kubernetes.io/infra
+              operator: Exists
+        - weight: 90
+          preference:
+            matchExpressions:
+            - key: role
+              operator: In
+              values:
+              - infra
+
+    tolerations:
+    - key: dedicated
+      value: infra
+      effect: NoSchedule
+
     tempo:
       multitenancyEnabled: false
       retention: 168h

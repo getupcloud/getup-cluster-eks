@@ -27,17 +27,16 @@ variable "overlay" {
   description = "Map of variables to inject into overlay files."
   type        = map(string)
   default = {
-    certmanager_acme_email: "",
-    cronitor_ping_url: "",
-    datadog_api_key: "",
-    ecr_credential_sync_region: "",
-    msteams_channel_url: "",
-    opsgenie_integration_api_key: "",
-    pagerduty_service_key: "",
-    slack_api_url: "",
-    slack_channel: "",
-    teleport_auth_token : "",
-    velero_do_token: ""
+    certmanager_acme_email : ""
+    cronitor_ping_url : ""
+    ecr_credential_sync_region : ""
+    msteams_channel_url : ""
+    opsgenie_integration_api_key : ""
+    pagerduty_service_key : ""
+    slack_api_url : ""
+    slack_channel : ""
+    teleport_auth_token : ""
+    datadog_api_key : ""
   }
 }
 

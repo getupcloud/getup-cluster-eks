@@ -12,9 +12,6 @@ spec:
       - mountPath: /target
         name: plugins
 
-    credentials:
-      useSecret: false # required to use IRSA
-
     configuration:
       defaultBackupStorageLocation:
       - aws: default
@@ -27,65 +24,12 @@ spec:
         config:
           region: #output:{aws_region}
 
-      defaultVolumeSnapshotLocations:
-      - aws: default
       volumeSnapshotLocation:
       - provider: aws
         name: default
         default: true
         config:
           region: #output:{aws_region}
-
-    schedules:
-      volumes:
-        schedule: '0 3 * * *'
-        template:
-          storageLocation: default
-          ttl: 168h0m0s
-
-          # Please note labelSelector can't be empty
-          # https://github.com/vmware-tanzu/velero/issues/2083
-          #labelSelector:
-          #  app: web
-
-          includedClusterScopedResources:
-          - persistentvolumes
-          - persistentvolumeclaims
-          excludedNamespaces:
-          - kube-system
-          - kube-public
-          - velero
-          - monitoring
-          - logging
-
-          snapshotVolumes: true
-          volumeSnapshotLocations:
-          - default
-
-      resources:
-        schedule: '0 */12 * * *'
-        template:
-          storageLocation: default
-          ttl: 720h0m0s
-
-          # Please note labelSelector can't be empty
-          # https://github.com/vmware-tanzu/velero/issues/2083
-          #labelSelector:
-          #  app: web
-
-          includedNamespaces:
-          - "*"
-          excludedNamespaces:
-          - kube-system
-          - kube-public
-          - monitoring
-          - velero
-          includedResources:
-          - "*"
-          #excludedResources: []
-          includeClusterResources: true
-
-          snapshotVolumes: false
 
     serviceAccount:
       server:

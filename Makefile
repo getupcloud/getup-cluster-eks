@@ -3,7 +3,9 @@
 # This is a suggestion, not a requirement.
 #
 
-FLAVOR              := eks
+include Makefile.conf
+
+# General variables
 TERRAFORM           ?= terraform
 TF_LOG_PATH         ?= terraform.log
 TF_LOG              ?= DEBUG
@@ -19,8 +21,6 @@ OUTPUT_OVERLAY_JSON := .overlay.output.json
 TFVARS_OVERLAY_JSON := .overlay.tfvars.json
 ROOT_DIR            := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 
-KUBECONFIG_RETRIEVE_COMMAND = AWS_REGION=$(shell awk '/^aws_region/{print $$3}' *.tfvars 2>/dev/null | tr -d '"') && \
-                               aws eks update-kubeconfig --name=$(CLUSTER_NAME) $(AWS_EKS_ARGS) --region $$AWS_REGION
 
 UPSTREAM_CLUSTER_DIR          ?= ../getup-cluster-$(FLAVOR)/
 UPSTREAM_EXAMPLES_COMMON_DIR  ?= ../getup-modules/examples/common
@@ -48,10 +48,18 @@ all help:
 	echo "  apply         Executes 'terraform apply'"
 	echo "  validate      Executes 'terraform validate'"
 	echo
-	echo "Git comands"
+	echo "Git commands"
 	echo "  overlay      Updates ./clustetr/overlay using data from terraform output and tfvars"
 	echo "  commit       Executes 'git commit' using default message"
 	echo "  push         Executes 'git push'"
+	echo
+	echo "Flux commands"
+	echo "  flux-rec-sg    Reconcile GitRepository/flux-system"
+	echo "  flux-rec-ks    Reconcile Kustomization/flux-system"
+	echo "  flux-sus-sg    Suspend GitRepository/flux-system"
+	echo "  flux-sus-ks    Suspend Kustomization/flux-system"
+	echo "  flux-res-sg    Resume GitRepository/flux-system"
+	echo "  flux-res-ks    Resume Kustomization/flux-system"
 	echo
 	echo "Pre-defined reconcile flows"
 	echo
@@ -98,6 +106,19 @@ migrate-state:
 # WARNING: NO CONFIRMATION ON APPLY
 apply:
 	$(TERRAFORM) apply -auto-approve terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_APPLY_ARGS)
+
+flux-rec-sg fr:
+	flux reconcile source git flux-system
+flux-rec-ks:
+	flux reconcile kustomization flux-system
+flux-sus-sg:
+	flux suspend source git flux-system
+flux-sus-ks:
+	flux suspend kustomization flux-system
+flux-res-sg:
+	flux resume source git flux-system
+flux-res-ks:
+	flux resume kustomization flux-system
 
 #################################################################################################
 

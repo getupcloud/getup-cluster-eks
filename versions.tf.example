@@ -1,7 +1,7 @@
 # File auto-generated from bin/make-versions
 
 terraform {
-  required_version = "~> 1.7"
+  required_version = "~> 1.11"
 
   backend "s3" {
     bucket = "-- DEFINE BUCKET NAME HERE --"

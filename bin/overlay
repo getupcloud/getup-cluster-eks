@@ -6,8 +6,8 @@ import re
 import os
 import sys
 import json
-
-regex = os.environ.get('OVERLAY_LINE_REGEX', '^(\\s*)([^:]+):\\s+(.*)#output:(.+)$')
+                                            #'^(\\s*)([^:=]+)([:=]\\s?)\\s*(.*)#output:(.+)$'
+regex = os.environ.get('OVERLAY_LINE_REGEX', '^(\\s*)([^:=]+)([:=]\\s*)(.*)#output:(.+)$')
 output_re = re.compile(regex)
 overlay_file = sys.argv[1]
 input_files = sys.argv[2:]
@@ -38,13 +38,13 @@ with open(overlay_file, 'r') as f:
             continue
 
         try:
-            indent, name, _, tpl = match.groups()
+            indent, name, delim, _, tpl = match.groups()
             #TODO: add libs (ex: base64)
             value = eval(f"f'{tpl}'", data)
             if value:
-                print(f'{indent}{name}: {value} #output:{tpl}')
+                print(f'{indent}{name}{delim}{value} #output:{tpl}')
             else:
-                print(f'{indent}{name}: #output:{tpl}')
+                print(f'{indent}{name}{delim}#output:{tpl}')
             count = count + 1
         except (NameError, KeyError) as ex:
             print(line, end='')

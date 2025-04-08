@@ -6,11 +6,13 @@ metadata:
 spec:
   chart:
     spec:
-      chart: opentelemetry-demo
+      chart: templater
       sourceRef:
         kind: HelmRepository
-        name: open-telemetry
-      version: "~> 0.29.0"
+        name: getupcloud
+      version: "1.x"
+  dependsOn:
+  - name: otel-operator
   install:
     createNamespace: true
     disableWait: false
@@ -24,3 +26,202 @@ spec:
   storageNamespace: otel-demo
   targetNamespace: otel-demo
   values:
+    ##
+    ## Frontend
+    ##
+    literal-deployment:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: otel-demo-frontend
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: otel-demo-frontend
+        template:
+          metadata:
+            labels:
+              app: otel-demo-frontend
+          spec:
+            containers:
+            - name: app
+              image: grafana/tns-app:latest
+              imagePullPolicy: IfNotPresent
+              args:
+              - -log.level=debug
+              - http://otel-demo-database
+              ports:
+              - name: http-metrics
+                containerPort: 80
+              env:
+              - name: NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+              - name: JAEGER_AGENT_HOST
+                value: tempo.monitoring.svc.cluster.local
+              - name: JAEGER_TAGS
+                value: cluster=demo,app=api,namespace=$(NAMESPACE)
+              - name: JAEGER_SAMPLER_TYPE
+                value: const
+              - name: JAEGER_SAMPLER_PARAM
+                value: "1"
+
+    literal-service:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: otel-demo-frontend
+      spec:
+        selector:
+          app: otel-demo-frontend
+        ports:
+        - protocol: TCP
+          port: 80
+          targetPort: 80
+
+    literal-ingress:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: otel-demo
+      spec:
+        ingressClassName: nginx
+        tls:
+        - hosts:
+          - app.pontta.com
+        rules:
+        - host: otel-demo.127.0.0.1.nip.io
+          http:
+            paths:
+            - backend:
+                service:
+                  name: otel-demo-frontend
+                  port:
+                    number: 80
+              path: /
+              pathType: Prefix
+
+    literal-servicemonitor:
+      apiVersion: monitoring.coreos.com/v1
+      kind: ServiceMonitor
+      metadata:
+        name: otel-demo
+      spec:
+        endpoints:
+        - interval: 30s
+          targetPort: http-metrics
+        selector:
+          matchLabels:
+            app: otel-demo-frontend
+
+    ##
+    ## Database
+    ##
+    literal-database-deployment:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: otel-demo-database
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: otel-demo-database
+        template:
+          metadata:
+            labels:
+              app: otel-demo-database
+          spec:
+            containers:
+            - name: db
+              image: grafana/tns-db:latest
+              imagePullPolicy: IfNotPresent
+              args:
+              - -log.level=debug
+              ports:
+              - name: http-metrics
+                containerPort: 80
+              env:
+              - name: NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+              - name: JAEGER_AGENT_HOST
+                value: tempo.monitoring.svc.cluster.local
+              - name: JAEGER_TAGS
+                value: cluster=demo,app=db,namespace=$(NAMESPACE)
+              - name: JAEGER_SAMPLER_TYPE
+                value: const
+              - name: JAEGER_SAMPLER_PARAM
+                value: "1"
+
+    literal-database-service:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: otel-demo-database
+      spec:
+        selector:
+          app: otel-demo-database
+        ports:
+        - protocol: TCP
+          port: 80
+          targetPort: 80
+
+    ##
+    ## Load Generator
+    ##
+    literal-loadgen-deployment:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: otel-demo-loadgen
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: otel-demo-loadgen
+        template:
+          metadata:
+            labels:
+              app: otel-demo-loadgen
+          spec:
+            containers:
+            - name: loadgen
+              image: grafana/tns-loadgen:latest
+              imagePullPolicy: IfNotPresent
+              args:
+              - -log.level=debug
+              - http://otel-demo-frontend
+              ports:
+              - name: http-metrics
+                containerPort: 80
+              env:
+              - name: NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+              - name: JAEGER_AGENT_HOST
+                value: tempo.monitoring.svc.cluster.local
+              - name: JAEGER_TAGS
+                value: cluster=demo,app=loadgen,namespace=$(NAMESPACE)
+              - name: JAEGER_SAMPLER_TYPE
+                value: const
+              - name: JAEGER_SAMPLER_PARAM
+                value: "1"
+
+    literal-loadgen-service:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: otel-demo-loadgen
+      spec:
+        selector:
+          app: otel-demo-loadgen
+        ports:
+        - protocol: TCP
+          port: 80
+          targetPort: 80
+
