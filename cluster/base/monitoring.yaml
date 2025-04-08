@@ -13,10 +13,12 @@ spec:
       version: "55.11.0" # "~> 56.6" # 56 tem bug no grafana pra buscar log-volume
   install:
     createNamespace: true
+    crds: CreateReplace
     disableWait: false
     remediation:
       retries: -1
   upgrade:
+    crds: CreateReplace
     disableWait: false
     remediation:
       retries: -1
