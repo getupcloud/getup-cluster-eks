@@ -175,7 +175,7 @@ update-from-local-cluster: locals  = $(wildcard $(UPDATE_CLUSTER_FILES))
 update-from-local-cluster: #is-tree-clean
 	@shopt -s nullglob
 	echo Updating local files only from $(from):
-	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative $(locals) $(ROOT_DIR)
+	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args $(locals) $(ROOT_DIR)
 
 # copy all existing files from source
 upgrade-from-local-cluster: from ?= $(UPSTREAM_CLUSTER_DIR)
