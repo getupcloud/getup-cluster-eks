@@ -10,7 +10,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: getupcloud
-      version: "~> 1.1"
+      version: "1.x"
   dependsOn:
   - name: otel-operator
   install:
@@ -33,7 +33,7 @@ spec:
         name: otel
         namespace: monitoring
       spec:
-        config: |-
+        config:
           receivers:
             otlp:
               protocols:
@@ -56,7 +56,7 @@ spec:
                 receivers: [otlp]
                 processors: []
                 exporters: [debug,otlphttp]
-    - apiVersion: opentelemetry.io/v1beta1
+    - apiVersion: opentelemetry.io/v1alpha1
       kind: Instrumentation
       metadata:
         name: otel

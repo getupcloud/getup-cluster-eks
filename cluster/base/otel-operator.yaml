@@ -10,7 +10,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: open-telemetry
-      version: "~> 0.49.0"
+      version: "~> 0.84.2"
   install:
     createNamespace: true
     crds: CreateReplace
@@ -32,6 +32,8 @@ spec:
     manager:
       extraArgs:
       - --enable-multi-instrumentation
+      collectorImage:
+        repository: otel/opentelemetry-collector-k8s
     admissionWebhooks:
       certManager:
         enabled: true
