@@ -90,7 +90,7 @@ spec:
         ingressClassName: nginx
         tls:
         - hosts:
-          - app.pontta.com
+          - otel-demo.127.0.0.1.nip.io
         rules:
         - host: otel-demo.127.0.0.1.nip.io
           http:
