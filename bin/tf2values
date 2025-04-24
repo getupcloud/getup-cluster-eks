@@ -21,10 +21,40 @@ print(f'+ {output_file}', file=sys.stderr)
 with open(output_file, 'r') as f:
     data.update({ k: v['value'] for k, v in json.load(f).items() })
 
-def lowerSnakeCase(s):
-    return ''.join((s[0] + s.title()[1:]).split('_'))
 
-for tf_key in sorted(list(data)):
-    print(lowerSnakeCase(tf_key), file=sys.stderr)
+# Convert keys to helm's values top-level format
+#  aws-access-key -> awsAccessKey
+#  aws_access_key -> awsAccessKey
+def normalize_root_key(s):
+    return ''.join((s[0] + s.replace('-', '_').title()[1:]).split('_'))
+
+# Convert to helm's values format
+def normalize_key(s):
+    return s.replace('-', '_')
+
+# Recursive update keys
+def normalize_data(data, func=normalize_key):
+    keys = list(data.keys())
+    for k in keys:
+        v = data.pop(k)
+        k = func(k)
+
+        if isinstance(v, dict):
+            normalize_data(v, func)
+        elif isinstance(v, (list, tuple)):
+            v = [ normalize_data(i, func) if isinstance(i, dict) else i for i in v]
+
+        data[k] = v
+    return data
+
+# Update top-level keys only
+def normalize_root(data, func=normalize_root_key):
+    keys = list(data.keys())
+    for k in keys:
+        v = data.pop(k)
+        data[func(k)] = v
+    return data
+
+normalize_data(normalize_root(data))
 
 print(yaml.dump(data, indent=2, default_flow_style=False))

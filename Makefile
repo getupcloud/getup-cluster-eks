@@ -216,14 +216,14 @@ overlay: clean-output $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
 		bin/overlay "$$file" $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON) >"$${file}.tmp" && mv "$${file}.tmp" "$$file" || exit 1
 	done
 
-$(VALUES_YAML): $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
-	@echo Generating values.yaml
+$(VALUES_YAML): $(OUTPUT_JSON) $(TFVARS)
+	echo Generating values.yaml
 	bin/tf2values $(OUTPUT_JSON) $(TFVARS) > $(VALUES_YAML)
 
 manifests: $(VALUES_YAML)
 	helm template cluster --no-hooks --disable-openapi-validation cluster-chart --set kustomize=true
 	helm template cluster --no-hooks --disable-openapi-validation cluster-chart --set manifests=true
-
+	#jq | python -e "''.join((s[0] + s.title()[1:]).split('_'))"
 
 validate-vars:
 	@if [ -z "$(CLUSTER_NAME)" ]; then
