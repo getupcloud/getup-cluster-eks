@@ -1,0 +1,140 @@
+{{- if and .Values.manifests .Values.ingressNginx.enabled }}
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ingress-nginx
+  namespace: flux-system
+spec:
+  chart:
+    spec:
+      chart: ingress-nginx
+      sourceRef:
+        kind: HelmRepository
+        name: ingress-nginx
+      version: 4.12.x
+  dependsOn:
+  {{- if .Values.monitoring.enabled }}
+  - name: monitoring
+  {{- end }}
+  install:
+    createNamespace: true
+    disableWait: false
+    remediation:
+      retries: -1
+  upgrade:
+    disableWait: false
+    remediation:
+      retries: -1
+  interval: 10m
+  releaseName: ingress-nginx
+  storageNamespace: ingress-nginx
+  targetNamespace: ingress-nginx
+  values:
+    controller:
+      #kind: Deployment
+      replicaCount: 2
+
+      # PodDisruptionBudget
+      # Define either 'minAvailable' or 'maxUnavailable', never both.
+      minAvailable: 1
+      #maxUnavailable: 1
+
+      resources:
+        limits:
+          cpu: 300m
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+
+      allowSnippetAnnotations: false
+      enableAnnotationValidations: true
+
+      admissionWebhooks:
+        # enable after install in order to avoid ingress deadlock
+        enabled: false
+
+      #priorityClassName: high-priority
+
+      #dnsPolicy: ClusterFirstWithHostNet
+
+      extraArgs:
+        enable-ssl-passthrough: "false"
+        #default-ssl-certificate: "ingress-nginx/default-ssl-certificate" ## "<namespace>/<secret_name>"
+
+      config:
+        use-proxy-protocol: "true"
+
+        # Use ewma load-balancing for high-load envs. It avoids concentrating reqs into a small set of app pods.
+        # https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#load-balance
+        #load-balance: ewma
+        #
+        #whitelist-source-range: 10.10.0.0/16,172.168.0.1
+        #real-ip-header: proxy_protocol
+        #set-real-ip-from: X.X.X.X
+
+      autoscaling:
+        enabled: false
+        minReplicas: 2
+        maxReplicas: 30
+        targetCPUUtilizationPercentage: 90
+        targetMemoryUtilizationPercentage: 90
+
+      keda:
+        enabled: false
+        minReplicas: 2
+        maxReplicas: 30
+        triggers:
+        # https://keda.sh/docs/2.7/scalers/cpu/
+        - type: cpu
+          metricType: Utilization
+          metadata:
+            value: "90" # percentage of requests
+        # https://keda.sh/docs/2.7/scalers/memory/
+        - type: memory
+          metricType: Utilization
+          metadata:
+            value: "90" # percentage of requests
+        #- type: prometheus
+        #  metadata:
+        #    serverAddress: http://<prometheus-host>:9090
+        #    metricName: http_requests_total
+        #    threshold: '100'
+        #    query: sum(rate(http_requests_total{deployment="my-deployment"}[2m]))
+
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: {{ default false .Values.monitoring.enabled }}
+
+      service:
+        enabled: true
+        type: LoadBalancer
+        #loadBalancerIP: 1.1.1.1
+
+        annotations:
+          # aks
+          #service.beta.kubernetes.io/azure-load-balancer-internal: false
+
+          # eks nlb internal - Lembrando que pra usar NLB INTERNAL O EKS TEM QUE TER SIDO CRIADO COM UMA SUBNET PRIVADA
+          # service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+          # service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+          # service.beta.kubernetes.io/aws-load-balancer-type: nlb-ip
+
+          # eks - nlb external
+          service.beta.kubernetes.io/aws-load-balancer-type: external
+          service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance ## to receive client IP. Doesn't work for IPv6
+          service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+          service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
+
+    defaultBackend:
+      enabled: true
+
+      resources:
+        limits:
+          cpu: 50m
+          memory: 64Mi
+        requests:
+          cpu: 20m
+          memory: 32Mi
+{{- end }}

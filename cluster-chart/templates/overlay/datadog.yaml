@@ -1,0 +1,12 @@
+{{- if and .Values.manifests .Values.datadog.enabled }}
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: datadog
+  namespace: flux-system
+spec:
+  values:
+    datadog:
+      clusterName: {{ .Values.cluster_name }}
+      apiKey: {{ .Values.datadog.datadog_api_key }}
+{{- end }}

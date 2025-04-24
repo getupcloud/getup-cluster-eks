@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+
+import sys
+import json
+import yaml
+import hcl2
+
+data = {}
+
+output_file = sys.argv[1]
+tfvars_files = sys.argv[2:]
+
+# Convert terraform tfvars to yaml
+for t in tfvars_files:
+    print(f'+ {t}', file=sys.stderr)
+    with open(t, 'r') as f:
+        data.update(hcl2.api.load(f))
+
+# Convert terraform outputs to yaml
+print(f'+ {output_file}', file=sys.stderr)
+with open(output_file, 'r') as f:
+    data.update({ k: v['value'] for k, v in json.load(f).items() })
+
+def lowerSnakeCase(s):
+    return ''.join((s[0] + s.title()[1:]).split('_'))
+
+for tf_key in sorted(list(data)):
+    print(lowerSnakeCase(tf_key), file=sys.stderr)
+
+print(yaml.dump(data, indent=2, default_flow_style=False))

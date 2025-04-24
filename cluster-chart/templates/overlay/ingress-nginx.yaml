@@ -1,0 +1,12 @@
+{{- if and .Values.manifests .Values.ingressNginx.enabled }}
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ingress-nginx
+  namespace: flux-system
+spec:
+  {{- include "fluxValuesFrom" (dict "secretName" "ingress-nginx" "values" .Values.ingressNginx.extraValues) | nindent 2}}
+  values: {}
+---
+{{ include "fluxValuesFromData" (dict "secretName" "ingress-nginx" "values" .Values.ingressNginx.extraValues) }}
+{{- end }}

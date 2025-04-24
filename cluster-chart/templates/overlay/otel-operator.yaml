@@ -1,0 +1,17 @@
+{{- if and .Values.manifests .Values.otelOperator.enabled }}
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: otel-operator
+  namespace: flux-system
+spec:
+  {{- include "fluxValuesFrom" (dict "secretName" "otel-operator" "values" .Values.otelOperator.extraValues) | nindent 2 }}
+  values:
+    admissionWebhooks:
+      certManager:
+        enabled: {{ if .Values.certManager.enabled -}} true {{- else -}} false {{- end }}
+      autoGenerateCert:
+        enabled: true
+---
+{{ include "fluxValuesFromData" (dict "secretName" "otel-operator" "values" .Values.otelOperator.extraValues) }}
+{{- end }}

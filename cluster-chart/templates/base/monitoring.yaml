@@ -1,0 +1,477 @@
+{{- if and .Values.manifests .Values.monitoring.enabled }}
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: monitoring
+  namespace: flux-system
+spec:
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+      version: "55.11.x" # "~> 56.6" # 56 tem bug no grafana pra buscar log-volume
+  install:
+    createNamespace: true
+    crds: CreateReplace
+    disableWait: false
+    remediation:
+      retries: -1
+  upgrade:
+    crds: CreateReplace
+    disableWait: false
+    remediation:
+      retries: -1
+  interval: 10m
+  timeout: 30m
+  releaseName: monitoring
+  storageNamespace: monitoring
+  targetNamespace: monitoring
+  values:
+    ###############################################
+    prometheusOperator:
+      admissionWebhooks:
+        enabled: false
+        patch:
+          enabled: false
+      tls:
+        enabled: false
+
+      resources:
+        limits:
+          cpu: 150m
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+
+    ###############################################
+    prometheus:
+      ingress:
+        enabled: false
+        ingressClassName: {{ include "ingressClassName" . }}
+        #annotations:
+        #  cert-manager.io/cluster-issuer: letsencrypt-staging-dns01
+        #  nginx.ingress.kubernetes.io/auth-realm: Authentication Required - Monitoring
+        #  nginx.ingress.kubernetes.io/auth-secret: monitoring-basic-auth
+        #  nginx.ingress.kubernetes.io/auth-type: basic
+        #hosts:
+        #  - prometheus.monitoring.example.com
+        #tls:
+        #- hosts:
+        #  - prometheus.monitoring.example.com
+        #  secretName: monitoring-ingress-tls
+
+      prometheusSpec:
+        replicas: 1
+        retention: 14d
+        scrapeInterval: 30s
+        enableAdminAPI: true
+
+        enableFeatures: []
+
+        resources:
+          limits:
+            cpu: 4
+            memory: 4Gi
+          requests:
+            cpu: 1
+            memory: 4Gi
+
+        externalLabels:
+          cluster: production
+
+        ruleSelectorNilUsesHelmValues: false
+        ruleSelector: {}
+        ruleNamespaceSelector: {}
+
+        serviceMonitorSelectorNilUsesHelmValues: false
+        serviceMonitorSelector: {}
+        serviceMonitorNamespaceSelector: {}
+
+        podMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelector: {}
+        podMonitorNamespaceSelector: {}
+
+        probeSelectorNilUsesHelmValues: false
+        probeSelector: {}
+        probeNamespaceSelector: {}
+
+        storageSpec:
+          volumeClaimTemplate:
+            metadata:
+              labels:
+                velero.io/exclude-from-backup: "true"
+            spec:
+              resources:
+                requests:
+                  storage: 200Gi
+
+        # enable istio scrape
+        #additionalScrapeConfigs:
+        #- job_name: 'istiod'
+        #  kubernetes_sd_configs:
+        #  - role: endpoints
+        #    namespaces:
+        #      names:
+        #      - istio-system
+        #  relabel_configs:
+        #  - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+        #    action: keep
+        #    regex: istiod;http-monitoring
+        #- job_name: 'envoy-stats'
+        #  metrics_path: /stats/prometheus
+        #  kubernetes_sd_configs:
+        #  - role: pod
+        #  relabel_configs:
+        #  - source_labels: [__meta_kubernetes_pod_container_port_name]
+        #    action: keep
+        #    regex: '.*-envoy-prom'
+
+    ###############################################
+    alertmanager:
+      alertmanagerSpec:
+        replicas: 2
+
+        logFormat: logfmt
+
+        resources:
+          limits:
+            cpu: 50m
+            memory: 256Mi
+          requests:
+            cpu: 10m
+            memory: 128Mi
+
+      ingress:
+        enabled: false
+        ingressClassName: {{ include "ingressClassName" . }}
+        #annotations:
+        #  cert-manager.io/cluster-issuer: letsencrypt-staging-dns01
+        #  nginx.ingress.kubernetes.io/auth-realm: Authentication Required - Monitoring
+        #  nginx.ingress.kubernetes.io/auth-secret: monitoring-basic-auth
+        #  nginx.ingress.kubernetes.io/auth-type: basic
+        #hosts:
+        #  - alertmanager.monitoring.example.com
+        #tls:
+        #- hosts:
+        #  - alertmanager.monitoring.example.com
+        #  secretName: monitoring-ingress-tls
+
+      config:
+        global:
+          resolve_timeout: 6h
+
+        inhibit_rules:
+        # Inhibit same alert with lower severity of an already firing alert
+        - equal:
+          - alertname
+          source_matchers: # existing alert
+            - severity = critical
+          target_matchers: # new/entering alert
+            - severity = warning
+
+        - equal:
+          - service # monitoring-kube-state-metrics
+          - node    # matches same node
+        - source_matchers: # existing alert
+          - alertname =~ KubeNodeUnreachable|KubeNodeNotReady|KubeletDown
+          target_matchers: # new/entering alert
+          - alertname =~ KubeDaemonSetRolloutStuck|KubeStatefulSetReplicasMismatch|KubeDeploymentReplicasMismatch
+
+        - equal:
+          - service # only from monitoring-kube-state-metrics
+          - node    # matches same nodes
+          source_matchers: # existing alert
+          - alertname = ToBeDeletedByClusterAutoscaler
+          target_matchers: # new/entering alert
+          - alertname =~ KubeNodeUnreachable|KubeNodeNotReady|KubeletDown|KubeDaemonSetRolloutStuck|KubeStatefulSetReplicasMismatch|KubeDeploymentReplicasMismatch
+
+        route:
+          receiver: blackhole
+          group_by:
+          - cluster
+          - alertname
+          group_wait: 15s
+          group_interval: 5m
+          repeat_interval: 3h
+
+          #################################################################
+          ## Routes are define in overlay/monitoring.yaml
+          #################################################################
+          # routes: {}
+
+        #################################################################
+        ## Receivers are define in overlay/monitoring.yaml
+        #################################################################
+        # receivers: {}
+
+    ###############################################
+    grafana:
+      adminUsername: admin
+      adminPassword: prom-operator
+
+      deploymentStrategy:
+        type: Recreate
+
+      persistence:
+        enabled: true
+        accessModes: ["ReadWriteOnce"]
+        size: 10Gi
+
+      resources:
+        limits:
+          cpu: 1
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+
+      env: {}
+
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+          #- name: 'default'
+          #  orgId: 1
+          #  folder: ''
+          #  type: file
+          #  disableDeletion: false
+          #  editable: true
+          #  options:
+          #    path: /var/lib/grafana/dashboards/default
+
+          #- name: istio
+          #  orgId: 1
+          #  folder: "Istio"
+          #  type: file
+          #  disableDeletion: false
+          #  editable: true
+          #  options:
+          #    path: /var/lib/grafana/dashboards/istio
+
+      dashboards:
+        default:
+          #### Trivy ####
+          #trivy-image-vulnerability:
+          #  gnetId: 17214
+          #  revision: 1
+          #  datasource: Prometheus
+
+          #### Linkerd ####
+          # https://github.com/linkerd/linkerd2/blob/main/grafana/values.yaml
+          # all these charts are hosted at https://grafana.com/grafana/dashboards/$gnetId
+          #top-line:
+          #  gnetId: 15474
+          #  revision: 4
+          #  datasource: prometheus
+          #health:
+          #  gnetId: 15486
+          #  revision: 3
+          #  datasource: prometheus
+          #kubernetes:
+          #  gnetId: 15479
+          #  revision: 2
+          #  datasource: prometheus
+          #namespace:
+          #  gnetId: 15478
+          #  revision: 3
+          #  datasource: prometheus
+          #deployment:
+          #  gnetId: 15475
+          #  revision: 6
+          #  datasource: prometheus
+          #pod:
+          #  gnetId: 15477
+          #  revision: 3
+          #  datasource: prometheus
+          #service:
+          #  gnetId: 15480
+          #  revision: 3
+          #  datasource: prometheus
+          #route:
+          #  gnetId: 15481
+          #  revision: 3
+          #  datasource: prometheus
+          #authority:
+          #  gnetId: 15482
+          #  revision: 3
+          #  datasource: prometheus
+          #cronjob:
+          #  gnetId: 15483
+          #  revision: 3
+          #  datasource: prometheus
+          #job:
+          #  gnetId: 15487
+          #  revision: 3
+          #  datasource: prometheus
+          #daemonset:
+          #  gnetId: 15484
+          #  revision: 3
+          #  datasource: prometheus
+          #replicaset:
+          #  gnetId: 15491
+          #  revision: 3
+          #  datasource: prometheus
+          #statefulset:
+          #  gnetId: 15493
+          #  revision: 3
+          #  datasource: prometheus
+          #replicationcontroller:
+          #  gnetId: 15492
+          #  revision: 4
+          #  datasource: prometheus
+          #prometheus:
+          #  gnetId: 15489
+          #  revision: 2
+          #  datasource: prometheus
+          #prometheus-benchmark:
+          #  gnetId: 15490
+          #  revision: 2
+          #  datasource: prometheus
+          #multicluster:
+          #  gnetId: 15488
+          #  revision: 3
+          #  datasource: prometheus
+        #### Istio ####
+        #istio:
+        #  istio-controle-plane:
+        #    gnetId: 7645
+        #    datasource: prometheus
+        #    revision: 146
+        #  istio-mesh:
+        #    gnetId: 7639
+        #    datasource: prometheus
+        #    revision: 146
+        #  istio-performance:
+        #    gnetId: 11829
+        #    datasource: prometheus
+        #    revision: 146
+        #  istio-service:
+        #    gnetId: 7636
+        #    datasource: prometheus
+        #    revision: 146
+        #  istio-workload:
+        #    gnetId: 7630
+        #    datasource: prometheus
+        #    revision: 146
+        #  istio-wasm:
+        #    gnetId: 13277
+        #    datasource: prometheus
+        #    revision: 103
+
+      grafana.ini:
+        alerting:
+          enabled: false
+
+        unified_alerting:
+          enabled: true
+
+        auth.anonymous:
+          enabled: false
+          org_name: Main Org.
+          org_role: Admin
+
+        auth:
+          disable_login_form: false
+          disable_signout_menu: false
+
+        auth.basic:
+          # enabled=true is required by grafana config-reloader
+          enabled: true
+
+        # Admin user/pass comes from a secret
+        #security:
+        #  admin_user: admin
+        #  admin_password: admin
+
+      ingress:
+        enabled: false
+        ingressClassName: {{ include "ingressClassName" . }}
+        annotations:
+        #  nginx.ingress.kubernetes.io/whitelist-source-range: 10.10.0.0/16,192.168.0.10
+        #  cert-manager.io/cluster-issuer: letsencrypt-staging-dns01
+        #  nginx.ingress.kubernetes.io/auth-realm: Authentication Required - Monitoring
+        #  nginx.ingress.kubernetes.io/auth-secret: monitoring-basic-auth
+        #  nginx.ingress.kubernetes.io/auth-type: basic
+        #hosts:
+        #  - grafana.monitoring.example.com
+        #tls:
+        #- hosts:
+        #  - grafana.monitoring.example.com
+        #  secretName: monitoring-ingress-tls
+
+    ###############################################
+    kubeApiServer:
+      enabled: false ## enable if onprem
+
+    ###############################################
+    #kubelet:
+    #  enabled: true
+
+    ###############################################
+    kubeControllerManager:
+      enabled: false
+
+    ###############################################
+    #coreDns:
+    #  enabled: true
+
+    ###############################################
+    #kubeDns:
+    #  enabled: false
+
+    ###############################################
+    kubeEtcd:
+      enabled: false
+
+    ###############################################
+    kubeScheduler:
+      enabled: false
+
+    ###############################################
+    #kubeProxy:
+    #  enabled: true
+
+    ###############################################
+    #kubeStateMetrics:
+    #  enabled: true
+
+    ###############################################
+    kube-state-metrics:
+      extraArgs:
+      - --metric-labels-allowlist=nodes=[eks.amazonaws.com/capacityType]
+
+    ###############################################
+    #nodeExporter:
+    #  enabled: true
+
+    ###############################################
+    prometheus-node-exporter:
+      #priorityClassName: high-priority
+
+      resources:
+        limits:
+          cpu: 15m
+          memory: 40Mi
+        requests:
+          cpu: 15m
+          memory: 40Mi
+
+      updateStrategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: "20%"
+
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: eks.amazonaws.com/compute-type
+                operator: NotIn
+                values:
+                - fargate
+{{- end }}

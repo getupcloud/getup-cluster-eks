@@ -1,0 +1,29 @@
+{{- if and .Values.manifests .Values.flagger.enabled }}
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: flagger
+  namespace: flux-system
+spec:
+  {{- if eq .Values.flagger.meshProvider "nginx" }}
+  storageNamespace: ingress-nginx
+  targetNamespace: ingress-nginx
+  {{- else if eq .Values.flagger.meshProvider "istio" }}
+  storageNamespace: istio-system
+  targetNamespace: istio-system
+  {{- end }}
+
+  {{- include "fluxValuesFrom" (dict "secretName" "flagger" "values" .Values.flagger.extraValues) | nindent 2 }}
+
+  values:
+    meshProvider: {{ .Values.flagger.meshProvider }}
+
+    {{- if eq .Values.flagger.meshProvider "nginx" }}
+    ingressAnnotationsPrefix: nginx.ingress.kubernetes.io
+    {{- end }}
+
+    prometheus:
+      install: true
+---
+{{ include "fluxValuesFromData" (dict "secretName" "flagger" "values" .Values.flagger.extraValues) }}
+{{- end }}

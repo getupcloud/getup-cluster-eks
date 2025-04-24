@@ -1,0 +1,23 @@
+{{- if and .Values.manifests .Values.loki.enabled }}
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: loki
+  namespace: flux-system
+spec:
+  {{- include "fluxValuesFrom" (dict "secretName" "loki" "values" .Values.loki.extraValues) | nindent 2 }}
+  values:
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: {{ .Values.loki.loki_iam_role_arn }}
+    loki:
+      storage:
+        type: s3
+        s3:
+          region: {{ .Values.aws_region }}
+        bucketNames:
+          chunks: {{ .Values.loki.loki_s3_bucket_name }}
+          ruler: {{ .Values.loki.loki_s3_bucket_name }}
+---
+{{ include "fluxValuesFromData" (dict "secretName" "loki" "values" .Values.loki.extraValues) }}
+{{- end }}

@@ -1,0 +1,19 @@
+{{- if and .Values.manifests .Values.teleportAgent.enabled }}
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: teleport-agent
+  namespace: flux-system
+spec:
+  {{- include "fluxValuesFrom" (dict "secretName" "teleport-agent" "values" .Values.teleportAgent.extraValues) | nindent 2 }}
+  values:
+    authToken: {{ .Values.teleportAgent.teleport_auth_token }}
+    kubeClusterName: {{ .Values.customer_name }}-{{ .Values.cluster_name }}
+
+    labels:
+      customer: {{ .Values.customer_name }}
+      region: {{ .Values.aws_region }}
+      sla: {{ .Values.cluster_sla }}
+---
+{{ include "fluxValuesFromData" (dict "secretName" "teleport-agent" "values" .Values.teleportAgent.extraValues) }}
+{{- end }}

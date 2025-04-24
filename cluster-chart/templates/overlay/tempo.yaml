@@ -1,0 +1,22 @@
+{{- if and .Values.manifests .Values.tempo.enabled }}
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tempo
+  namespace: flux-system
+spec:
+  {{- include "fluxValuesFrom" (dict "secretName" "tempo" "values" .Values.tempo.extraValues) | nindent 2 }}
+  values:
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: {{ .Values.tempo_iam_role_arn }}
+    tempo:
+      storage:
+        trace:
+          s3:
+            bucket: {{ .Values.tempo_s3_bucket_name }}
+            region: {{ .Values.aws_region }}
+            endpoint: s3.dualstack.{{ .Values.aws_region }}.amazonaws.com
+---
+{{ include "fluxValuesFromData" (dict "secretName" "tempo" "values" .Values.tempo.extraValues) }}
+{{- end }}
