@@ -1,8 +1,5 @@
-#
-# You can use this Makefile to create resources using the modules from this repo.
-# This is a suggestion, not a requirement.
-#
-
+-include .env
+-include Makefile.local
 include Makefile.conf
 
 # General variables
@@ -19,21 +16,20 @@ KUSTOMIZE_BUILD     := .kustomize_build.yaml
 OUTPUT_JSON         := .output.json
 OUTPUT_OVERLAY_JSON := .overlay.output.json
 TFVARS_OVERLAY_JSON := .overlay.tfvars.json
+TFVARS              := $(wildcard *.tfvars)
+VALUES_YAML         := values.yaml
 ROOT_DIR            := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
-
 
 UPSTREAM_CLUSTER_DIR          ?= ../getup-cluster-$(FLAVOR)/
 UPSTREAM_EXAMPLES_COMMON_DIR  ?= ../getup-modules/examples/common
 UPSTREAM_EXAMPLES_CLUSTER_DIR ?= ../getup-modules/examples/$(FLAVOR)
-UPDATE_CLUSTER_FILES          := Makefile bin cluster/base/* *.tf *.example
+UPDATE_CLUSTER_FILES          := Makefile bin cluster/base/* $(MODULES:=.tf) $(MODULES:=*.example)
 UPDATE_EXAMPLES_CLUSTER_FILES := *.tf *.example */*.tf */*.example
 UPDATE_EXAMPLES_COMMON_FILES  := *.tf *.example
 
 ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -s https://api.ipify.org)/32"]'
 endif
-
--include .env
 
 .ONESHELL:
 .EXPORT_ALL_VARIABLES:
@@ -202,7 +198,7 @@ upgrade-from-local-examples: upgrade-from-local-examples-common #is-tree-clean
 show-overlay-vars:
 	@grep -wrn -A 1 --color '#output:.*' cluster/overlay 2>/dev/null
 
-$(OUTPUT_JSON): *.tf *.tfvars
+$(OUTPUT_JSON): *.tf $(TVARS)
 	@echo Generating $@
 	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) > $(OUTPUT_JSON)
 
@@ -210,7 +206,7 @@ $(OUTPUT_OVERLAY_JSON): $(OUTPUT_JSON)
 	@echo Generating $@
 	bin/output2overlay $^ > $@
 
-$(TFVARS_OVERLAY_JSON): *.tfvars
+$(TFVARS_OVERLAY_JSON): $(TFVARS)
 	@echo Generating $@
 	bin/tfvars2overlay $^ > $@
 
@@ -219,6 +215,15 @@ overlay: clean-output $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
 	find cluster/overlay -type f -name '*.yaml' -o -name '*.yml' | sort -u | while read file; do
 		bin/overlay "$$file" $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON) >"$${file}.tmp" && mv "$${file}.tmp" "$$file" || exit 1
 	done
+
+$(VALUES_YAML): $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
+	@echo Generating values.yaml
+	bin/tf2values $(OUTPUT_JSON) $(TFVARS) > $(VALUES_YAML)
+
+manifests: $(VALUES_YAML)
+	helm template cluster --no-hooks --disable-openapi-validation cluster-chart --set kustomize=true
+	helm template cluster --no-hooks --disable-openapi-validation cluster-chart --set manifests=true
+
 
 validate-vars:
 	@if [ -z "$(CLUSTER_NAME)" ]; then
