@@ -45,6 +45,26 @@ spec:
         targetCPUUtilizationPercentage: 90
         targetMemoryUtilizationPercentage: 90
 
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: node-role.kubernetes.io/infra
+                operator: Exists
+          - weight: 90
+            preference:
+              matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - infra
+      tolerations:
+      - key: dedicated
+        value: infra
+        effect: NoSchedule
+
     read:
       replicas: 2
       requests:
@@ -59,13 +79,29 @@ spec:
         maxReplicas: 6
         targetCPUUtilizationPercentage: 90
 
-    resultsCache:
-      allocatedMemory: 2048
-      connectionLimit: 4096
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: node-role.kubernetes.io/infra
+                operator: Exists
+          - weight: 90
+            preference:
+              matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - infra
       tolerations:
       - key: dedicated
         value: infra
         effect: NoSchedule
+
+    resultsCache:
+      allocatedMemory: 2048
+      connectionLimit: 4096
 
       affinity:
         nodeAffinity:
@@ -82,14 +118,14 @@ spec:
                 operator: In
                 values:
                 - infra
+      tolerations:
+      - key: dedicated
+        value: infra
+        effect: NoSchedule
 
     chunksCache:
       allocatedMemory: 2048
       connectionLimit: 4096
-      tolerations:
-      - key: dedicated
-        value: infra
-        effect: NoSchedule
 
       affinity:
         nodeAffinity:
@@ -106,7 +142,11 @@ spec:
                 operator: In
                 values:
                 - infra
-      
+      tolerations:
+      - key: dedicated
+        value: infra
+        effect: NoSchedule
+
     backend:
       replicas: 2
       requests:
@@ -120,6 +160,26 @@ spec:
         minReplicas: 2
         maxReplicas: 6
         targetCPUUtilizationPercentage: 90
+
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: node-role.kubernetes.io/infra
+                operator: Exists
+          - weight: 90
+            preference:
+              matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - infra
+      tolerations:
+      - key: dedicated
+        value: infra
+        effect: NoSchedule
 
     loki:
       auth_enabled: false
@@ -317,6 +377,10 @@ spec:
     serviceMonitor:
       enabled: true
       interval: 60s
+
+    tolerations:
+    - operator: Exists
+      effect: NoSchedule
 
     #volumes:
     #- name: containers
