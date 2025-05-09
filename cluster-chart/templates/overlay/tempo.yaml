@@ -9,14 +9,14 @@ spec:
   values:
     serviceAccount:
       annotations:
-        eks.amazonaws.com/role-arn: {{ .Values.tempo_iam_role_arn }}
+        eks.amazonaws.com/role-arn: {{ .Values.tempoIamRoleArn }}
     tempo:
       storage:
         trace:
           s3:
-            bucket: {{ .Values.tempo_s3_bucket_name }}
-            region: {{ .Values.aws_region }}
-            endpoint: s3.dualstack.{{ .Values.aws_region }}.amazonaws.com
+            bucket: {{ .Values.tempoS3BucketName }}
+            region: {{ .Values.awsRegion }}
+            endpoint: s3.dualstack.{{ .Values.awsRegion }}.amazonaws.com
 ---
 {{ include "fluxValuesFromData" (dict "secretName" "tempo" "values" .Values.tempo.extraValues) }}
 {{- end }}

@@ -215,25 +215,25 @@ spec:
         # does nothing
         - name: blackhole
 
-        {{- if .Values.monitoring.cronitor_ping_url }}
+        {{- if .Values.monitoring.cronitorPingUrl }}
         #############################
         # Cronitor
         #############################
         #- name: cronitor
         #  webhook_configs:
-        #  - url: {{ .Values.monitoring.cronitor_ping_url }}
+        #  - url: {{ .Values.monitoring.cronitorPingUrl }}
         #    send_resolved: false
         {{- end }}
 
-        {{- if .Values.monitoring.slack_api_url }}
+        {{- if .Values.monitoring.slackApiUrl }}
         #############################
         # Slack
         #############################
         #- name: slack
         #  slack_configs:
         #  - send_resolved: true
-        #    api_url: {{ .Values.monitoring.slack_api_url }}
-        #    channel: {{ .Values.monitoring.slack_channel }}
+        #    api_url: {{ .Values.monitoring.slackApiUrl }}
+        #    channel: {{ .Values.monitoring.slackChannel }}
         #    color: |-
         {{- (list
         "        #      {{- if eq .Status \"firing\" -}} "
@@ -261,35 +261,35 @@ spec:
         | join "\n")}}
         {{- end }}
 
-        {{- if .Values.monitoring.msteams_channel_url }}
+        {{- if .Values.monitoring.msteamsChannelUrl }}
         #############################
         # MSTeams
         #############################
         #- name: msteams
         #  webhook_configs:
-        #  - url: {{ .Values.monitoring.msteams_channel_url }}
+        #  - url: {{ .Values.monitoring.msteamsChannelUrl }}
         {{- end }}
 
-        {{- if .Values.monitoring.opsgenie_integration_api_key }}
+        {{- if .Values.monitoring.opsgenieIntegrationApiKey }}
         #############################
         # Opsgenie
         #############################
         #- name: opsgenie
         #  opsgenie_configs:
-        #  - api_key: {{ .Values.monitoring.opsgenie_integration_api_key }}
-        #    tags: {{ .Values.customer_name }}, {{ .Values.cluster_name }}, {{ .Values.cluster_provider }}, {{ .Values.cluster_sla }}
+        #  - api_key: {{ .Values.monitoring.opsgenieIntegrationApiKey }}
+        #    tags: {{ .Values.customerName }}, {{ include "clusterName" . }}, {{ .Values.clusterProvider }}, {{ .Values.clusterSla }}
         #    # Choose priority according to SLA: high=[P1|P2], low=[P3|P4|P5]
         #    priority: P1
         {{- end }}
 
-        {{- if .Values.monitoring.pagerduty_service_key }}
+        {{- if .Values.monitoring.pagerdutyServiceKey }}
         #############################
         # PagerDuty
         #############################
         #- name: pagerduty
         #  pagerduty_configs:
-        #  - service_key: {{ .Values.monitoring.pagerduty_service_key }}
-        #    group: #output:sla-{{ .Values.cluster_sla }}
+        #  - service_key: {{ .Values.monitoring.pagerdutyServiceKey }}
+        #    group: #output:sla-{{ .Values.clusterSla }}
         {{- end }}
 ---
 {{ include "fluxValuesFromData" (dict "secretName" "monitoring" "values" .Values.monitoring.extraValues) }}

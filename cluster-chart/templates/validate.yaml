@@ -1,5 +1,5 @@
-{{- if not (or .Values.kustomize .Values.manifests) }}
-{{- fail "You must enable either kustomize=true or manifests=true" }}
+{{- if not (or .Values.kustomize .Values.manifests .Values.apps .Values.keys) }}
+{{- fail "You must enable one of: kustomize=true, manifests=true, apps=true, valuesKeys=true" }}
 {{- end }}
 
 {{- if and .Values.kustomize .Values.manifests }}

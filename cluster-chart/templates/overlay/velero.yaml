@@ -22,9 +22,9 @@ spec:
         name: default
         default: true
         prefix: velero/{{ template "clusterLongName" . }}
-        bucket: {{ .Values.velero.velero_s3_bucket_name }}
+        bucket: {{ .Values.velero.veleroS3BucketName }}
         config:
-          region: {{ .Values.aws_region }}
+          region: {{ .Values.awsRegion }}
       {{- if .Values.velero.extraBackupStorageLocations }}
       {{- .Values.velero.extraBackupStorageLocations | nindent 6 }}
       {{- end }}
@@ -34,7 +34,7 @@ spec:
         name: default
         default: true
         config:
-          region: {{ .Values.aws_region }}
+          region: {{ .Values.awsRegion }}
       {{- if .Values.velero.extraVolumeSnapshotLocation }}
       {{- .Values.velero.extraVolumeSnapshotLocation | nindent 6 }}
       {{- end }}
@@ -44,7 +44,7 @@ spec:
         create: true
         name: velero
         annotations:
-          eks.amazonaws.com/role-arn: {{ .Values.velero.velero_iam_role_arn }}
+          eks.amazonaws.com/role-arn: {{ .Values.velero.veleroIamRoleArn }}
 ---
 {{ include "fluxValuesFromData" (dict "secretName" "velero" "values" .Values.velero.extraValues) }}
 {{- end }}

@@ -1,15 +1,20 @@
 {{/* Basic */}}
 
+{{- define "clusterName" -}}
+{{ $clusterNameVar := printf "%s%s" .Values.clusterProvider .Values.clusterName }}
+{{ tpl $clusterNameVar .Values }}
+{{- end -}}
+
 {{- define "clusterLongName" -}}
-{{ printf "%s-%s" .Values.cluster_name .Values.aws_region | trunc 63 | trimSuffix "-" }}
+{{ printf "%s-%s" (include "clusterName" .) .Values.aws_region | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
 {{- define "clusterFullName" -}}
-{{ printf "%s-%s-%s" .Values.customer_name .Values.cluster_name .Values.aws_region | trunc 63 | trimSuffix "-" }}
+{{ printf "%s-%s-%s" .Values.customer_name (include "clusterName" .) .Values.aws_region | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
 {{- define "clusterSlug" -}}
-{{ printf "%s-%s-%s" .Values.customer_name .Values.cluster_name .Values.aws_region | lower | sha256sum | trunc 8 }}
+{{ printf "%s-%s-%s" .Values.customer_name (include "clusterName" .) .Values.aws_region | lower | sha256sum | trunc 8 }}
 {{- end -}}
 
 {{- define "ingressClassName" -}}

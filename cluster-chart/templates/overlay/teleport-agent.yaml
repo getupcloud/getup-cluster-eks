@@ -7,13 +7,13 @@ metadata:
 spec:
   {{- include "fluxValuesFrom" (dict "secretName" "teleport-agent" "values" .Values.teleportAgent.extraValues) | nindent 2 }}
   values:
-    authToken: {{ .Values.teleportAgent.teleport_auth_token }}
-    kubeClusterName: {{ .Values.customer_name }}-{{ .Values.cluster_name }}
+    authToken: {{ .Values.teleportAgent.teleportAuthToken }}
+    kubeClusterName: {{ .Values.customerName }}-{{ include "clusterName" . }}
 
     labels:
-      customer: {{ .Values.customer_name }}
-      region: {{ .Values.aws_region }}
-      sla: {{ .Values.cluster_sla }}
+      customer: {{ .Values.customerName }}
+      region: {{ .Values.awsRegion }}
+      sla: {{ .Values.clusterSla }}
 ---
 {{ include "fluxValuesFromData" (dict "secretName" "teleport-agent" "values" .Values.teleportAgent.extraValues) }}
 {{- end }}

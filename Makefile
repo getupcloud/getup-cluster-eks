@@ -210,30 +210,37 @@ $(TFVARS_OVERLAY_JSON): $(TFVARS)
 	@echo Generating $@
 	bin/tfvars2overlay $^ > $@
 
-overlay: clean-output $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
-	@echo Processing overlays
-	find cluster/overlay -type f -name '*.yaml' -o -name '*.yml' | sort -u | while read file; do
-		bin/overlay "$$file" $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON) >"$${file}.tmp" && mv "$${file}.tmp" "$$file" || exit 1
-	done
-
-$(VALUES_YAML): $(OUTPUT_JSON) $(TFVARS)
-	echo Generating values.yaml
-	bin/tf2values $(OUTPUT_JSON) $(TFVARS) > $(VALUES_YAML)
-
-manifests: $(VALUES_YAML)
-	helm template cluster --no-hooks --disable-openapi-validation cluster-chart --set kustomize=true
-	helm template cluster --no-hooks --disable-openapi-validation cluster-chart --set manifests=true
-	#jq | python -e "''.join((s[0] + s.title()[1:]).split('_'))"
-
 validate-vars:
 	@if [ -z "$(CLUSTER_NAME)" ]; then
 		echo "Missing required var: CLUSTER_NAME"
 		exit 1
 	fi
 
-kustomize ks:
-	@echo Checking kustomization
-	if ! kubectl kustomize ./cluster -o $(KUSTOMIZE_BUILD); then
-		echo Generated output: $(KUSTOMIZE_BUILD)
-		exit 1
-	fi
+### HELM CHART
+
+HELM_TEMPLATE_CMD := helm template cluster cluster-chart --no-hooks --disable-openapi-validation
+
+values-keys:
+	$(HELM_TEMPLATE_CMD) --set keys=true | yq '.[]|.[]' | xargs printf "%s "
+
+$(VALUES_YAML): $(OUTPUT_JSON) $(TFVARS)
+	echo Generating values.yaml
+	bin/tf2values $(OUTPUT_JSON) $(TFVARS) $$($(HELM_TEMPLATE_CMD) --set keys=true | yq '.[]|.[]') > $(VALUES_YAML)
+
+overlay: clean-output $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
+	@echo Processing overlays
+	find cluster/overlay -type f -name '*.yaml' -o -name '*.yml' | sort -u | while read file; do
+		bin/overlay "$$file" $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON) >"$${file}.tmp" && mv "$${file}.tmp" "$$file" || exit 1
+	done
+
+manifests: $(VALUES_YAML)
+	$(HELM_TEMPLATE_CMD) --set kustomize=true
+	$(HELM_TEMPLATE_CMD) --set manifests=true
+	#jq | python -e "''.join((s[0] + s.title()[1:]).split('_'))"
+
+#kustomize ks:
+#	@echo Checking kustomization
+#	if ! kubectl kustomize ./cluster -o $(KUSTOMIZE_BUILD); then
+#		echo Generated output: $(KUSTOMIZE_BUILD)
+#		exit 1
+#	fi

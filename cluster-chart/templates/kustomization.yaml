@@ -4,7 +4,7 @@ kind: Kustomization
 
 resources:
 - flux-system
-{{- if .Values.apps.enabled }}
+{{- if .Values.apps }}
 - ../apps/
 {{- end }}
 - base/repo.yaml

@@ -7,6 +7,6 @@ metadata:
 spec:
   values:
     datadog:
-      clusterName: {{ .Values.cluster_name }}
+      clusterName: {{ include "clusterName" . }}
       apiKey: {{ .Values.datadog.datadog_api_key }}
 {{- end }}

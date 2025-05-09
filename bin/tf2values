@@ -1,32 +1,68 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import json
 import yaml
 import hcl2
+import subprocess
 
 data = {}
 
-output_file = sys.argv[1]
-tfvars_files = sys.argv[2:]
+if '-h' in sys.argv or '--help' in sys.argv or len(sys.argv) == 1:
+    print(f'Usage: {sys.argv[0]} [REPO_URL/]CHART TERRAFORM_OUTPUT TERRAFORM_TFVARS...')
+    sys.exit(0)
 
-# Convert terraform tfvars to yaml
+repo, chart = None, sys.argv[1]
+output_file = sys.argv[2]
+tfvars_files = sys.argv[3:]
+
+if '/' in chart and not os.path.exists(chart):
+    repo, chart = chart.rsplit('/', 1)
+
+print(f'repo={repo} / {chart}')
+print(f'output_file={output_file}')
+print(f'tfvars_files={tfvars_files}')
+
+# Load values from chart
+helm_show_values = [os.environ.get('HELM', 'helm'), 'show', 'values']
+if repo:
+    helm_show_values.extend(['--repo', repo])
+helm_show_values.append(chart)
+print(' '.join(helm_show_values))
+proc = subprocess.run(helm_show_values, shell=False, capture_output=True)
+if proc.returncode:
+    print(f'Unable to load chat values: {" ".join(helm_show_values)}', file=sys.stderr)
+    print(proc.stderr.decode('unicode_escape'), file=sys.stderr, end=None)
+    sys.exit(1)
+if repo:
+    print(f'+ {repo}/{chart}', file=sys.stderr)
+else:
+    print(f'+ {chart}', file=sys.stderr)
+values_yaml = yaml.safe_load(proc.stdout.decode('unicode_escape'))
+
+# Load terraform tfvars
 for t in tfvars_files:
-    print(f'+ {t}', file=sys.stderr)
-    with open(t, 'r') as f:
-        data.update(hcl2.api.load(f))
+    try:
+        with open(t, 'r') as f:
+            print(f'+ {t}', file=sys.stderr)
+            data.update(hcl2.api.load(f))
+    except FileNotFoundError:
+        pass
 
-# Convert terraform outputs to yaml
-print(f'+ {output_file}', file=sys.stderr)
-with open(output_file, 'r') as f:
-    data.update({ k: v['value'] for k, v in json.load(f).items() })
-
+# Load terraform outputs
+try:
+    with open(output_file, 'r') as f:
+        print(f'+ {output_file}', file=sys.stderr)
+        data.update({ k: v['value'] for k, v in json.load(f).items() })
+except FileNotFoundError:
+    pass
 
 # Convert keys to helm's values top-level format
 #  aws-access-key -> awsAccessKey
 #  aws_access_key -> awsAccessKey
 def normalize_root_key(s):
-    return ''.join((s[0] + s.replace('-', '_').title()[1:]).split('_'))
+    return ''.join((s[0].lower() + s.replace('-', '_').title()[1:]).split('_'))
 
 # Convert to helm's values format
 def normalize_key(s):
@@ -58,3 +94,25 @@ def normalize_root(data, func=normalize_root_key):
 normalize_data(normalize_root(data))
 
 print(yaml.dump(data, indent=2, default_flow_style=False))
+print('--------')
+print(yaml.dump(list(values_yaml.keys()), indent=2, default_flow_style=False))
+
+print('--------')
+data_keys = list(data.keys())
+values = {}
+for values_key in list(values_yaml.keys()):
+    if values_key in data_keys:
+        value = data[values_key]
+    else:
+        for sub_key in [ dk for dk in data_keys if dk.startswith(values_key) ]:
+            sub_key_no_prefix = normalize_root_key(data_keys[len(sub_key):])
+            sub_key_no_prefix = normalize_root_key(data[len(sub_key):])
+            if values_key in values:
+                values[values_key].update()
+            else:
+                values[values_key] = {sub_key_no_prefix: values_key}
+                [inner_key_no_prefix] = data[inner_key]
+
+    values[values_key] = value_for_key
+
+    print(f'++ {values_key}: {value_for_key}')

@@ -11,18 +11,18 @@ spec:
       customPricing:
         provider: aws
         costModel:
-          awsSpotDataRegion: {{ .Values.aws_region }}
-          awsSpotDataBucket: {{ .Values.opencost_spot_datafeed_bucket_name }}
-          awsSpotDataPrefix: {{ .Values.opencost_spot_datafeed_bucket_prefix }}
-          projectID: {{ .Values.aws_account_id | quote }}
+          awsSpotDataRegion: {{ .Values.awsRegion }}
+          awsSpotDataBucket: {{ .Values.opencostSpotDatafeedBucketName }}
+          awsSpotDataPrefix: {{ .Values.opencostSpotDatafeedBucketPrefix }}
+          projectID: {{ .Values.awsAccountId | quote }}
       exporter:
-        defaultClusterId: {{ .Values.cluster_name }}
+        defaultClusterId: {{ include "clusterName" . }}
         persistence:
-          storageClass: {{ .Values.default_storage_class_name }}
+          storageClass: {{ .Values.defaultStorageClassName }}
     serviceAccount:
       name: opencost
       annotations:
-        eks.amazonaws.com/role-arn: {{ .Values.opencost_iam_role_arn }}
+        eks.amazonaws.com/role-arn: {{ .Values.opencostIamRoleArn }}
 ---
 {{ include "fluxValuesFromData" (dict "secretName" "opencost" "values" .Values.opencost.extraValues) }}
 {{- end }}

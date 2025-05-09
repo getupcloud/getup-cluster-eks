@@ -9,15 +9,15 @@ spec:
   values:
     serviceAccount:
       annotations:
-        eks.amazonaws.com/role-arn: {{ .Values.loki.loki_iam_role_arn }}
+        eks.amazonaws.com/role-arn: {{ .Values.loki.lokiIamRoleArn }}
     loki:
       storage:
         type: s3
         s3:
-          region: {{ .Values.aws_region }}
+          region: {{ .Values.awsRegion }}
         bucketNames:
-          chunks: {{ .Values.loki.loki_s3_bucket_name }}
-          ruler: {{ .Values.loki.loki_s3_bucket_name }}
+          chunks: {{ .Values.loki.lokiS3BucketName }}
+          ruler: {{ .Values.loki.lokiS3BucketName }}
 ---
 {{ include "fluxValuesFromData" (dict "secretName" "loki" "values" .Values.loki.extraValues) }}
 {{- end }}
