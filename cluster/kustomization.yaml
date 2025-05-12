@@ -7,7 +7,6 @@ resources:
 #- base/repo.yaml
 #- base/metrics-server.yaml
 #- base/cert-manager.yaml
-#- base/cert-manager-issuers.yaml
 #- base/monitoring.yaml
 #- base/monitoring-config.yaml
 #- base/logging.yaml
@@ -30,7 +29,6 @@ resources:
 
 #patches:
 #- path: overlay/cert-manager.yaml
-#- path: overlay/cert-manager-issuers.yaml
 #- path: overlay/monitoring.yaml
 #- path: overlay/monitoring-logging.yaml
 #- path: overlay/monitoring-tempo.yaml

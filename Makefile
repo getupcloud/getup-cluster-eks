@@ -1,6 +1,6 @@
--include .env
--include Makefile.local
 include Makefile.conf
+-include Makefile.local
+-include .env
 
 # General variables
 TERRAFORM           ?= terraform
@@ -23,12 +23,12 @@ ROOT_DIR            := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 UPSTREAM_CLUSTER_DIR          ?= ../getup-cluster-$(FLAVOR)/
 UPSTREAM_EXAMPLES_COMMON_DIR  ?= ../getup-modules/examples/common
 UPSTREAM_EXAMPLES_CLUSTER_DIR ?= ../getup-modules/examples/$(FLAVOR)
-UPDATE_CLUSTER_FILES          := Makefile bin cluster/base/* $(MODULES:=.tf) $(MODULES:=*.example)
+UPDATE_CLUSTER_FILES          := Makefile bin cluster/base/* $(MODULES_TF)
 UPDATE_EXAMPLES_CLUSTER_FILES := *.tf *.example */*.tf */*.example
 UPDATE_EXAMPLES_COMMON_FILES  := *.tf *.example
 
 ifeq ($(AUTO_LOCAL_IP),true)
-  TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -s https://api.ipify.org)/32"]'
+  TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -4 -s https://ifconfig.me)/32"]'
 endif
 
 .ONESHELL:
@@ -185,13 +185,13 @@ upgrade-from-local-cluster: #is-tree-clean
 #
 upgrade-from-local-examples-common: from ?= $(UPSTREAM_EXAMPLES_COMMON_DIR)
 upgrade-from-local-examples-common: #is-tree-clean
-	shopt -s nullglob
+	@shopt -s nullglob
 	echo Updating examples from $(from):
 	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' $(UPDATE_EXAMPLES_COMMON_FILES) $(ROOT_DIR)
 
 upgrade-from-local-examples: from ?= $(UPSTREAM_EXAMPLES_CLUSTER_DIR)
 upgrade-from-local-examples: upgrade-from-local-examples-common #is-tree-clean
-	shopt -s nullglob
+	@shopt -s nullglob
 	echo Updating examples from $(from):
 	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' $(UPDATE_EXAMPLES_CLUSTER_FILES) $(ROOT_DIR)
 
