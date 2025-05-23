@@ -378,10 +378,6 @@ spec:
       enabled: true
       interval: 60s
 
-    tolerations:
-    - operator: Exists
-      effect: NoSchedule
-
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -391,6 +387,9 @@ spec:
               operator: NotIn
               values:
               - fargate
+    tolerations:
+    - operator: Exists
+      effect: NoSchedule
 
     #volumes:
     #- name: containers
