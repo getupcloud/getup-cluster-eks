@@ -15,13 +15,15 @@ spec:
   - name: monitoring
   install:
     createNamespace: true
-    disableWait: false
+    disableWait: true
     remediation:
-      retries: -1
+      # Ingress can not be retried in order to avoid the loadbalancer service to be deleted between attempts
+      retries: 0
   upgrade:
-    disableWait: false
+    disableWait: true
     remediation:
-      retries: -1
+      # Ingress can not be retried in order to avoid the loadbalancer service to be deleted between attmpts
+      retries: 0
   interval: 10m
   releaseName: ingress-nginx
   storageNamespace: ingress-nginx
@@ -115,13 +117,13 @@ spec:
 
           # eks nlb internal - Lembrando que pra usar NLB INTERNAL O EKS TEM QUE TER SIDO CRIADO COM UMA SUBNET PRIVADA
           # service.beta.kubernetes.io/aws-load-balancer-scheme: internal
-          # service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
           # service.beta.kubernetes.io/aws-load-balancer-type: nlb-ip
+          # service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
 
           # eks - nlb external
-          service.beta.kubernetes.io/aws-load-balancer-type: external
-          service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance ## to receive client IP. Doesn't work for IPv6
           service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+          service.beta.kubernetes.io/aws-load-balancer-type: nlb-ip
+          service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance ## to receive client IP. Doesn't work for IPv6
           service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
 
     defaultBackend:

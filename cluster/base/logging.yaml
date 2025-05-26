@@ -29,8 +29,50 @@ spec:
   values:
     deploymentMode: SimpleScalable
 
+    ###################################
     write:
       replicas: 2
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 6
+        targetCPUUtilizationPercentage: 90
+        targetMemoryUtilizationPercentage: 90
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          cpu: 1
+          memory: 1Gi
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: node-role.kubernetes.io/infra
+                operator: Exists
+          - weight: 90
+            preference:
+              matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - infra
+      tolerations:
+      - key: dedicated
+        value: infra
+        effect: NoSchedule
+
+    ###################################
+    read:
+      replicas: 2
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 6
+        targetCPUUtilizationPercentage: 90
       resources:
         requests:
           cpu: 100m
@@ -38,13 +80,44 @@ spec:
         limits:
           cpu: 200m
           memory: 512Mi
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: node-role.kubernetes.io/infra
+                operator: Exists
+          - weight: 90
+            preference:
+              matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - infra
+      tolerations:
+      - key: dedicated
+        value: infra
+        effect: NoSchedule
+
+    ###################################
+    resultsCache:
+      allocatedMemory: 2048
+      connectionLimit: 4096
+      replicas: 2
       autoscaling:
         enabled: true
         minReplicas: 2
         maxReplicas: 6
         targetCPUUtilizationPercentage: 90
         targetMemoryUtilizationPercentage: 90
-
+      resources:
+        requests:
+          cpu: 500m
+          memory: 512Mi
+        limits:
+          cpu: 2
+          memory: 2Gi
       affinity:
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -65,102 +138,24 @@ spec:
         value: infra
         effect: NoSchedule
 
-    read:
-      replicas: 2
-      requests:
-        cpu: 100m
-        memory: 256Mi
-      limits:
-        cpu: 200m
-        memory: 512Mi
-      autoscaling:
-        enabled: true
-        minReplicas: 2
-        maxReplicas: 6
-        targetCPUUtilizationPercentage: 90
-
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            preference:
-              matchExpressions:
-              - key: node-role.kubernetes.io/infra
-                operator: Exists
-          - weight: 90
-            preference:
-              matchExpressions:
-              - key: role
-                operator: In
-                values:
-                - infra
-      tolerations:
-      - key: dedicated
-        value: infra
-        effect: NoSchedule
-
-    resultsCache:
-      allocatedMemory: 2048
-      connectionLimit: 4096
-
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            preference:
-              matchExpressions:
-              - key: node-role.kubernetes.io/infra
-                operator: Exists
-          - weight: 90
-            preference:
-              matchExpressions:
-              - key: role
-                operator: In
-                values:
-                - infra
-      tolerations:
-      - key: dedicated
-        value: infra
-        effect: NoSchedule
-
+    ###################################
     chunksCache:
       allocatedMemory: 2048
       connectionLimit: 4096
-
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            preference:
-              matchExpressions:
-              - key: node-role.kubernetes.io/infra
-                operator: Exists
-          - weight: 90
-            preference:
-              matchExpressions:
-              - key: role
-                operator: In
-                values:
-                - infra
-      tolerations:
-      - key: dedicated
-        value: infra
-        effect: NoSchedule
-
-    backend:
       replicas: 2
-      requests:
-        cpu: 100m
-        memory: 256Mi
-      limits:
-        cpu: 200m
-        memory: 512Mi
       autoscaling:
         enabled: true
         minReplicas: 2
         maxReplicas: 6
         targetCPUUtilizationPercentage: 90
-
+        targetMemoryUtilizationPercentage: 90
+      resources:
+        requests:
+          cpu: 500m
+          memory: 512Mi
+        limits:
+          cpu: 2
+          memory: 2Gi
       affinity:
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -181,6 +176,43 @@ spec:
         value: infra
         effect: NoSchedule
 
+    ###################################
+    backend:
+      replicas: 2
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 6
+        targetCPUUtilizationPercentage: 90
+        targetMemoryUtilizationPercentage: 90
+      resources:
+        requests:
+          cpu: 500m
+          memory: 512Mi
+        limits:
+          cpu: 1
+          memory: 1Gi
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: node-role.kubernetes.io/infra
+                operator: Exists
+          - weight: 90
+            preference:
+              matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - infra
+      tolerations:
+      - key: dedicated
+        value: infra
+        effect: NoSchedule
+
+    ###################################
     loki:
       auth_enabled: false
 
@@ -258,9 +290,11 @@ spec:
       query_range:
         parallelise_shardable_queries: true
 
+    ###################################
     lokiCanary:
       enabled: false
 
+    ###################################
     # -- DEPRECATED Monitoring section determines which monitoring features to enable, this section is being replaced
     # by https://github.com/grafana/meta-monitoring-chart
     monitoring:
@@ -282,10 +316,17 @@ spec:
         grafanaAgent:
           installOperator: false
 
+
+    ###################################
     test:
       #prometheusAddress: http://monitoring-kube-prometheus-prometheus.monitoring.cluster.local:9090
       enabled: false
 
+    ###################################
+    lokiCanary:
+      enabled: false
+
+    ###################################
     #alerting_groups:
     #- name: Missing Log Lines for 30m
     #  rules:
@@ -293,15 +334,18 @@ spec:
     #    expr: sum(count_over_time({namespace="logging"}[30s])) == 0
     #    for: 30m
 
+    ###################################
     #ingress:
     #  enabled: false
     gateway:
       enabled: true
 
+    ###################################
     #resources:
     #  limits:
     #    cpu: 1
 
+    ###################################
     #resources:
     #  limits:
     #    cpu: 1
@@ -366,7 +410,7 @@ spec:
         cpu: 1
         memory: 1Gi
       requests:
-        cpu: 100m
+        cpu: 10m
         memory: 64Mi
 
     updateStrategy:

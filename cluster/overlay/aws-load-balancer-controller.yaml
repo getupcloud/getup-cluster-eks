@@ -6,9 +6,10 @@ metadata:
 spec:
   values:
     clusterName: #output:{cluster_name}
+    vpcId: #output:{eks_cluster_vpc_id}
 
     replicaCount: 1
 
     serviceAccount:
       annotations:
-        eks.amazonaws.com/role-arn: #output:{aws_load_balancer_controller_iam_role_arn}
+        eks.amazonaws.com/role-arn: #output:{eks_aws_load_balancer_controller_iam_role_arn}

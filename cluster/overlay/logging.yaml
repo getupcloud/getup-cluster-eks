@@ -16,3 +16,19 @@ spec:
         bucketNames:
           chunks: #output:{loki_s3_bucket_name}
           ruler: #output:{loki_s3_bucket_name}
+    write:
+      nodeSelector:
+        karpenter.sh/capacity-type: on-demand
+    read:
+      nodeSelector:
+        karpenter.sh/capacity-type: on-demand
+    resultsCache:
+      nodeSelector:
+        karpenter.sh/capacity-type: on-demand
+    backend:
+      nodeSelector:
+        karpenter.sh/capacity-type: on-demand
+    chunksCache:
+      nodeSelector:
+        karpenter.sh/capacity-type: on-demand
+

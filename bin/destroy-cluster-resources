@@ -7,6 +7,7 @@ import time
 import subprocess
 
 dryrun = '' if '--confirm-delete-cluster-resources' in sys.argv else 'echo'
+ignore_countdown = '--ignore-countdown' in sys.argv
 
 if dryrun:
     print("\033[1m>> This is a dry-run operation by default.\033[0m")
@@ -21,30 +22,59 @@ else:
     print()
     print('\033[1m-->> PRESS CTRL+C TO CANCEL <<--\033[0m')
     print()
-    for i in range(30, -1, -1):
-        print(f'\033[1m{i}\033[0m', end=' ')
-        sys.stdout.flush()
-        time.sleep(1)
-    print()
+    if ignore_countdown:
+        time.sleep(3)
+    else:
+        for i in range(30, -1, -1):
+            print(f'\033[1m{i}\033[0m', end=' ')
+            sys.stdout.flush()
+            time.sleep(1)
+        print()
 
 ################################
 
-def run(cmd):
-    global dryrun
-    print('>', cmd.strip().lstrip(dryrun).lstrip())
-    return subprocess.run(cmd.strip().split(), capture_output=True).stdout.decode('utf8')
+def run_raw(cmd, silent=False):
+    if not silent:
+        global dryrun
+        print('>', cmd.strip().lstrip(dryrun).lstrip())
+    return subprocess.run(cmd.strip().split(), capture_output=True)
 
-def run_json(cmd):
-    return json.loads(run(cmd))
+def run(cmd, silent=False):
+    return run_raw(cmd, silent=silent).stdout.decode('utf8')
+
+def run_json(cmd, silent=False):
+    return json.loads(run(cmd, silent=silent))
 
 def for_each_resource(cmd, func, root='items'):
-    resources = run_json(cmd)
+    resources = run_json(cmd, silent=True)
     if root:
         resources = resources[root]
     for res in resources:
         func(res)
 
-def get_nn(res):
+def has_resource(res, namespace=''):
+    _n = ''
+    if namespace == 'all':
+        _n = '-A'
+    elif namespace:
+        _n = f'-n {namespace}'
+    found = run_raw(f'kubectl get {res} {_n}', silent=True).returncode == 0
+    if not found:
+        if namespace and namespace != 'all':
+            print(f'Resource not found: {res} (namespace={namespace}_')
+        else:
+            print(f'Resource not found: {res} (cluster)')
+    return found
+
+def get_resources(res, namespace='all'):
+    _n = ''
+    if namespace == 'all':
+        _n = '-A'
+    elif namespace:
+        _n = f'-n {namespace}'
+    return run_json(f'kubectl get {res} {_n} -o json', silent=True)['items']
+
+def get_name_and_namespace(res):
     if 'metadata' in res:
         try:
             return res['metadata']['name'], res['metadata']['namespace']
@@ -56,62 +86,92 @@ def get_nn(res):
         except KeyError:
             return res['name'], None
 
-def show_helmrelease(hr):
-    print(hr['metadata']['name'])
+def wait_deleted(res, namespace='all'):
+    print(f'Waiting for {res} to be deleted ', end='')
+    if dryrun:
+        print('(dryrun, ignoring wait)')
+        return
+    sys.stdout.flush()
+    while get_resources(res, namespace=namespace):
+        print('.', end='')
+        sys.stdout.flush()
+        time.sleep(1)
+    print(' done')
+
+def delete_resource(res):
+    kind = res['kind']
+    name, namespace = get_name_and_namespace(res)
+    if namespace:
+        run(f'{dryrun} kubectl delete {kind} {name} -n {namespace} --wait=true')
+    else:
+        run(f'{dryrun} kubectl delete {kind} {name} --wait=true')
+
+############################
+##         Velero         ##
+############################
+
+if has_resource('crd/schedules.velero.io'):
+    for_each_resource('kubectl get schedules.velero.io -o json -A', delete_resource)
+    wait_deleted('schedules.velero.io')
+
+############################
+##          Flux          ##
+############################
 
 def flux_suspend(kind, res):
-    name, namespace = get_nn(res)
+    name, namespace = get_name_and_namespace(res)
     run(f'{dryrun} flux suspend {kind} {name} --namespace {namespace}')
 
-for_each_resource('kubectl get gitrepository -o json -A', lambda gr: flux_suspend('source git', gr))
-for_each_resource('kubectl get kustomizations -o json -A', lambda ks: flux_suspend('kustomization', ks))
-# for_each_resource('kubectl get helmreleases -o json -A', lambda hr: flux_suspend('helmrelease', hr))
-
-total_deleted = 0
 def flux_delete(kind, res):
-    name, namespace = get_nn(res)
+    name, namespace = get_name_and_namespace(res)
     run(f'{dryrun} flux delete {kind} {name} --namespace {namespace} --silent')
-    global total_deleted
-    total_deleted += 1
 
-for_each_resource('kubectl get helmreleases -o json -A', lambda hr: flux_delete('helmrelease', hr))
-for_each_resource('kubectl get kustomizations -o json -A', lambda ks: flux_delete('kustomization', ks))
-for_each_resource('kubectl get gitrepository -o json -A', lambda gr: flux_delete('source git', gr))
+if has_resource('crd/gitrepositories.source.toolkit.fluxcd.io'):
+    for_each_resource('kubectl get gitrepository -o json -A', lambda res: flux_suspend('source git', res))
+    for_each_resource('kubectl get gitrepository -o json -A', lambda res: flux_delete('source git', res))
 
-if total_deleted and not dryrun:
-    total_remaining = total_deleted
-    while total_remaining:
-        print(f'Waiting {total_remaining} resource(s) to be deleted...')
-        time.sleep(2)
-        total_remaining = len(run_json('kubectl get helmreleases,kustomizations,gitrepository -o json -A')['items'])
+if has_resource('crd/kustomizations.kustomize.toolkit.fluxcd.io'):
+    for_each_resource('kubectl get kustomizations -o json -A', lambda res: flux_suspend('kustomization', res))
+    for_each_resource('kubectl get kustomizations -o json -A', lambda res: flux_delete('kustomization', res))
+
+if has_resource('crd/helmreleases.helm.toolkit.fluxcd.io'):
+    #for_each_resource('kubectl get helmreleases -o json -A', lambda res: flux_suspend('helmrelease', res))
+    for_each_resource('kubectl get helmreleases -o json -A', lambda res: flux_delete('helmrelease', res))
+
+wait_deleted('helmreleases')
+wait_deleted('kustomizations')
+wait_deleted('gitrepository')
+
+############################
+##          Helm          ##
+############################
 
 def helm_uninstall(rel):
-    name, namespace = get_nn(rel)
+    name, namespace = get_name_and_namespace(rel)
     run(f'{dryrun} helm uninstall {name} --namespace {namespace}')
 
 for_each_resource('helm ls -n istio-system -o json', helm_uninstall, None)
 
+############################
+##         Service        ##
+############################
+
 def service_load_balancer_delete(svc):
     if svc['spec']['type'] == 'LoadBalancer':
-        name, namespace = get_nn(svc)
-        run(f'{dryrun} kubectl delete service {name} --namespace {namespace}')
+        name, namespace = get_name_and_namespace(svc)
+        run(f'{dryrun} kubectl delete service {name} --namespace {namespace} --wait=true')
 
 for_each_resource('kubectl get service -A -o json', service_load_balancer_delete)
 
-def nodepool_delete(nc):
-    name, _ = get_nn(nc)
-    run(f'{dryrun} kubectl delete nodepools {name}')
+############################
+##        Karpenter       ##
+############################
 
-for_each_resource('kubectl get nodepools -A -o json', nodepool_delete)
+if has_resource('crd/nodepools'):
+    for_each_resource('kubectl get nodepools -A -o json', delete_resource)
 
-def nodeclaim_delete(nc):
-    name, _ = get_nn(nc)
-    run(f'{dryrun} kubectl delete nodeclaim {name}')
+if has_resource('crd/nodepools'):
+    for_each_resource('kubectl get nodeclaim -A -o json', delete_resource)
 
-for_each_resource('kubectl get nodeclaim -A -o json', nodeclaim_delete)
-
-def ec2nodeclass_delete(nc):
-    name, _ = get_nn(nc)
-    run(f'{dryrun} kubectl delete ec2nodeclass {name}')
-
-for_each_resource('kubectl get ec2nodeclass -o json', ec2nodeclass_delete)
+if has_resource('crd/nodepools'):
+    for_each_resource('kubectl get ec2nodeclass -o json', delete_resource)
