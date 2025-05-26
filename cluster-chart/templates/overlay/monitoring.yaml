@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.monitoring.enabled }}
+{{- if and .Values.mode.overlay .Values.monitoring.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -10,7 +10,7 @@ spec:
     ###############################################
     prometheus:
       prometheusSpec:
-        {{ if .Values.tempo.enabled }}
+        {{- if .Values.tempo.enabled }}
         enableRemoteWriteReceiver: true
         remoteWriteDashboards: true
         enableFeatures:
@@ -21,7 +21,7 @@ spec:
     grafana:
       sidecar:
         datasources:
-          {{ if .Values.tempo.enabled }}
+          {{- if .Values.tempo.enabled }}
           exemplarTraceIdDestinations:
             datasourceUid: tempo
             traceIdLabelName: traceID
@@ -29,12 +29,12 @@ spec:
 
       grafana.ini:
         feature_toggles:
-          {{ if .Values.tempo.enabled }}
+          {{- if .Values.tempo.enabled }}
           traceToMetrics: true
           {{- end }}
 
       additionalDataSources:
-        {{ if .Values.tempo.enabled }}
+        {{- if .Values.tempo.enabled }}
         name: Tempo
         type: tempo
         uid: tempo
@@ -77,7 +77,7 @@ spec:
           lokiSearch:
             datasourceUid: loki
         {{- end }}
-        {{ if .Values.loki.enabled }}
+        {{- if .Values.loki.enabled }}
         additionalDataSources:
         - name: Loki
           type: loki
@@ -111,89 +111,99 @@ spec:
             - alertname = Watchdog
             continue: false
 
+          {{- with .Values.monitoring.ignoredAlerts }}
           # Ignore following alerts and/or namespaces
           - receiver: blackhole
             matchers:
-            - alertname = CPUThrottlingHigh
-              #namespace =~ logging|monitoring|ingress-nginx|velero|cert-manager|getup|.*-(controllers?|operators?|provisioners?|system)
+            {{- range . }}
+            - alertname =~ {{ .name }}
+              {{- if .namespace }}
+              namespace =~ {{ .namespace }}
+              {{- end }}
+            {{- end }}
             continue: false
+          {{- end }}
 
-          - receiver: blackhole
-            matchers:
-            - alertname = KubeJobFailed
-            - namespace = zora-system
-            continue: false
-
+          {{- if .Values.monitoring.cronitorPingUrl }}
           #############################
           # Cronitor
           #############################
-          #- receiver: cronitor
-          #  matchers:
-          #  - alertname = CronitorWatchdog
-          #  group_wait: 1s
-          #  group_interval: 10s
-          #  continue: false
+          - receiver: cronitor
+            matchers:
+            - alertname = CronitorWatchdog
+            group_wait: 1s
+            group_interval: 10s
+            continue: false
+          {{- end }}
 
+          {{- if .Values.monitoring.slackApiUrl }}
           #############################
           # Slack
           #############################
-          #- receiver: slack
-          #  matchers:
-          #  - alertname != ""
-          #  continue: true
+          - receiver: slack
+            matchers:
+            - alertname != ""
+            continue: true
+          {{- end }}
 
+          {{- if .Values.monitoring.msteamsChannelUrl }}
           #############################
           # MS Teams
           #############################
-          #- receiver: msteams
-          #  matchers:
-          #  - alertname != ""
-          #  continue: true
+          - receiver: msteams
+            matchers:
+            - alertname != ""
+            continue: true
+          {{- end }}
 
+          {{- if .Values.monitoring.pagerdutyServiceKey }}
           #############################
           # PageDuty
           #############################
-          #- receiver: pagerduty
-          #  matchers:
-          #  - alertname != ""
-          #  - severity: critical
-          #  continue: true
+          - receiver: pagerduty
+            matchers:
+            - alertname != ""
+            - severity: critical
+            continue: true
+          {{- end }}
 
+          {{- if .Values.monitoring.opsgenieIntegrationApiKey }}
           #############################
           # Opsgenie
           #############################
-          #- receiver: opsgenie
-          #  matchers:
-          #  - alertname =~ KubeNodeUnreachable|KubeCronJobRunning|KubeDaemonSetRolloutStuck|KubePodCrashLooping|KubePodNotReady|KubeStatefulSetGenerationMismatch|KubeStatefulSetReplicasMismatch
-          #  - namespace =~ logging|monitoring|velero|cert-manager|getup|.*-(ingress|controllers?|operators?|provisioners?|system)
-          #  - severity = warning
-          #  continue: true
-          #
-          #- receiver: opsgenie
-          #  matchers:
-          #  - alertname =~ KubeDeploymentGenerationMismatch|KubeDeploymentReplicasMismatch|KubeNodeNotReady|KubeAPILatencyHigh|KubeStatefulSetUpdateNotRolledOut|KubeJobCompletion|KubeJobFailed
-          #  - namespace =~ logging|monitoring|velero|cert-manager|getup|.*-(ingress|controllers?|operators?|provisioners?|system)
-          #  - severity = warning
-          #  continue: true
-          #
-          #- receiver: opsgenie
-          #  matchers:
-          #  - alertname =~ CertificateAlert|KubeClientCertificateExpiration|ClockSkewDetected|EndpointDown|HighNumberOfFailedProposals|HighNumberOfFailedHTTPRequests
-          #  - namespace =~ logging|monitoring|velero|cert-manager|getup|.*-(ingress|controllers?|operators?|provisioners?|system)
-          #  - severity = warning
-          #  continue: true
-          #
-          #- receiver: opsgenie
-          #  matchers:
-          #  - alertname =~ AlertmanagerFailedReload|PrometheusOperatorReconcileErrors|PrometheusConfigReloadFailed|PrometheusNotConnectedToAlertmanagers|PrometheusTSDBReloadsFailing|PrometheusTSDBCompactionsFailing|PrometheusTSDBWALCorruptions|PrometheusNotIngestingSamples
-          #  - namespace = monitoring
-          #  - severity = warning
-          #  continue: true
-          #
-          #- receiver: opsgenie
-          #  matchers:
-          #  - severity = critical
-          #  continue: true
+          - receiver: opsgenie
+            matchers:
+            - alertname =~ KubeNodeUnreachable|KubeCronJobRunning|KubeDaemonSetRolloutStuck|KubePodCrashLooping|KubePodNotReady|KubeStatefulSetGenerationMismatch|KubeStatefulSetReplicasMismatch
+            - namespace =~ logging|monitoring|velero|cert-manager|getup|.*-(ingress|controllers?|operators?|provisioners?|system)
+            - severity = warning
+            continue: true
+
+          - receiver: opsgenie
+            matchers:
+            - alertname =~ KubeDeploymentGenerationMismatch|KubeDeploymentReplicasMismatch|KubeNodeNotReady|KubeAPILatencyHigh|KubeStatefulSetUpdateNotRolledOut|KubeJobCompletion|KubeJobFailed
+            - namespace =~ logging|monitoring|velero|cert-manager|getup|.*-(ingress|controllers?|operators?|provisioners?|system)
+            - severity = warning
+            continue: true
+
+          - receiver: opsgenie
+            matchers:
+            - alertname =~ CertificateAlert|KubeClientCertificateExpiration|ClockSkewDetected|EndpointDown|HighNumberOfFailedProposals|HighNumberOfFailedHTTPRequests
+            - namespace =~ logging|monitoring|velero|cert-manager|getup|.*-(ingress|controllers?|operators?|provisioners?|system)
+            - severity = warning
+            continue: true
+
+          - receiver: opsgenie
+            matchers:
+            - alertname =~ AlertmanagerFailedReload|PrometheusOperatorReconcileErrors|PrometheusConfigReloadFailed|PrometheusNotConnectedToAlertmanagers|PrometheusTSDBReloadsFailing|PrometheusTSDBCompactionsFailing|PrometheusTSDBWALCorruptions|PrometheusNotIngestingSamples
+            - namespace = monitoring
+            - severity = warning
+            continue: true
+
+          - receiver: opsgenie
+            matchers:
+            - severity = critical
+            continue: true
+          {{- end }}
 
           # ignore non-matching alerts. This is mostly for metrics purpose.
           - receiver: blackhole
@@ -219,77 +229,84 @@ spec:
         #############################
         # Cronitor
         #############################
-        #- name: cronitor
-        #  webhook_configs:
-        #  - url: {{ .Values.monitoring.cronitorPingUrl }}
-        #    send_resolved: false
+        - name: cronitor
+          webhook_configs:
+          - url: {{ .Values.monitoring.cronitorPingUrl }}
+            send_resolved: false
         {{- end }}
 
         {{- if .Values.monitoring.slackApiUrl }}
+
         #############################
         # Slack
         #############################
-        #- name: slack
-        #  slack_configs:
-        #  - send_resolved: true
-        #    api_url: {{ .Values.monitoring.slackApiUrl }}
-        #    channel: {{ .Values.monitoring.slackChannel }}
-        #    color: |-
-        {{- (list
-        "        #      {{- if eq .Status \"firing\" -}} "
-        "        #        {{- if eq (index .Alerts 0).Labels.severity \"critical\" -}} "
-        "        #          #FF2222 "
-        "        #        {{- end -}} "
-        "        #        {{- if eq (index .Alerts 0).Labels.severity \"warning\" -}} "
-        "        #          #FF8800 "
-        "        #        {{- end -}} "
-        "        #        {{- if and (ne (index .Alerts 0).Labels.severity \"critical\") (ne (index .Alerts 0).Labels.severity \"warning\") -}} "
-        "        #          #22FF22 "
-        "        #        {{- end -}} "
-        "        #      {{- else -}} "
-        "        #        #22FF22 "
-        "        #      {{- end -}} "
-        "        #    title: '{{ template \"slack.default.title\" . }}' "
-        "        #    pretext: '{{ .CommonAnnotations.summary }}' "
-        "        #    fallback: '{{ template \"slack.default.fallback\" . }}' "
-        "        #    text: |- "
-        "        #      {{ range .Alerts -}} "
-        "        #      *Severity:* `{{ .Labels.severity | title }}` (<{{ .GeneratorURL }}|graph>) "
-        "        #      *Description:* {{ .Annotations.message }} "
-        "        #      *Labels:*{{ range .Labels.SortedPairs }} `{{ .Name }}={{ .Value }}`{{ end }} "
-        "        #      {{ end }} "
-        | join "\n")}}
+        - name: slack
+          slack_configs:
+          - send_resolved: true
+            api_url: {{ .Values.monitoring.slackApiUrl }}
+            {{- if .Values.monitoring.slackChannel }}
+            channel: {{ .Values.monitoring.slackChannel }}
+            {{- end }}
+            {{- (list
+            "color: |-"
+            "  {{- if eq .Status \"firing\" -}}"
+            "    {{- if eq (index .Alerts 0).Labels.severity \"critical\" -}}"
+            "      #FF2222"
+            "    {{- end -}}"
+            "    {{- if eq (index .Alerts 0).Labels.severity \"warning\" -}}"
+            "      #FF8800"
+            "    {{- end -}}"
+            "    {{- if and (ne (index .Alerts 0).Labels.severity \"critical\") (ne (index .Alerts 0).Labels.severity \"warning\") -}}"
+            "      #22FF22"
+            "    {{- end -}}"
+            "  {{- else -}}"
+            "    #22FF22"
+            "  {{- end -}}"
+            "title: '{{ template \"slack.default.title\" . }}'"
+            "pretext: '{{ .CommonAnnotations.summary }}'"
+            "fallback: '{{ template \"slack.default.fallback\" . }}'"
+            "text: |-"
+            "  {{ range .Alerts -}}"
+            "  *Severity:* `{{ .Labels.severity | title }}` (<{{ .GeneratorURL }}|graph>)"
+            "  *Description:* {{ .Annotations.message }}"
+            "  *Labels:*{{ range .Labels.SortedPairs }} `{{ .Name }}={{ .Value }}`{{ end }}"
+            "  {{ end }}"
+            | join "\n") | nindent 12 }}
         {{- end }}
 
         {{- if .Values.monitoring.msteamsChannelUrl }}
         #############################
         # MSTeams
         #############################
-        #- name: msteams
-        #  webhook_configs:
-        #  - url: {{ .Values.monitoring.msteamsChannelUrl }}
+        - name: msteams
+          webhook_configs:
+          - url: {{ .Values.monitoring.msteamsChannelUrl }}
         {{- end }}
 
         {{- if .Values.monitoring.opsgenieIntegrationApiKey }}
         #############################
         # Opsgenie
         #############################
-        #- name: opsgenie
-        #  opsgenie_configs:
-        #  - api_key: {{ .Values.monitoring.opsgenieIntegrationApiKey }}
-        #    tags: {{ .Values.customerName }}, {{ include "clusterName" . }}, {{ .Values.clusterProvider }}, {{ .Values.clusterSla }}
-        #    # Choose priority according to SLA: high=[P1|P2], low=[P3|P4|P5]
-        #    priority: P1
+        - name: opsgenie
+          opsgenie_configs:
+          - api_key: {{ .Values.monitoring.opsgenieIntegrationApiKey }}
+            tags: {{ .Values.customer.customerName }}, {{ include "clusterName" . }}, {{ .Values.cluster.clusterProvider }}, sla-{{ .Values.customer.clusterSla }}
+            # Choose priority according to SLA: high=[P1|P2], low=[P3|P4|P5]
+            {{- if eq .Values.customer.clusterSla "high" }}
+            priority: P1
+            {{- else }}
+            priority: P3
+            {{- end }}
         {{- end }}
 
         {{- if .Values.monitoring.pagerdutyServiceKey }}
         #############################
         # PagerDuty
         #############################
-        #- name: pagerduty
-        #  pagerduty_configs:
-        #  - service_key: {{ .Values.monitoring.pagerdutyServiceKey }}
-        #    group: #output:sla-{{ .Values.clusterSla }}
+        - name: pagerduty
+          pagerduty_configs:
+          - service_key: {{ .Values.monitoring.pagerdutyServiceKey }}
+            group: {{ .Values.customer.clusterSla }}
         {{- end }}
 ---
 {{ include "fluxValuesFromData" (dict "secretName" "monitoring" "values" .Values.monitoring.extraValues) }}

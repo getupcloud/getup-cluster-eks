@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.otelDemo.enabled }}
+{{- if and .Values.mode.base .Values.otelDemo.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -88,7 +88,7 @@ spec:
       metadata:
         name: otel-demo
       spec:
-        ingressClassName: {{ include "ingressClassName" . }}
+        ingressClassName: {{ include "defaultIngressClassName" . }}
         tls:
         - hosts:
           - otel-demo.127.0.0.1.nip.io

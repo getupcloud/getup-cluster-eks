@@ -1,45 +1,21 @@
-{{ if .Values.kustomize -}}
+{{ if .Values.mode.kustomization -}}
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
 - flux-system
-{{- if .Values.apps }}
+{{- if .Values.mode.apps }}
 - ../apps/
 {{- end }}
-- base/repo.yaml
-
-{{- template "kustomizationBases" (list .Values.awsEfsStorageclass.enabled "aws-efs-storageclass.yaml") }}
-{{- template "kustomizationBases" (list .Values.externalSecrets.enabled "aws-external-secrets-operator.yaml" "aws-external-secrets-config.yaml") }}
-{{- template "kustomizationBases" (list .Values.awsLoadBalancerController.enabled "aws-load-balancer-controller.yaml") }}
-{{- template "kustomizationBases" (list .Values.certManager.enabled "cert-manager.yaml") }}
-{{- template "kustomizationBases" (list .Values.datadog.enabled "datadog.yaml") }}
-{{- template "kustomizationBases" (list .Values.ecrCredentialsSync.enabled "ecr-credentials-sync.yaml") }}
-{{- template "kustomizationBases" (list .Values.flagger.enabled "flagger.yaml") }}
-{{- template "kustomizationBases" (list .Values.ingressNginx.enabled "ingress-nginx.yaml") }}
-{{- template "kustomizationBases" (list .Values.loki.enabled "loki.yaml") }}
-{{- template "kustomizationBases" (list .Values.metricsServer.enabled "metrics-server.yaml") }}
-{{- template "kustomizationBases" (list .Values.monitoring.enabled "monitoring.yaml" "monitoring-config.yaml") }}
-{{- template "kustomizationBases" (list .Values.otelOperator.enabled "otel-operator.yaml" "otel-config.yaml" "otel-demo.yaml" "otel-shop-demo.yaml") }}
-{{- template "kustomizationBases" (list .Values.opencost.enabled "opencost.yaml") }}
-{{- template "kustomizationBases" (list .Values.teleportAgent.enabled "teleport.yaml") }}
-{{- template "kustomizationBases" (list .Values.tempo.enabled "tempo.yaml") }}
-{{- template "kustomizationBases" (list .Values.velero.enabled "velero.yaml") }}
+- base.yaml
+{{- with .Values.extraResources }}
+{{ .Values.extraResources | toYaml }}
+{{- end }}
 
 patches:
-{{- template "kustomizationPatches" (list .Values.externalSecrets.enabled "aws-external-secrets-operator.yaml" "aws-external-secrets-config.yaml") }}
-{{- template "kustomizationPatches" (list .Values.awsLoadBalancerController.enabled "aws-load-balancer-controller.yaml") }}
-{{- template "kustomizationPatches" (list .Values.certManager.enabled "cert-manager.yaml") }}
-{{- template "kustomizationPatches" (list .Values.datadog.enabled "datadog.yaml") }}
-{{- template "kustomizationPatches" (list .Values.ecrCredentialsSync.enabled "ecr-credentials-sync.yaml") }}
-{{- template "kustomizationPatches" (list .Values.flagger.enabled "flagger.yaml") }}
-{{- template "kustomizationPatches" (list .Values.ingressNginx.enabled "ingress-nginx.yaml") }}
-{{- template "kustomizationPatches" (list .Values.loki.enabled "loki.yaml") }}
-{{- template "kustomizationPatches" (list .Values.opencost.enabled "opencost.yaml") }}
-{{- template "kustomizationPatches" (list .Values.monitoring.enabled "monitoring.yaml") }}
-{{- template "kustomizationPatches" (list .Values.otelOperator.enabled "otel-operator.yaml") }}
-{{- template "kustomizationPatches" (list .Values.teleportAgent.enabled "teleport.yaml") }}
-{{- template "kustomizationPatches" (list .Values.tempo.enabled "tempo.yaml") }}
-{{- template "kustomizationPatches" (list .Values.velero.enabled "velero.yaml") }}
+- path: overlay.yaml
+{{- with .Values.extraPatches }}
+{{ .Values.extraPatches | toYaml }}
+{{- end }}
 
 {{- end -}}

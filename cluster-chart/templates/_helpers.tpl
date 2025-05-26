@@ -1,43 +1,53 @@
-{{/* Basic */}}
+{{/*
+Default macros
+*/}}
 
 {{- define "clusterName" -}}
-{{ $clusterNameVar := printf "%s%s" .Values.clusterProvider .Values.clusterName }}
-{{ tpl $clusterNameVar .Values }}
-{{- end -}}
-
-{{- define "clusterLongName" -}}
-{{ printf "%s-%s" (include "clusterName" .) .Values.aws_region | trunc 63 | trimSuffix "-" }}
-{{- end -}}
+{{- $provider := get .Values .Values.cluster.clusterProvider }}
+{{- tpl $provider.clusterNameFmt . | trunc 63 | trimSuffix "-" }}
+{{- end }}
 
 {{- define "clusterFullName" -}}
-{{ printf "%s-%s-%s" .Values.customer_name (include "clusterName" .) .Values.aws_region | trunc 63 | trimSuffix "-" }}
-{{- end -}}
+{{- printf "%s-%s" .Values.customer.customerName (include "clusterName" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
 
-{{- define "clusterSlug" -}}
-{{ printf "%s-%s-%s" .Values.customer_name (include "clusterName" .) .Values.aws_region | lower | sha256sum | trunc 8 }}
-{{- end -}}
+{{- define "clusterUniqueName" -}}
+{{- $clusterFullName := (include "clusterFullName" .) }}
+{{- printf "%s-%s" $clusterFullName (sha256sum $clusterFullName | trunc 8)  | trunc 63 | trimSuffix "-" }}
+{{- end }}
 
-{{- define "ingressClassName" -}}
-{{- if .Values.default_ingress_class_name }}
-{{- .Values.default_ingress_class_name }}
+{{- define "defaultIngressClassName" -}}
+{{- $provider := get .Values .Values.cluster.clusterProvider }}
+{{- if .Values.cluster.defaultIngressClassName }}
+{{- .Values.cluster.defaultIngressClassName }}
+{{- else if $provider.defaultIngressClassName }}
+{{- $provider.defaultIngressClassName }}
 {{- else if .Values.ingressNginx.enabled }}
-{{- printf "nginx" }}
-{{- else if .Values.awsLoadBalancerController.enabled }}
-{{- printf "alb" }}
-{{- end}}
-{{- end -}}
+{{- default "nginx" .Values.ingressNginx.ingressClassName }}
+{{- end }}
+{{- end }}
+
+{{- define "defaultStorageClassName" -}}
+{{- $provider := get .Values .Values.cluster.clusterProvider }}
+{{- if .Values.cluster.defaultStorageClassName }}
+{{- .Values.cluster.defaultStorageClassName }}
+{{- else if $provider.defaultStorageClassName }}
+{{- $provider.defaultStorageClassName }}
+{{- end }}
+{{- end }}
 
 {{/*
 Kustomization
 */}}
 
+{{/*
 {{- define "kustomizationBases" -}}
 {{- if (first .) }}
 {{- range (rest .) }}
 - base/{{ . }}
 {{- end }}
 {{- end }}
-{{- end -}}
+{{- end }}
 
 {{- define "kustomizationPatches" -}}
 {{- if (first .) }}
@@ -45,23 +55,24 @@ Kustomization
 - path: overlay/{{ . }}
 {{- end }}
 {{- end }}
-{{- end -}}
+{{- end }}
+*/}}
 
 {{- define "fluxValuesFrom" -}}
-{{ if .values }}
+{{- if .values }}
 valuesFrom:
 - kind: Secret
-  name: {{ .secretName }}-extra-values
-{{ end }}
-{{- end -}}
+  name: {{ .secretName }}-values-{{ toYaml .values | sha256sum | trunc 6 }}
+{{- end }}
+{{- end }}
 
 {{- define "fluxValuesFromData" -}}
-{{ if .values }}
+{{- if .values }}
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ .secretName }}-extra-values
+  name: {{ .secretName }}-values-{{ toYaml .values | sha256sum | trunc 6 }}
 data:
   values.yaml: {{ toYaml .values | b64enc }}
-{{ end }}
-{{- end -}}
+{{- end }}
+{{- end }}

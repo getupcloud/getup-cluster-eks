@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.tempo.enabled }}
+{{- if and .Values.mode.base .Values.tempo.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -31,7 +31,7 @@ spec:
       size: 10Gi
 
     serviceMonitor:
-      enabled: true
+      enabled: {{ .Values.monitoring.enabled }}
       interval: 60s
 
     affinity:

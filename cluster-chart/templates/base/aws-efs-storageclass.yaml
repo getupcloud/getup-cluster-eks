@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.awsEfsStorageclass.enabled }}
+{{- if and .Values.mode.base .Values.awsEfsStorageclass.enabled }}
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:

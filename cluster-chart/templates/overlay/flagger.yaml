@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.flagger.enabled }}
+{{- if and .Values.mode.overlay .Values.flagger.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:

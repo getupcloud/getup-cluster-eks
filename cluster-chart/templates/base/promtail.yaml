@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.promtail.enabled }}
+{{- if and .Values.mode.base .Values.promtail.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -60,7 +60,7 @@ spec:
         maxUnavailable: "25%"
 
     serviceMonitor:
-      enabled: true
+      enabled: {{ .Values.monitoring.enabled }}
       interval: 60s
 
     #volumes:

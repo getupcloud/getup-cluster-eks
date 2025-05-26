@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.teleportAgent.enabled }}
+{{- if and .Values.mode.overlay .Values.teleportAgent.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -8,12 +8,12 @@ spec:
   {{- include "fluxValuesFrom" (dict "secretName" "teleport-agent" "values" .Values.teleportAgent.extraValues) | nindent 2 }}
   values:
     authToken: {{ .Values.teleportAgent.teleportAuthToken }}
-    kubeClusterName: {{ .Values.customerName }}-{{ include "clusterName" . }}
+    kubeClusterName: {{ include "clusterFullName" . }}
 
     labels:
-      customer: {{ .Values.customerName }}
-      region: {{ .Values.awsRegion }}
-      sla: {{ .Values.clusterSla }}
+      customer: {{ .Values.customer.customerName }}
+      region: {{ .Values.eks.eksAwsRegion }}
+      sla: {{ .Values.customer.clusterSla }}
 ---
 {{ include "fluxValuesFromData" (dict "secretName" "teleport-agent" "values" .Values.teleportAgent.extraValues) }}
 {{- end }}

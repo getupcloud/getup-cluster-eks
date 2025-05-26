@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.velero.enabled }}
+{{- if and .Values.mode.base .Values.velero.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -109,7 +109,8 @@ spec:
     metrics:
       enabled: true
       serviceMonitor:
-        enabled: true
+        enabled: {{ .Values.monitoring.enabled }}
+      {{- if .Values.monitoring.enabled }}
       prometheusRule:
         enabled: true
         spec:
@@ -120,7 +121,7 @@ spec:
             service: backup
             severity: warning
           annotations:
-            message: {{"Velero backup {{ $labels.schedule }} has {{ $value | humanizePercentage }} partialy failed backups."}}
+            message: {{ "Velero backup {{ $labels.schedule }} has {{ $value | humanizePercentage }} partialy failed backups." }}
             summary: "Some backups have partialy failed"
 
         - alert: VeleroBackupFailures
@@ -150,7 +151,7 @@ spec:
             service: backup
             severity: critical
           annotations:
-            message: {{"Velero backup {{ $labels.schedule }} has {{ $value }} failed backups."}}
+            message: {{ "Velero backup {{ $labels.schedule }} has {{ $value }} failed backups." }}
             summary: "Some backups have failed"
 
         - alert: BackupNotActive
@@ -172,4 +173,5 @@ spec:
           annotations:
             message: "Velero has not created any backups in the last 24h. Please check Schedules."
             summary: "No Velero backups found"
+      {{- end }}
 {{- end }}

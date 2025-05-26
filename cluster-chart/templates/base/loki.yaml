@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.loki.enabled }}
+{{- if and .Values.mode.base .Values.loki.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -215,7 +215,7 @@ spec:
 
       serviceMonitor:
         # -- If enabled, ServiceMonitor resources for Prometheus Operator are created
-        enabled: true
+        enabled: {{ .Values.monitoring.enabled }}
 
       selfMonitoring:
         enabled: false # Disables grafana-agent-opera

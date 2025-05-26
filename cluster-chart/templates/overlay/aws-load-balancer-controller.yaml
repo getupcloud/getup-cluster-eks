@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.awsLoadBalancerController.enabled }}
+{{- if and .Values.mode.overlay .Values.awsLoadBalancerController.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -13,7 +13,7 @@ spec:
 
     serviceAccount:
       annotations:
-        eks.amazonaws.com/role-arn: {{ .Values.awsLoadBalancerController.aws_load_balancer_controller_iam_role_arn }}
+        eks.amazonaws.com/role-arn: {{ .Values.eks.eksAwsLoadBalancerControllerIamRoleArn }}
 ---
 {{ include "fluxValuesFromData" (dict "secretName" "aws-load-balancer-controller" "values" .Values.awsLoadBalancerController.extraValues) }}
 {{- end }}

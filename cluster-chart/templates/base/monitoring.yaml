@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.monitoring.enabled }}
+{{- if and .Values.mode.base .Values.monitoring.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -50,7 +50,7 @@ spec:
     prometheus:
       ingress:
         enabled: false
-        ingressClassName: {{ include "ingressClassName" . }}
+        ingressClassName: {{ include "defaultIngressClassName" . }}
         #annotations:
         #  cert-manager.io/cluster-issuer: letsencrypt-staging-dns01
         #  nginx.ingress.kubernetes.io/auth-realm: Authentication Required - Monitoring
@@ -146,7 +146,7 @@ spec:
 
       ingress:
         enabled: false
-        ingressClassName: {{ include "ingressClassName" . }}
+        ingressClassName: {{ include "defaultIngressClassName" . }}
         #annotations:
         #  cert-manager.io/cluster-issuer: letsencrypt-staging-dns01
         #  nginx.ingress.kubernetes.io/auth-realm: Authentication Required - Monitoring
@@ -389,7 +389,7 @@ spec:
 
       ingress:
         enabled: false
-        ingressClassName: {{ include "ingressClassName" . }}
+        ingressClassName: {{ include "defaultIngressClassName" . }}
         annotations:
         #  nginx.ingress.kubernetes.io/whitelist-source-range: 10.10.0.0/16,192.168.0.10
         #  cert-manager.io/cluster-issuer: letsencrypt-staging-dns01

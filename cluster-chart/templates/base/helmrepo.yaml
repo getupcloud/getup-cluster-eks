@@ -1,4 +1,4 @@
-{{- if .Values.manifests }}
+{{- if .Values.mode.base }}
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository

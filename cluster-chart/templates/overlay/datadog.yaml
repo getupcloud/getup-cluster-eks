@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.datadog.enabled }}
+{{- if and .Values.mode.overlay .Values.datadog.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -8,5 +8,5 @@ spec:
   values:
     datadog:
       clusterName: {{ include "clusterName" . }}
-      apiKey: {{ .Values.datadog.datadog_api_key }}
+      apiKey: {{ .Values.datadog.datadogApiKey }}
 {{- end }}

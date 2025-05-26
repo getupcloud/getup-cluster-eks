@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.tempo.enabled }}
+{{- if and .Values.mode.overlay .Values.tempo.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -9,14 +9,14 @@ spec:
   values:
     serviceAccount:
       annotations:
-        eks.amazonaws.com/role-arn: {{ .Values.tempoIamRoleArn }}
+        eks.amazonaws.com/role-arn: {{ .Values.tempo.tempoIamRoleArn }}
     tempo:
       storage:
         trace:
           s3:
-            bucket: {{ .Values.tempoS3BucketName }}
-            region: {{ .Values.awsRegion }}
-            endpoint: s3.dualstack.{{ .Values.awsRegion }}.amazonaws.com
+            bucket: {{ .Values.tempo.tempoS3BucketName }}
+            region: {{ .Values.eks.eksAwsRegion }}
+            endpoint: s3.dualstack.{{ .Values.eks.eksAwsRegion }}.amazonaws.com
 ---
 {{ include "fluxValuesFromData" (dict "secretName" "tempo" "values" .Values.tempo.extraValues) }}
 {{- end }}

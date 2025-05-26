@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.otelConfig.enabled }}
+{{- if and .Values.mode.base .Values.otelConfig.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:

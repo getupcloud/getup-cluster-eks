@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.ingressNginx.enabled }}
+{{- if and .Values.mode.base .Values.ingressNginx.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -105,7 +105,7 @@ spec:
       metrics:
         enabled: true
         serviceMonitor:
-          enabled: {{ default false .Values.monitoring.enabled }}
+          enabled: {{ .Values.monitoring.enabled }}
 
       service:
         enabled: true

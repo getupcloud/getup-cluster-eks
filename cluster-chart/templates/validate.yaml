@@ -1,7 +1,31 @@
-{{- if not (or .Values.kustomize .Values.manifests .Values.apps .Values.keys) }}
-{{- fail "You must enable one of: kustomize=true, manifests=true, apps=true, valuesKeys=true" }}
+{{- if .Values.error }}
+{{- fail .Values.error }}
 {{- end }}
 
-{{- if and .Values.kustomize .Values.manifests }}
-{{- fail "You must enable only one of kustomize=true or manifests=true" }}
+{{- if not (or .Values.mode.kustomization .Values.mode.base .Values.mode.overlay) }}
+{{- fail "You must enable one of: mode.kustomization=true, mode.base=true, mode.overlay=true" }}
+{{- end }}
+
+{{- if and .Values.kustomization .Values.base }}
+{{- fail "You must enable only one of kustomization=true or base=true" }}
+{{- end }}
+
+{{- if and .Values.kustomization .Values.overlay }}
+{{- fail "You must enable only one of kustomization=true or overlay=true" }}
+{{- end }}
+
+{{- if not .Values.cluster.clusterName }}
+{{- fail "Missing values: cluster.clusterName" }}
+{{- end }}
+
+{{- if not .Values.cluster.clusterProvider }}
+{{- fail "Missing values: cluster.clusterProvider" }}
+{{- end }}
+
+{{- if not .Values.customer.customerName }}
+{{- fail "Missing values: customer.customerName" }}
+{{- end }}
+
+{{- if not .Values.customer.clusterSla }}
+{{- fail "Missing values: customer.clusterSla" }}
 {{- end }}

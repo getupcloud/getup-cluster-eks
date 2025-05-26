@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.certManager.enabled }}
+{{- if and .Values.mode.base .Values.certManager.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:

@@ -1,4 +1,4 @@
-{{- if and .Values.manifests .Values.opencost.enabled }}
+{{- if and .Values.mode.base .Values.opencost.enabled }}
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -51,6 +51,6 @@ spec:
           port: 9090
       metrics:
         serviceMonitor:
-          enabled: true
+          enabled: {{ .Values.monitoring.enabled }}
       {{- end }}
 {{- end }}
