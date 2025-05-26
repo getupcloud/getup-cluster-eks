@@ -323,10 +323,6 @@ spec:
       enabled: false
 
     ###################################
-    lokiCanary:
-      enabled: false
-
-    ###################################
     #alerting_groups:
     #- name: Missing Log Lines for 30m
     #  rules:
