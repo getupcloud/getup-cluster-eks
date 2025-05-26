@@ -27,6 +27,8 @@ variable "overlay" {
   description = "Map of variables to inject into overlay files."
   type        = map(string)
   default = {
+    default_storage_class_name : ""
+    default_ingress_class_name : ""
     certmanager_acme_email : ""
     cronitor_ping_url : ""
     ecr_credential_sync_region : ""
