@@ -26,6 +26,7 @@ resources:
 #- base/teleport.yaml
 #- base/opencost.yaml ## Experimental
 #- base/datadog.yaml
+#- base/vap.yaml
 
 #patches:
 #- path: overlay/cert-manager.yaml
@@ -45,6 +46,7 @@ resources:
 #- path: overlay/tempo.yaml
 #- path: overlay/opencost.yaml ## Experimental
 #- path: overlay/datadog.yaml
+#- path: overlay/vap-enforced.yaml
 
 #patchesJson6902:
 #- path: overlay/monitoring-tempo-ops.yaml
