@@ -316,7 +316,6 @@ spec:
         grafanaAgent:
           installOperator: false
 
-
     ###################################
     test:
       #prometheusAddress: http://monitoring-kube-prometheus-prometheus.monitoring.cluster.local:9090

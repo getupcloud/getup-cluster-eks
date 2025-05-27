@@ -7,8 +7,9 @@ spec:
   values:
     authToken: #output:{overlay["teleport_auth_token"]}
     kubeClusterName: #output:{customer_name}-{cluster_name}
-
     labels:
+      team: operations
+      provider: #output:{cluster_provider}
       customer: #output:{customer_name}
       region: #output:{aws_region}
       sla: #output:{cluster_sla}
