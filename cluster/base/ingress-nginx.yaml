@@ -73,7 +73,7 @@ spec:
         #set-real-ip-from: X.X.X.X
 
       autoscaling:
-        enabled: false
+        enabled: true
         minReplicas: 2
         maxReplicas: 30
         targetCPUUtilizationPercentage: 90

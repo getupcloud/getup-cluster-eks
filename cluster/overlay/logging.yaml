@@ -31,4 +31,3 @@ spec:
     chunksCache:
       nodeSelector:
         karpenter.sh/capacity-type: on-demand
-

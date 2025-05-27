@@ -73,10 +73,30 @@ spec:
         resources:
           limits:
             cpu: 4
-            memory: 4Gi
+            memory: 8Gi
           requests:
-            cpu: 1
-            memory: 4Gi
+            cpu: 2
+            memory: 6Gi
+
+        affinity:
+          nodeAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                - key: node-role.kubernetes.io/infra
+                  operator: Exists
+            - weight: 90
+              preference:
+                matchExpressions:
+                - key: role
+                  operator: In
+                  values:
+                  - infra
+        tolerations:
+        - key: dedicated
+          value: infra
+          effect: NoSchedule
 
         externalLabels:
           cluster: production
