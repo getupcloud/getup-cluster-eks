@@ -37,6 +37,7 @@ resources:
 #- path: overlay/otel-operator.yaml
 #- path: overlay/otel-demo.yaml
 #- path: overlay/velero.yaml
+#- path: overlay/aws-efs-storageclass.yaml
 #- path: overlay/aws-load-balancer-controller.yaml
 #- path: overlay/aws-external-secrets-operator.yaml
 #- path: overlay/aws-external-secrets-config.yaml
