@@ -30,6 +30,10 @@ resources:
 #- base/vap.yaml
 #- base/kubed.yaml
 
+## Custom resources
+#- overlay/my-secret.yaml
+#- overlay/my-deployment.yaml
+
 #patches:
 #- path: overlay/cert-manager.yaml
 #- path: overlay/external-dns.yaml

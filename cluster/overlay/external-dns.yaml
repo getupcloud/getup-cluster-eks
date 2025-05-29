@@ -4,6 +4,7 @@ metadata:
   name: external-dns
   namespace: flux-system
 spec:
+  values:
     serviceAccount:
       create: true
       annotations:
@@ -11,3 +12,7 @@ spec:
 
     #domainFilters:
     #- example.com
+    #- example.dev.br
+
+    #excludeDomains:
+    #- exemplo.com.br
