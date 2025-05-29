@@ -12,6 +12,9 @@ spec:
       - mountPath: /target
         name: plugins
 
+    credentials:
+      useSecret: false # required to use IRSA
+
     configuration:
       defaultBackupStorageLocation:
       - aws: default
@@ -24,6 +27,8 @@ spec:
         config:
           region: #output:{aws_region}
 
+      defaultVolumeSnapshotLocations:
+      - aws: default
       volumeSnapshotLocation:
       - provider: aws
         name: default

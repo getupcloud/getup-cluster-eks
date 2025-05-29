@@ -8,3 +8,13 @@ spec:
     datadog:
       clusterName: #output:{cluster_name}
       apiKey: #output:{overlay["datadog_api_key"]}
+    agents:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: dedicated
+                operator: NotIn
+                values:
+                - infra

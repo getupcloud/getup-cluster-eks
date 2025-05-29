@@ -3,27 +3,43 @@ include Makefile.conf
 -include .env
 
 # General variables
-TERRAFORM           ?= terraform
-TF_LOG_PATH         ?= terraform.log
-TF_LOG              ?= DEBUG
-CLUSTER_NAME        ?= $(shell sed -n -e 's|^[[:space:]]*cluster_name[[:space:]]*=[[:space:]]*"\([^"]*\)".*|\1|p' *.tfvars 2>/dev/null)
-GIT_REMOTE          ?= origin
-GIT_BRANCH          ?= main
-GIT_COMMIT_MESSAGE  ?= Auto-generated commit
-FLOW_RECONCILE      := plan apply pull overlay commit push
-FLOW_FULL_RECONCILE := pull init validate plan apply pull kubeconfig overlay commit push
-KUSTOMIZE_BUILD     := .kustomize_build.yaml
-OUTPUT_JSON         := .output.json
-OUTPUT_OVERLAY_JSON := .overlay.output.json
-TFVARS_OVERLAY_JSON := .overlay.tfvars.json
-TFVARS              := $(wildcard *.tfvars)
-VALUES_YAML         := values.yaml
-ROOT_DIR            := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
+ROOT_DIR              := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
+TERRAFORM             ?= terraform
+TF_LOG_PATH           ?= terraform.log
+TF_LOG                ?= DEBUG
+CLUSTER_NAME          ?= $(shell sed -n -e 's|^[[:space:]]*cluster_name[[:space:]]*=[[:space:]]*"\([^"]*\)".*|\1|p' *.tfvars 2>/dev/null)
+GIT_REMOTE            ?= origin
+GIT_BRANCH            ?= main
+GIT_COMMIT_MESSAGE    ?= Auto-generated commit
+FLOW_RECONCILE        := plan apply overlay fmt commit push
+FLOW_FULL_RECONCILE   := clean pull init validate $(FLOW_RECONCILE) kubeconfig
+KUSTOMIZE_BUILD       := .kustomize_build.yaml
+OUTPUT_JSON           := .output.json
+OUTPUT_OVERLAY_JSON   := .overlay.output.json
+TFVARS_OVERLAY_JSON   := .overlay.tfvars.json
+MAIN_TF               := $(wildcard main-*.tf)
+OUTPUTS_TF            := $(wildcard outputs-*.tf)
+VARIABLES_TF          := $(wildcard variables-*.tf)
+ALL_TF                := $(wildcard *.tf)
+ALL_TFVARS            := $(wildcard *.tfvars)
 
+# Helm vars
+HELM_VALUES_TF        := helm-values.tf
+VALUES_TERRAFORM_YAML := values-terraform.yaml
+VALUES_CUSTOM_YAML    := values-custom.yaml
+HELM_TEMPLATE_CMD     := helm template cluster /home/mateus/getup/git/gitops/getup-cluster-eks/cluster-chart --no-hooks --disable-openapi-validation --set cluster.clusterProvider=$(FLAVOR)
+
+# Update vars
 UPSTREAM_CLUSTER_DIR          ?= ../getup-cluster-$(FLAVOR)/
 UPSTREAM_EXAMPLES_COMMON_DIR  ?= ../getup-modules/examples/common
 UPSTREAM_EXAMPLES_CLUSTER_DIR ?= ../getup-modules/examples/$(FLAVOR)
-UPDATE_CLUSTER_FILES          := Makefile bin cluster/base/* $(MODULES_TF)
+
+UPDATE_CLUSTER_FILES          := Makefile Makefile.conf bin cluster/base/* $(MODULES_TF)
+MANIFESTS_BASE                := cluster/base
+MANIFESTS_OVERLAY             := cluster/overlay cluster/kustomization.yaml
+COMMON_FILES                  := Makefile Makefile.conf bin
+UPDATE_OVERLAY_TARGET         ?= update-overlay # or update-overlay-meld
+
 UPDATE_EXAMPLES_CLUSTER_FILES := *.tf *.example */*.tf */*.example
 UPDATE_EXAMPLES_COMMON_FILES  := *.tf *.example
 
@@ -34,6 +50,7 @@ endif
 .ONESHELL:
 .EXPORT_ALL_VARIABLES:
 
+.PHONY: all help
 all help:
 	@echo Available targets
 	echo
@@ -62,6 +79,11 @@ all help:
 	echo "  reconcile        $(FLOW_RECONCILE)"
 	echo "  full-reconcile   $(FLOW_FULL_RECONCILE)"
 
+#
+# Top-level targets
+#
+.PHONY: $(FLOW_FULL_RECONCILE) upgrade migrate-state
+
 reconcile: $(FLOW_RECONCILE)
 
 full-reconcile: $(FLOW_FULL_RECONCILE)
@@ -69,17 +91,14 @@ full-reconcile: $(FLOW_FULL_RECONCILE)
 pull:
 	git pull origin main
 
-commit:
-	git status --porcelain | grep -vE '^(\?\?|!!)' && git commit -a -m "$(GIT_COMMIT_MESSAGE)" || true
-
-push:
-	git push $(GIT_REMOTE) $(GIT_BRANCH)
-
 clean:
-	rm -rf .terraform terraform.log $(KUSTOMIZE_BUILD)
+	rm -rf terraform.log $(OUTPUT_JSON) $(TFVARS_OVERLAY_JSON) $(VALUES_TERRAFORM_YAML)
 
 clean-output:
-	@rm -f $(OUTPUT_JSON) $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
+	rm -f $(OUTPUT_JSON) $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
+
+clean-all: clean
+	rm -rf .terraform
 
 init: validate-vars
 	$(TERRAFORM) init $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
@@ -87,36 +106,199 @@ init: validate-vars
 upgrade: validate-vars
 	$(TERRAFORM) init -upgrade $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
 
-validate: validate-vars
+validate: $(HELM_VALUES_TF) validate-vars
 	$(TERRAFORM) validate $(TERRAFORM_ARGS) $(TERRAFORM_VALIDATE_ARGS)
+
+plan: $(HELM_VALUES_TF) validate-vars
+	$(TERRAFORM) plan -out terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_PLAN_ARGS)
+
+apply:
+	$(TERRAFORM) apply -auto-approve terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_APPLY_ARGS)
+
+## Overlay
+overlay: clean-output $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
+	@echo Processing overlays
+	find cluster/overlay -type f -name '*.yaml' -o -name '*.yml' | sort -u | while read file; do
+		bin/overlay "$$file" $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON) >"$${file}.tmp" && mv "$${file}.tmp" "$$file" || exit 1
+	done
+
+$(OUTPUT_OVERLAY_JSON): $(OUTPUT_JSON)
+	@echo Generating $@
+	bin/output2overlay $^ > $@
+
+$(TFVARS_OVERLAY_JSON): $(TFVARS)
+	@echo Generating $@
+	bin/tfvars2overlay $^ > $@
+
+## Helm Overlay
+overlay-helm: manifests
 
 fmt:
 	$(TERRAFORM) fmt $(TERRAFORM_ARGS) $(TERRAFORM_FMT_ARGS)
 
-plan: validate-vars
-	$(TERRAFORM) plan -out terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_PLAN_ARGS)
+commit:
+	if git status --porcelain | grep -vE '^(\?\?|!!)'; then
+		#git add $(HELM_VALUES_TF)
+		git commit -a -m "$(GIT_COMMIT_MESSAGE)"
+	fi
+
+push:
+	git push $(GIT_REMOTE) $(GIT_BRANCH)
+
+kubeconfig:
+	$(KUBECONFIG_RETRIEVE_COMMAND)
 
 migrate-state:
 	$(TERRAFORM) init -migrate-state
 
-# WARNING: NO CONFIRMATION ON APPLY
-apply:
-	$(TERRAFORM) apply -auto-approve terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_APPLY_ARGS)
+#
+# Validations
+#
+.PHONY: validate-vars is-tree-clean
 
-flux-rec-sg fr:
+validate-vars:
+	@if [ -z "$(CLUSTER_NAME)" ]; then
+		echo "Missing required var: CLUSTER_NAME"
+		exit 1
+	fi
+
+is-tree-clean:
+ifneq ($(force), true)
+	@if git status --porcelain | grep '^[^?]'; then
+		git status;
+		echo -e "\n>>> Tree is not clean. Please commit and try again <<<\n";
+		exit 1;
+	fi
+endif
+
+#
+# Outputs
+#
+$(OUTPUT_JSON): $(ALL_TF) $(ALL_TFVARS)
+	@echo Generating $@
+	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) > $@
+
+output: $(OUTPUT_JSON)
+	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS)
+
+#
+# Helm chart
+#
+.PHONY: manifests cluster2/%.yaml
+
+$(HELM_VALUES_TF): $(filter-out $(HELM_VALUES_TF),$(wildcard *.tf *tfvars))
+	@echo Building $@ from:
+	python bin/mk-helm-values $(OUTPUTS_TF) | tr -d '\\' > $@
+
+$(VALUES_TERRAFORM_YAML): $(OUTPUT_JSON) $(HELM_VALUES_TF)
+	@echo Building $@ from $(OUTPUT_JSON)
+	python bin/tf2values2 $(OUTPUT_JSON) | yq -P > $@
+
+cluster2/%.yaml: $(VALUES_TERRAFORM_YAML) $(VALUES_CUSTOM_YAML)
+	$(HELM_TEMPLATE_CMD) --values values-terraform.yaml --values values-custom.yaml --set mode.$*=true > $@
+
+manifests: cluster2/kustomization.yaml cluster2/base.yaml cluster2/overlay.yaml
+
+#
+# Flux sugar
+#
+.PHONY: flux-%-%
+flux-rec-sg frsg:
 	flux reconcile source git flux-system
-flux-rec-ks:
+flux-rec-ks frks:
 	flux reconcile kustomization flux-system
-flux-sus-sg:
+
+flux-sus-sg fssg:
 	flux suspend source git flux-system
-flux-sus-ks:
+flux-sus-ks fsks:
 	flux suspend kustomization flux-system
-flux-res-sg:
+
+flux-res-sg fresg:
 	flux resume source git flux-system
-flux-res-ks:
+flux-res-ks fresks:
 	flux resume kustomization flux-system
 
-#################################################################################################
+#
+# Updates
+# Used only to update upstream cluster repo, not to be meant to be used by end-users.
+#
+
+.PHONY: update-% upgrade-%
+update-version:
+	latest=$$(timeout 3 curl -s https://raw.githubusercontent.com/getupcloud/getup-modules/main/version.txt || echo 0.0.0)
+	read -e -p "New module version: " -i "$$latest" v || read -e -p "New module version: [latest=$$latest]: " v
+	sed=$$(type gsed &>/dev/null && echo gsed || echo sed)
+	$$sed -i -e '/source/s/ref=v.*"/ref=v'$$v'"/g' main-*tf
+
+########################################################
+
+update: update-common update-terraform update-manifests
+	@echo
+	echo "--> Execute 'make $(UPDATE_OVERLAY_TARGET)' to see diff for overlay files <--"
+
+update-common: from ?= $(UPSTREAM_CLUSTER_DIR)
+update-common:
+	@echo 'Checking common files'
+	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
+		$(COMMON_FILES) $(ROOT_DIR)
+
+update-terraform: from ?= $(UPSTREAM_CLUSTER_DIR)
+update-terraform: update-common
+	@echo 'Checking terraform files'
+	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
+		$(MODULES_TF) $(ROOT_DIR)
+
+update-manifests: from ?= $(UPSTREAM_CLUSTER_DIR)
+update-manifests: update-common
+	@echo 'Checking manifest files'
+	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
+		$(MANIFESTS_BASE) $(ROOT_DIR)
+
+update-overlay: from ?= $(UPSTREAM_CLUSTER_DIR)
+update-overlay:
+	@echo 'Checking overlay files'
+	$(foreach source,$(MANIFESTS_OVERLAY),diff -prNu --color=always $(source) $(UPSTREAM_CLUSTER_DIR)/$(source) || true;)
+
+update-overlay-meld: from ?= $(UPSTREAM_CLUSTER_DIR)
+update-overlay-meld:
+	@echo 'Checking overlay files (using meld)'
+	$(foreach source,$(MANIFESTS_OVERLAY),meld --newtab $(source) $(UPSTREAM_CLUSTER_DIR)/$(source) || true;)
+
+########################################################
+
+# TO REMOVE ASAP
+#
+## copy files from modules defined in modules.yaml
+#update-from-local-cluster: from   ?= $(UPSTREAM_CLUSTER_DIR)
+#update-from-local-cluster: locals  = $(wildcard $(addprefix $(UPSTREAM_CLUSTER_DIR)/,$(UPDATE_CLUSTER_FILES)))
+#update-from-local-cluster: is-tree-clean
+#	@shopt -s nullglob
+#	echo Updating local files only from $(from):
+#	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args $(locals) $(ROOT_DIR)
+#
+## copy all existing files from source
+#upgrade-from-local-cluster: from ?= $(UPSTREAM_CLUSTER_DIR)
+#upgrade-from-local-cluster: is-tree-clean
+#	@shopt -s nullglob
+#	echo Updating all files from $(from):
+#	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative $(UPDATE_CLUSTER_FILES) $(ROOT_DIR)
+#
+#upgrade-from-local-examples-common: from ?= $(UPSTREAM_EXAMPLES_COMMON_DIR)
+#upgrade-from-local-examples-common: is-tree-clean
+#	@shopt -s nullglob
+#	echo Updating examples from $(from):
+#	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' $(UPDATE_EXAMPLES_COMMON_FILES) $(ROOT_DIR)
+#
+#upgrade-from-local-examples: from ?= $(UPSTREAM_EXAMPLES_CLUSTER_DIR)
+#upgrade-from-local-examples: upgrade-from-local-examples-common is-tree-clean
+#	@shopt -s nullglob
+#	echo Updating examples from $(from):
+#	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' $(UPDATE_EXAMPLES_CLUSTER_FILES) $(ROOT_DIR)
+
+#
+# Delete resources and cluster
+#
+.PHONY: destroy destroy-%
 
 destroy-cluster-resources:
 	python bin/destroy-cluster-resources
@@ -126,8 +308,6 @@ destroy-cluster:
 
 destroy: destroy-cluster-resources destroy-cluster
 	@echo 'Use "$(MAKE) destroy-cluster-resources-auto-approve" to destroy without asking.'
-
-#################################################################################################
 
 # WARNING: NO CONFIRMATION ON DESTROY
 destroy-cluster-resources-auto-approve:
@@ -140,107 +320,3 @@ destroy-cluster-auto-approve:
 
 # WARNING: NO CONFIRMATION ON DESTROY
 destroy-auto-approve: destroy-cluster-resources-auto-approve destroy-cluster-auto-approve
-
-#################################################################################################
-
-output:
-	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS)
-
-kubeconfig: REGION ?= $(shell awk '/^region/{print $$3}' terraform-*.auto.tfvars | tr -d '"')
-kubeconfig:
-	$(KUBECONFIG_RETRIEVE_COMMAND)
-
-update-version:
-	latest=$$(timeout 3 curl -s https://raw.githubusercontent.com/getupcloud/getup-modules/main/version.txt || echo 0.0.0)
-	read -e -p "New module version: " -i "$$latest" v || read -e -p "New module version: [latest=$$latest]: " v
-	sed=$$(type gsed &>/dev/null && echo gsed || echo sed)
-	$$sed -i -e '/source/s/ref=v.*"/ref=v'$$v'"/g' main-*tf
-
-is-tree-clean:
-ifneq ($(force), true)
-	@if git status --porcelain | grep '^[^?]'; then
-		git status;
-		echo -e "\n>>> Tree is not clean. Please commit and try again <<<\n";
-		exit 1;
-	fi
-endif
-
-# copy only locally existing files from source
-update-from-local-cluster: from   ?= $(UPSTREAM_CLUSTER_DIR)
-update-from-local-cluster: locals  = $(wildcard $(UPDATE_CLUSTER_FILES))
-update-from-local-cluster: #is-tree-clean
-	@shopt -s nullglob
-	echo Updating local files only from $(from):
-	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args $(locals) $(ROOT_DIR)
-
-# copy all existing files from source
-upgrade-from-local-cluster: from ?= $(UPSTREAM_CLUSTER_DIR)
-upgrade-from-local-cluster: #is-tree-clean
-	@shopt -s nullglob
-	echo Updating all files from $(from):
-	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative $(UPDATE_CLUSTER_FILES) $(ROOT_DIR)
-
-#
-# used only to update upstream cluster repo, not to be meant to be used by end-users.
-#
-upgrade-from-local-examples-common: from ?= $(UPSTREAM_EXAMPLES_COMMON_DIR)
-upgrade-from-local-examples-common: #is-tree-clean
-	@shopt -s nullglob
-	echo Updating examples from $(from):
-	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' $(UPDATE_EXAMPLES_COMMON_FILES) $(ROOT_DIR)
-
-upgrade-from-local-examples: from ?= $(UPSTREAM_EXAMPLES_CLUSTER_DIR)
-upgrade-from-local-examples: upgrade-from-local-examples-common #is-tree-clean
-	@shopt -s nullglob
-	echo Updating examples from $(from):
-	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' $(UPDATE_EXAMPLES_CLUSTER_FILES) $(ROOT_DIR)
-
-show-overlay-vars:
-	@grep -wrn -A 1 --color '#output:.*' cluster/overlay 2>/dev/null
-
-$(OUTPUT_JSON): *.tf $(TVARS)
-	@echo Generating $@
-	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) > $(OUTPUT_JSON)
-
-$(OUTPUT_OVERLAY_JSON): $(OUTPUT_JSON)
-	@echo Generating $@
-	bin/output2overlay $^ > $@
-
-$(TFVARS_OVERLAY_JSON): $(TFVARS)
-	@echo Generating $@
-	bin/tfvars2overlay $^ > $@
-
-validate-vars:
-	@if [ -z "$(CLUSTER_NAME)" ]; then
-		echo "Missing required var: CLUSTER_NAME"
-		exit 1
-	fi
-
-### HELM CHART
-
-HELM_TEMPLATE_CMD := helm template cluster cluster-chart --no-hooks --disable-openapi-validation
-
-values-keys:
-	$(HELM_TEMPLATE_CMD) --set keys=true | yq '.[]|.[]' | xargs printf "%s "
-
-$(VALUES_YAML): $(OUTPUT_JSON) $(TFVARS)
-	echo Generating values.yaml
-	bin/tf2values $(OUTPUT_JSON) $(TFVARS) $$($(HELM_TEMPLATE_CMD) --set keys=true | yq '.[]|.[]') > $(VALUES_YAML)
-
-overlay: clean-output $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
-	@echo Processing overlays
-	find cluster/overlay -type f -name '*.yaml' -o -name '*.yml' | sort -u | while read file; do
-		bin/overlay "$$file" $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON) >"$${file}.tmp" && mv "$${file}.tmp" "$$file" || exit 1
-	done
-
-manifests: $(VALUES_YAML)
-	$(HELM_TEMPLATE_CMD) --set kustomize=true
-	$(HELM_TEMPLATE_CMD) --set manifests=true
-	#jq | python -e "''.join((s[0] + s.title()[1:]).split('_'))"
-
-#kustomize ks:
-#	@echo Checking kustomization
-#	if ! kubectl kustomize ./cluster -o $(KUSTOMIZE_BUILD); then
-#		echo Generated output: $(KUSTOMIZE_BUILD)
-#		exit 1
-#	fi

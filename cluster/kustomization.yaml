@@ -7,6 +7,7 @@ resources:
 #- base/repo.yaml
 #- base/metrics-server.yaml
 #- base/cert-manager.yaml
+#- base/external-dns.yaml
 #- base/monitoring.yaml
 #- base/monitoring-config.yaml
 #- base/logging.yaml
@@ -27,9 +28,12 @@ resources:
 #- base/opencost.yaml ## Experimental
 #- base/datadog.yaml
 #- base/vap.yaml
+#- base/kubed.yaml
 
 #patches:
 #- path: overlay/cert-manager.yaml
+#- path: overlay/external-dns.yaml
+#- path: overlay/ingress-nginx.yaml
 #- path: overlay/monitoring.yaml
 #- path: overlay/monitoring-logging.yaml
 #- path: overlay/monitoring-tempo.yaml
@@ -48,8 +52,7 @@ resources:
 #- path: overlay/opencost.yaml ## Experimental
 #- path: overlay/datadog.yaml
 #- path: overlay/vap-enforced.yaml
-
-#patchesJson6902:
+#- path: overlay/kubed.yaml
 #- path: overlay/monitoring-tempo-ops.yaml
 #  target:
 #    group: helm.toolkit.fluxcd.io
