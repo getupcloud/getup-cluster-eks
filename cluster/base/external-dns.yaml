@@ -1,0 +1,40 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-dns
+  namespace: flux-system
+spec:
+  chart:
+    spec:
+      chart: external-dns
+      sourceRef:
+        kind: HelmRepository
+        name: external-dns
+      version: "~> 1.16"
+  install:
+    createNamespace: true
+    disableWait: false
+    remediation:
+      retries: -1
+  interval: 5m
+  releaseName: external-dns
+  storageNamespace: external-dns
+  targetNamespace: external-dns
+  values:
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+            - key: role
+              operator: In
+              values:
+              - infra
+
+    tolerations:
+    - key: dedicated
+      value: infra
+      effect: NoSchedule
+
+    policy: sync

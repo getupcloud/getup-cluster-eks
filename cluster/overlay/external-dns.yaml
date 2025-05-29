@@ -1,0 +1,13 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-dns
+  namespace: flux-system
+spec:
+    serviceAccount:
+      create: true
+      annotations:
+        eks.amazonaws.com/role-arn: #output:{external_dns_iam_role_arn}
+
+    #domainFilters:
+    #- example.com

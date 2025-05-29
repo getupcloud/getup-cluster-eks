@@ -1,0 +1,10 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  annotations:
+  name: kubed
+  namespace: flux-system
+spec:
+  values:
+    config:
+      clusterName: #output:{cluster_name}
