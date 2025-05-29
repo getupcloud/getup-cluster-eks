@@ -3,7 +3,7 @@
 #    versions \
 #    eks \
 #    all \
-#    v2.0.2 \
+#    v2.0.6 \
 #    modules/eks/cert-manager/versions.tf \
 #    modules/eks/ecr-credentials-sync/versions.tf \
 #    modules/eks/flux/versions.tf \
@@ -14,7 +14,8 @@
 #    modules/eks/velero/versions.tf \
 #    modules/eks/vpc_peering/versions.tf \
 #    modules/eks/eks/versions.tf \
-#    modules/eks/external-secrets-operator/versions.tf
+#    modules/eks/external-secrets-operator/versions.tf \
+#    modules/eks/external-dns/versions.tf
 
 terraform {
   required_version = "~> 1.11"

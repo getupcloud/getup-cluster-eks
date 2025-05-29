@@ -4,6 +4,7 @@ modules:
 - ecr-credentials-sync
 - eks
 - external-secrets-operator
+- external-dns
 - flux
 - istio
 - loki
