@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import hcl2
+import json
+
+if '-h' in sys.argv or '--help' in sys.argv or len(sys.argv) < 2:
+    print(f'Usage: {sys.argv[0]} OUTPUTS_TF')
+    sys.exit(1 if len(sys.argv) < 2 else 0)
+
+output_tf_files = sys.argv[1:]
+outputs = {
+    'cluster': {
+        'cluster_name': '${var.cluster_name}',
+        'default_storage_class_name': '${lookup(var.overlay, "default_storage_class_name","")}',
+        'default_ingress_class_name': '${lookup(var.overlay, "default_ingress_class_name","")}'
+    }
+}
+values = {}
+
+for t in output_tf_files:
+    module_name = os.path.splitext(os.path.basename(t))[0].removeprefix('outputs-').removeprefix('output-')
+    if module_name not in outputs:
+        outputs[module_name] = {}
+    with open(t, 'r') as f:
+        print(f'+ {t}', file=sys.stderr)
+        outputs[module_name].update({
+            key: value['value']
+            for d in hcl2.api.load(f).get('output', [])
+            for key, value in d.items()
+        })
+
+#print(json.dumps(outputs, indent=2))
+#sys.exit(0)
+
+def indent(s, n=2):
+    return '\n'.join([ (' ' * n) + i for i in s.split('\n') ]).lstrip()
+
+print('output "helm-values" {')
+print('  description = "Output suitable for helm chart values from getupcloud/cluster."')
+print('  sensitive = true')
+print('  value = ', end='')
+print(indent(json.dumps(outputs, indent=2)))
+print('}')
