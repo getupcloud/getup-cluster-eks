@@ -27,7 +27,7 @@ ALL_TFVARS            := $(wildcard *.tfvars)
 HELM_VALUES_TF        := helm-values.tf
 VALUES_TERRAFORM_YAML := values-terraform.yaml
 VALUES_CUSTOM_YAML    := values-custom.yaml
-HELM_TEMPLATE_CMD     := helm template cluster /home/mateus/getup/git/gitops/getup-cluster-eks/cluster-chart --no-hooks --disable-openapi-validation --set cluster.clusterProvider=$(FLAVOR)
+HELM_TEMPLATE_CMD     := helm template cluster cluster-chart --no-hooks --disable-openapi-validation --set cluster.clusterProvider=$(FLAVOR)
 
 # Update vars
 UPSTREAM_CLUSTER_DIR          ?= ../getup-cluster-$(FLAVOR)/
@@ -94,7 +94,23 @@ clean-output:
 clean-all: clean
 	rm -rf .terraform
 
-init: validate-vars
+versions.tf: versions.tf.example
+	@true
+	if [ -e $@ ]; then
+		tput setaf 1
+		echo "The file $< is newer than $@. Please update $@ manually."
+		echo "If this isn't necessary, just execute the command below and try again:"
+		echo "$$ touch $@"
+		tput sgr0
+		exit 1
+	fi
+	cp -vi $< $@
+	tput setaf 3
+	echo "Update the file $@ first."
+	tput sgr0
+	exit 2
+
+init: versions.tf validate-vars
 	$(TERRAFORM) init $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
 
 upgrade: validate-vars
@@ -132,7 +148,7 @@ fmt:
 
 commit:
 	if git status --porcelain | grep -vE '^(\?\?|!!)'; then
-		#git add $(HELM_VALUES_TF)
+		git add $(HELM_VALUES_TF)
 		git commit -a -m "$(GIT_COMMIT_MESSAGE)"
 	fi
 
