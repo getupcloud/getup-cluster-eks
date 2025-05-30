@@ -8,6 +8,8 @@ spec:
     ingress:
       enabled: true
       className: #output:{overlay["default_ingress_class_name"]}
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-staging-http01
       hosts:
       - host: podinfo.example.com
         paths:

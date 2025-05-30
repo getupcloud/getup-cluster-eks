@@ -7,7 +7,7 @@ ROOT_DIR              := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 TERRAFORM             ?= terraform
 TF_LOG_PATH           ?= terraform.log
 TF_LOG                ?= DEBUG
-CLUSTER_NAME          ?= $(shell sed -n -e 's|^[[:space:]]*cluster_name[[:space:]]*=[[:space:]]*"\([^"]*\)".*|\1|p' terraform-$(FLAVOR).tfvars 2>/dev/null || true)
+CLUSTER_NAME          ?= $(shell sed -n -e 's|^[[:space:]]*cluster_name[[:space:]]*=[[:space:]]*"\([^"]*\)".*|\1|p' terraform-$(FLAVOR).auto.tfvars 2>/dev/null || true)
 GIT_REMOTE            ?= origin
 GIT_BRANCH            ?= main
 GIT_COMMIT_MESSAGE    ?= Auto-generated commit
