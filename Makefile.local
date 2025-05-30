@@ -1,0 +1,17 @@
+UPSTREAM_EXAMPLES_COMMON_DIR  ?= ../getup-modules/examples/common
+UPDATE_EXAMPLES_COMMON_FILES  := *.tf *.example
+
+UPSTREAM_EXAMPLES_CLUSTER_DIR ?= ../getup-modules/examples/$(FLAVOR)
+UPDATE_EXAMPLES_CLUSTER_FILES := *.tf *.example */*.tf */*.example
+
+upgrade-examples: upgrade-examples-common upgrade-examples-flavor
+
+upgrade-examples-common:
+	@shopt -s nullglob
+	echo Upgrading examples from $(UPSTREAM_EXAMPLES_COMMON_DIR)
+	cd $(UPSTREAM_EXAMPLES_COMMON_DIR) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' $(UPDATE_EXAMPLES_COMMON_FILES) $(ROOT_DIR)
+
+upgrade-examples-flavor:
+	@shopt -s nullglob
+	echo Upgrading examples from $(UPSTREAM_EXAMPLES_CLUSTER_DIR)
+	cd $(UPSTREAM_EXAMPLES_CLUSTER_DIR) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' $(UPDATE_EXAMPLES_CLUSTER_FILES) $(ROOT_DIR)

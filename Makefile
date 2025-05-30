@@ -7,7 +7,7 @@ ROOT_DIR              := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 TERRAFORM             ?= terraform
 TF_LOG_PATH           ?= terraform.log
 TF_LOG                ?= DEBUG
-CLUSTER_NAME          ?= $(shell sed -n -e 's|^[[:space:]]*cluster_name[[:space:]]*=[[:space:]]*"\([^"]*\)".*|\1|p' *.tfvars 2>/dev/null)
+CLUSTER_NAME          ?= $(shell sed -n -e 's|^[[:space:]]*cluster_name[[:space:]]*=[[:space:]]*"\([^"]*\)".*|\1|p' terraform-$(FLAVOR).tfvars 2>/dev/null || true)
 GIT_REMOTE            ?= origin
 GIT_BRANCH            ?= main
 GIT_COMMIT_MESSAGE    ?= Auto-generated commit
@@ -31,17 +31,11 @@ HELM_TEMPLATE_CMD     := helm template cluster /home/mateus/getup/git/gitops/get
 
 # Update vars
 UPSTREAM_CLUSTER_DIR          ?= ../getup-cluster-$(FLAVOR)/
-UPSTREAM_EXAMPLES_COMMON_DIR  ?= ../getup-modules/examples/common
-UPSTREAM_EXAMPLES_CLUSTER_DIR ?= ../getup-modules/examples/$(FLAVOR)
-
 UPDATE_CLUSTER_FILES          := Makefile Makefile.conf bin cluster/base/* $(MODULES_TF)
 MANIFESTS_BASE                := cluster/base
 MANIFESTS_OVERLAY             := cluster/overlay cluster/kustomization.yaml
 COMMON_FILES                  := Makefile Makefile.conf bin
 UPDATE_OVERLAY_TARGET         ?= update-overlay # or update-overlay-meld
-
-UPDATE_EXAMPLES_CLUSTER_FILES := *.tf *.example */*.tf */*.example
-UPDATE_EXAMPLES_COMMON_FILES  := *.tf *.example
 
 ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -4 -s https://ifconfig.me)/32"]'
@@ -126,8 +120,8 @@ $(OUTPUT_OVERLAY_JSON): $(OUTPUT_JSON)
 	@echo Generating $@
 	bin/output2overlay $^ > $@
 
-$(TFVARS_OVERLAY_JSON): $(TFVARS)
-	@echo Generating $@
+$(TFVARS_OVERLAY_JSON): $(ALL_TFVARS)
+	echo Generating $@
 	bin/tfvars2overlay $^ > $@
 
 ## Helm Overlay
@@ -162,6 +156,9 @@ validate-vars:
 		exit 1
 	fi
 
+kustomize:
+	kustomize build cluster/ -o $(KUSTOMIZE_BUILD)
+
 is-tree-clean:
 ifneq ($(force), true)
 	@if git status --porcelain | grep '^[^?]'; then
@@ -186,7 +183,7 @@ output: $(OUTPUT_JSON)
 #
 .PHONY: manifests cluster2/%.yaml
 
-$(HELM_VALUES_TF): $(filter-out $(HELM_VALUES_TF),$(wildcard *.tf *tfvars))
+$(HELM_VALUES_TF): $(filter-out $(HELM_VALUES_TF),$(wildcard $(ALL_TF) $(ALL_TFVARS)))
 	@echo Building $@ from:
 	python bin/mk-helm-values $(OUTPUTS_TF) | tr -d '\\' > $@
 
@@ -283,17 +280,6 @@ update-overlay-meld:
 #	echo Updating all files from $(from):
 #	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative $(UPDATE_CLUSTER_FILES) $(ROOT_DIR)
 #
-#upgrade-from-local-examples-common: from ?= $(UPSTREAM_EXAMPLES_COMMON_DIR)
-#upgrade-from-local-examples-common: is-tree-clean
-#	@shopt -s nullglob
-#	echo Updating examples from $(from):
-#	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' $(UPDATE_EXAMPLES_COMMON_FILES) $(ROOT_DIR)
-#
-#upgrade-from-local-examples: from ?= $(UPSTREAM_EXAMPLES_CLUSTER_DIR)
-#upgrade-from-local-examples: upgrade-from-local-examples-common is-tree-clean
-#	@shopt -s nullglob
-#	echo Updating examples from $(from):
-#	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' $(UPDATE_EXAMPLES_CLUSTER_FILES) $(ROOT_DIR)
 
 #
 # Delete resources and cluster

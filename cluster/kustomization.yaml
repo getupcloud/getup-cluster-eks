@@ -12,6 +12,7 @@ resources:
 #- base/monitoring-config.yaml
 #- base/logging.yaml
 #- base/tempo.yaml
+#- base/podinfo.yaml
 #- base/otel-operator.yaml
 #- base/otel-config.yaml
 #- base/otel-demo.yaml
@@ -42,6 +43,7 @@ resources:
 #- path: overlay/monitoring-logging.yaml
 #- path: overlay/monitoring-tempo.yaml
 #- path: overlay/logging.yaml
+#- path: overlay/podinfo.yaml
 #- path: overlay/otel-operator.yaml
 #- path: overlay/otel-demo.yaml
 #- path: overlay/velero.yaml

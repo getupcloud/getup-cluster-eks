@@ -29,6 +29,7 @@ variable "overlay" {
   default = {
     default_storage_class_name : ""
     default_ingress_class_name : ""
+    default_ingresss_domain : ""
     certmanager_acme_email : ""
     cronitor_ping_url : ""
     ecr_credential_sync_region : ""
