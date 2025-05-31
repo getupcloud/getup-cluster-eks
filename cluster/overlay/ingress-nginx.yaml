@@ -4,4 +4,26 @@ metadata:
   name: ingress-nginx
   namespace: flux-system
 spec:
-  values: {}
+  values:
+    controller:
+
+      config:
+        use-proxy-protocol: "true"
+
+      service:
+        enabled: true
+        type: LoadBalancer
+        #loadBalancerIP: 1.1.1.1
+
+        annotations:
+          # Reference: https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/service/annotations/
+          # Public/External NLB
+          service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+          service.beta.kubernetes.io/aws-load-balancer-type: nlb-ip
+          service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance     ## to receive client IP. Doesn't work for IPv6
+          service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
+
+          # Private/Internal NLB
+          #service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+          #service.beta.kubernetes.io/aws-load-balancer-type: nlb-ip
+          #service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip

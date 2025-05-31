@@ -14,26 +14,30 @@ curl -OLs https://github.com/getupcloud/getup-cluster-eks/raw/main/create-cluste
 bash ./create-cluster.sh
 ```
 
-## Creating a cluster using existing VPC
+## Install gitleak to prevent any secret to be commited to local repo
 
-### Enable public ipv4 on all **public** subnets
-
-```
-aws ec2 modify-subnet-attribute --subnet-id ${PUBLIC_SUBNET_ID} --map-public-ip-on-launch
-```
-
-### Create the service linked role for spot instances
+Download `gitleaks` from https://github.com/gitleaks/gitleaks/releases/tag/v8.26.0 and put in your $PATH:
 
 ```
-aws iam create-service-linked-role --aws-service-name spot.amazonaws.com || true
+curl -L https://github.com/gitleaks/gitleaks/releases/download/v8.26.0/gitleaks_8.26.0_linux_x64.tar.gz \
+  | tar xzvf - gitleaks
+sudo mv gitleaks /usr/local/bin
 ```
 
-### Create user admin `${CLUSTER_NAME}-admin` with attached `AdministratorAccess` policy
+Add it to your local repo's pre-commit hook:
 
 ```
-aws iam create-user --user-name ${CLUSTER_NAME}-admin
-aws iam attach-user-policy --user-name ${CLUSTER_NAME}-admin --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
-aws iam create-access-key --user-name ${CLUSTER_NAME}-admin
+mv bin/pre-commit > .git/hooks/pre-commit
+git config hooks.gitleaks true
+```
+
+To ignore specific files from being reported as leaks, and the filename under `path` in file `.gitleaks.toml`.
+
+You can also run it with the following command to scan the local dir and git repo:
+
+```
+gitleaks dir --redact=75 --max-decode-depth 5 --no-banner
+gitleaks git --redact=75 --max-decode-depth 5 --no-banner
 ```
 
 ## Create terraform state bucket
@@ -58,14 +62,39 @@ Open it and fill the values:
 ```tf
 terraform {
   ...
+
   backend "s3" {
     bucket = "${BUCKET_NAME}"                         ## the bucket name
     key    = "${CLUSTER_NAME}/terraform.tfstate"      ## path to store state file
     region = "$(AWS_REGION}"                          ## aws bucket region
   }
+
   ...
 }
 ```
+
+## Creating a cluster using existing VPC
+
+### Enable public ipv4 on all **public** subnets
+
+```
+aws ec2 modify-subnet-attribute --subnet-id ${PUBLIC_SUBNET_ID} --map-public-ip-on-launch
+```
+
+### Create the service linked role for spot instances
+
+```
+aws iam create-service-linked-role --aws-service-name spot.amazonaws.com || true
+```
+
+### Create user admin `${CLUSTER_NAME}-admin` with attached `AdministratorAccess` policy
+
+```
+aws iam create-user --user-name ${CLUSTER_NAME}-admin
+aws iam attach-user-policy --user-name ${CLUSTER_NAME}-admin --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+aws iam create-access-key --user-name ${CLUSTER_NAME}-admin
+```
+
 
 ## Configuring modules
 

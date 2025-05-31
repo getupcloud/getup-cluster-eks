@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if ! enabled=$(git config --bool hooks.gitleaks) || [ "$enabled" != true ]; then
+  echo 'gitleaks precommit disabled. Enable with `git config hooks.gitleaks true`'
+  exit 0
+fi
+
+if ! gitleaks protect -v --staged; then
+  echo 'Warning: gitleaks has detected sensitive information in your changes.'
+  echo
+  echo 'To disable the gitleaks precommit hook run the following command:'
+  echo '  git config hooks.gitleaks false'
+  echo
+  echo 'To ignore a file from gitleaks, add it to `.gitleaks.toml`'
+  exit 1
+fi
+
+echo "No leaks detected by $0"

@@ -5,6 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   values:
+    replicaCount: 0
     ingress:
       enabled: true
       className: #output:{overlay["default_ingress_class_name"]}

@@ -62,7 +62,7 @@ spec:
         #default-ssl-certificate: "ingress-nginx/default-ssl-certificate" ## "<namespace>/<secret_name>"
 
       config:
-        use-proxy-protocol: "true"
+        #use-proxy-protocol: "true"
 
         # Use ewma load-balancing for high-load envs. It avoids concentrating reqs into a small set of app pods.
         # https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#load-balance
@@ -105,26 +105,6 @@ spec:
         enabled: true
         serviceMonitor:
           enabled: true
-
-      service:
-        enabled: true
-        type: LoadBalancer
-        #loadBalancerIP: 1.1.1.1
-
-        annotations:
-          # aks
-          #service.beta.kubernetes.io/azure-load-balancer-internal: false
-
-          # eks nlb internal - Lembrando que pra usar NLB INTERNAL O EKS TEM QUE TER SIDO CRIADO COM UMA SUBNET PRIVADA
-          # service.beta.kubernetes.io/aws-load-balancer-scheme: internal
-          # service.beta.kubernetes.io/aws-load-balancer-type: nlb-ip
-          # service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-
-          # eks - nlb external
-          service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
-          service.beta.kubernetes.io/aws-load-balancer-type: nlb-ip
-          service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance ## to receive client IP. Doesn't work for IPv6
-          service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
 
     defaultBackend:
       enabled: true

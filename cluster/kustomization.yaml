@@ -5,60 +5,63 @@ resources:
 - flux-system
 #- ../apps/
 #- base/repo.yaml
-#- base/metrics-server.yaml
+
+## Default resources
+#- base/aws-efs-storageclass.yaml
+#- base/aws-external-secrets-config.yaml
+#- base/aws-external-secrets-operator.yaml
+#- base/aws-load-balancer-controller.yaml
 #- base/cert-manager.yaml
+#- base/datadog.yaml
+#- base/ecr-credentials-sync.yaml
 #- base/external-dns.yaml
-#- base/monitoring.yaml
-#- base/monitoring-config.yaml
+#- base/flagger.yaml
+#- base/ingress-nginx.yaml
+#- base/kubed.yaml
 #- base/logging.yaml
-#- base/tempo.yaml
-#- base/podinfo.yaml
-#- base/otel-operator.yaml
+#- base/metrics-server.yaml
+#- base/monitoring-config.yaml
+#- base/monitoring.yaml
+#- base/opencost.yaml ## Experimental
 #- base/otel-config.yaml
 #- base/otel-demo.yaml
+#- base/otel-operator.yaml
 #- base/otel-shop-demo.yaml
-#- base/ingress-nginx.yaml
-#- base/velero.yaml
-#- base/aws-efs-storageclass.yaml
-#- base/aws-load-balancer-controller.yaml
-#- base/aws-external-secrets-operator.yaml
-#- base/aws-external-secrets-config.yaml
-#- base/ecr-credentials-sync.yaml
-#- base/flagger.yaml
+#- base/podinfo.yaml
 #- base/teleport.yaml
-#- base/opencost.yaml ## Experimental
-#- base/datadog.yaml
+#- base/tempo.yaml
 #- base/vap.yaml
-#- base/kubed.yaml
+#- base/velero.yaml
 
 ## Custom resources
 #- overlay/my-secret.yaml
 #- overlay/my-deployment.yaml
 
 #patches:
+#- path: overlay/aws-efs-storageclass.yaml
+#- path: overlay/aws-external-secrets-config.yaml
+#- path: overlay/aws-external-secrets-operator.yaml
+#- path: overlay/aws-load-balancer-controller.yaml
 #- path: overlay/cert-manager.yaml
+#- path: overlay/datadog.yaml
+#- path: overlay/ecr-credentials-sync.yaml
 #- path: overlay/external-dns.yaml
+#- path: overlay/flagger.yaml
 #- path: overlay/ingress-nginx.yaml
-#- path: overlay/monitoring.yaml
+#- path: overlay/kubed.yaml
+#- path: overlay/logging.yaml
 #- path: overlay/monitoring-logging.yaml
 #- path: overlay/monitoring-tempo.yaml
-#- path: overlay/logging.yaml
-#- path: overlay/podinfo.yaml
-#- path: overlay/otel-operator.yaml
+#- path: overlay/monitoring.yaml
+#- path: overlay/opencost.yaml ## Experimental
 #- path: overlay/otel-demo.yaml
-#- path: overlay/velero.yaml
-#- path: overlay/aws-efs-storageclass.yaml
-#- path: overlay/aws-load-balancer-controller.yaml
-#- path: overlay/aws-external-secrets-operator.yaml
-#- path: overlay/aws-external-secrets-config.yaml
-#- path: overlay/ecr-credentials-sync.yaml
-#- path: overlay/flagger.yaml
+#- path: overlay/otel-operator.yaml
+#- path: overlay/podinfo.yaml
 #- path: overlay/teleport.yaml
 #- path: overlay/tempo.yaml
-#- path: overlay/opencost.yaml ## Experimental
-#- path: overlay/datadog.yaml
 #- path: overlay/vap-enforced.yaml
-#- path: overlay/kubed.yaml
+#- path: overlay/velero.yaml
+
 #- path: overlay/monitoring-tempo-ops.yaml
 #  target:
 #    group: helm.toolkit.fluxcd.io

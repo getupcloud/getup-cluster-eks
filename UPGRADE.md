@@ -1,4 +1,4 @@
-## 1.x -> 2.0
+## Upgrading karpenter 0.x to 1.5
 
 ```
 echo UPSTREAM_CLUSTER_DIR=/home/mateus/getup/git/gitops/getup-cluster-eks >> .env

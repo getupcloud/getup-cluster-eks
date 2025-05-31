@@ -12,9 +12,6 @@ spec:
       - mountPath: /target
         name: plugins
 
-    credentials:
-      useSecret: false # required to use IRSA
-
     configuration:
       defaultBackupStorageLocation:
       - aws: default
@@ -36,9 +33,13 @@ spec:
         config:
           region: #output:{aws_region}
 
+    credentials:
+      useSecret: false # required to use IRSA
+
     serviceAccount:
       server:
         create: true
         name: velero
         annotations:
           eks.amazonaws.com/role-arn: #output:{velero_iam_role_arn}
+

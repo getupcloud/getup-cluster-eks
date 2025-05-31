@@ -56,9 +56,6 @@ spec:
         memory: 1Gi
         cpu: 500m
 
-    credentials:
-      useSecret: false # required to use IRSA
-
     schedules:
       volumes:
         schedule: '0 3 * * *'
