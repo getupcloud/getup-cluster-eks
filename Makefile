@@ -113,7 +113,7 @@ versions.tf: versions.tf.example
 init: versions.tf validate-vars
 	$(TERRAFORM) init $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
 
-upgrade: validate-vars
+init-upgrade: validate-vars
 	$(TERRAFORM) init -upgrade $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
 
 validate: $(HELM_VALUES_TF) validate-vars
