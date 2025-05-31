@@ -40,6 +40,7 @@ variable "overlay" {
     slack_channel : ""
     teleport_auth_token : ""
     datadog_api_key : ""
+    aws_efs_filesystem_id : ""
   }
 }
 
