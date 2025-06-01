@@ -42,4 +42,3 @@ spec:
         name: velero
         annotations:
           eks.amazonaws.com/role-arn: #output:{velero_iam_role_arn}
-

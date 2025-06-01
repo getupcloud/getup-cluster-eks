@@ -259,7 +259,7 @@ update-terraform: from ?= $(UPSTREAM_CLUSTER_DIR)
 update-terraform: update-common
 	@echo 'Checking terraform files'
 	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
-		$(MODULES_TF) $(ROOT_DIR)
+		$(MODULES_TF) $(COMMONS_TF) $(ROOT_DIR)
 
 update-manifests: from ?= $(UPSTREAM_CLUSTER_DIR)
 update-manifests: update-common
