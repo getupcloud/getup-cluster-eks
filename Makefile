@@ -110,7 +110,18 @@ versions.tf: versions.tf.example
 	tput sgr0
 	exit 2
 
-init: versions.tf validate-vars
+.git/hooks/pre-commit: bin/pre-commit
+	@ln -sf ../../$< $@
+	git config hooks.gitleaks true
+	if ! which gitleaks &>/dev/null; then
+		echo "Please install 'gitleaks' from https://github.com/gitleaks/gitleaks first."
+		echo "Alternativelly, use the target 'init-unsafe'"
+		exit 2
+	fi
+
+init: .git/hooks/pre-commit versions.tf validate-vars init-unsafe
+
+init-unsafe: versions.tf validate-vars
 	$(TERRAFORM) init $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
 
 init-upgrade: validate-vars

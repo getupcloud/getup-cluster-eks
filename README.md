@@ -14,7 +14,7 @@ curl -OLs https://github.com/getupcloud/getup-cluster-eks/raw/main/create-cluste
 bash ./create-cluster.sh
 ```
 
-## Install gitleak to prevent any secret to be commited to local repo
+## Install gitleak to prevent any secret to be commited to your local repo
 
 Download `gitleaks` from https://github.com/gitleaks/gitleaks/releases/tag/v8.26.0 and put in your $PATH:
 
@@ -27,7 +27,7 @@ sudo mv gitleaks /usr/local/bin
 Add it to your local repo's pre-commit hook:
 
 ```
-mv bin/pre-commit > .git/hooks/pre-commit
+make .git/hooks/pre-commit
 git config hooks.gitleaks true
 ```
 
