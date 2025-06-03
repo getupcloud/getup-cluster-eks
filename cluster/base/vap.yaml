@@ -27,3 +27,8 @@ spec:
   values:
     enforce: false
     defaultFailurePolicy: Ignore #Ignore|Fail
+    policy:
+      getup-g-101-delete-protection:
+        validationActions:
+        - Deny
+        - Audit
