@@ -30,12 +30,14 @@ VALUES_CUSTOM_YAML    := values-custom.yaml
 HELM_TEMPLATE_CMD     := helm template cluster cluster-chart --no-hooks --disable-openapi-validation --set cluster.clusterProvider=$(FLAVOR)
 
 # Update vars
-UPSTREAM_CLUSTER_DIR          ?= ../getup-cluster-$(FLAVOR)/
-UPDATE_CLUSTER_FILES          := Makefile Makefile.conf bin cluster/base/* $(MODULES_TF)
-MANIFESTS_BASE                := cluster/base
-MANIFESTS_OVERLAY             := cluster/overlay cluster/kustomization.yaml
-COMMON_FILES                  := Makefile Makefile.conf bin
-UPDATE_OVERLAY_TARGET         ?= update-overlay # or update-overlay-meld
+UPSTREAM_CLUSTER_DIR  ?= ../getup-cluster-$(FLAVOR)/
+MANIFESTS_BASE        := cluster/base
+MANIFESTS_OVERLAY     := cluster/overlay cluster/kustomization.yaml
+MODULES               := $(shell yq '.modules[]' <modules.yaml) ## TODO: handle modules.yaml during update
+MODULES_TF            := $(foreach m,$(MODULES),main-$(m).tf variables-$(m).tf outputs-$(m).tf moved-$(m).tf terraform-$(m).auto.tfvars.example)
+COMMONS_TF            := variables-customer.tf terraform-customer.auto.tfvars.example variables-customer.tf
+COMMON_FILES          := Makefile Makefile.conf bin .gitleaks.toml
+UPDATE_OVERLAY_TARGET ?= update-overlay # or update-overlay-meld
 
 ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -4 -s https://ifconfig.me)/32"]'
@@ -243,22 +245,22 @@ flux-res-ks fresks:
 	flux resume kustomization flux-system
 
 #
-# Updates
-# Used only to update upstream cluster repo, not to be meant to be used by end-users.
+# Update customer cluster from upstream getup-cluster-${FLAVOR} code
+# TODO: update from remote repo, not filesystem
 #
 
-.PHONY: update-%
+.PHONY: update update-%
+
+update: update-common update-terraform update-manifests
+	@echo
+	echo "--> Execute 'make $(UPDATE_OVERLAY_TARGET)' to see diff for overlay files <--"
+
+# this exists just to allow to update versions only, without touching anything else
 update-version:
 	latest=$$(timeout 3 curl -s https://raw.githubusercontent.com/getupcloud/getup-modules/main/version.txt || echo 0.0.0)
 	read -e -p "New module version: " -i "$$latest" v || read -e -p "New module version: [latest=$$latest]: " v
 	sed=$$(type gsed &>/dev/null && echo gsed || echo sed)
 	$$sed -i -e '/source/s/ref=v.*"/ref=v'$$v'"/g' main-*tf
-
-########################################################
-
-update: update-common update-terraform update-manifests
-	@echo
-	echo "--> Execute 'make $(UPDATE_OVERLAY_TARGET)' to see diff for overlay files <--"
 
 update-common: from ?= $(UPSTREAM_CLUSTER_DIR)
 update-common:

@@ -1,3 +1,7 @@
+#
+# This file allows `getup-cluster-${FLAVOR}` repos to fetch changes from `getup-modues/examples/${FLAVOR}`.
+# It should not exists in user repos, a.k.a. `customer-$(customer_name}-${cluster_name}` repos.
+#
 UPSTREAM_EXAMPLES_COMMON_DIR  ?= ../getup-modules/examples/common
 UPDATE_EXAMPLES_COMMON_FILES  := *.tf *.example
 
