@@ -10,8 +10,8 @@ spec:
       annotations:
         eks.amazonaws.com/role-arn: #output:{external_dns_iam_role_arn}
 
-    #domainFilters:
-    #- example.com
+    domainFilters:
+    - example.com
     #- example.dev.br
 
     #excludeDomains:

@@ -76,7 +76,7 @@ all help:
 #
 # Top-level targets
 #
-.PHONY: $(FLOW_FULL_RECONCILE) upgrade migrate-state
+.PHONY: $(FLOW_FULL_RECONCILE) migrate-state
 
 reconcile: $(FLOW_RECONCILE)
 
@@ -247,7 +247,7 @@ flux-res-ks fresks:
 # Used only to update upstream cluster repo, not to be meant to be used by end-users.
 #
 
-.PHONY: update-% upgrade-%
+.PHONY: update-%
 update-version:
 	latest=$$(timeout 3 curl -s https://raw.githubusercontent.com/getupcloud/getup-modules/main/version.txt || echo 0.0.0)
 	read -e -p "New module version: " -i "$$latest" v || read -e -p "New module version: [latest=$$latest]: " v
@@ -289,24 +289,6 @@ update-overlay-meld:
 	$(foreach source,$(MANIFESTS_OVERLAY),meld --newtab $(source) $(UPSTREAM_CLUSTER_DIR)/$(source) || true;)
 
 ########################################################
-
-# TO REMOVE ASAP
-#
-## copy files from modules defined in modules.yaml
-#update-from-local-cluster: from   ?= $(UPSTREAM_CLUSTER_DIR)
-#update-from-local-cluster: locals  = $(wildcard $(addprefix $(UPSTREAM_CLUSTER_DIR)/,$(UPDATE_CLUSTER_FILES)))
-#update-from-local-cluster: is-tree-clean
-#	@shopt -s nullglob
-#	echo Updating local files only from $(from):
-#	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args $(locals) $(ROOT_DIR)
-#
-## copy all existing files from source
-#upgrade-from-local-cluster: from ?= $(UPSTREAM_CLUSTER_DIR)
-#upgrade-from-local-cluster: is-tree-clean
-#	@shopt -s nullglob
-#	echo Updating all files from $(from):
-#	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative $(UPDATE_CLUSTER_FILES) $(ROOT_DIR)
-#
 
 #
 # Delete resources and cluster
