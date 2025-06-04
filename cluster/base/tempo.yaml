@@ -39,11 +39,6 @@ spec:
         - weight: 100
           preference:
             matchExpressions:
-            - key: node-role.kubernetes.io/infra
-              operator: Exists
-        - weight: 90
-          preference:
-            matchExpressions:
             - key: role
               operator: In
               values:

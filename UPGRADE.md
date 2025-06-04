@@ -6,7 +6,7 @@ export UPSTREAM_CLUSTER_DIR=/home/mateus/getup/git/gitops/getup-cluster-eks
 
 make update-from-local-cluster
 cp $UPSTREAM_CLUSTER_DIR/cluster/overlay/aws-load-balancer-controller.yaml cluster/overlay/aws-load-balancer-controller.yaml
-sed -i -e 's/ref=v2.0.2/ref=v1.4.3/' main-eks.tf
+sed -i -e 's/ref=v2\.0\..*/ref=v1.4.3/' main-eks.tf
 make init
 kubectl delete nodepool --all
 kubectl delete nodeclaim --all
