@@ -10,7 +10,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: opencost
-      version: "~> 1.43"
+      version: "~> 2"
   dependsOn:
   - name: monitoring
   install:
