@@ -1,0 +1,58 @@
+# Put custom argo-cd chart values here and set `argocd_values = "examples/eks/argocd/helm-values-argocd.yaml"` in `terraform-argocd.auto.tfvars`
+#
+#global:
+#  domain: argocd.example.com
+#
+#server:
+#  ingress:
+#    enabled: true
+#    ingressClassName: nginx
+#    tls: true
+#  certificate:
+#    enabled: true
+#    issuer:
+#      group: cert-manager.io
+#      kind: ClusterIssuer
+#      name: letsencrypt-production-http01
+#
+#configs:
+#  params:
+#    ## NOTE: This value should be set when you generate params by other means as it changes ports used by ingress template.
+#    server.insecure: true
+#  cm:
+#    dex.config: |
+#      connectors:
+#      - type: ldap
+#        id: ldap
+#        name: LDAP
+#        config:
+#          host: ldap.example.com:389
+#          insecureNoSSL: true
+#          insecureSkipVerify: false
+#          startTLS: false
+#
+#          bindDN: "cn=exampleldap,ou=Example Co.,dc=example,dc=ops"
+#          bindPW: "ldap-secret-password"
+#          usernamePrompt: "Username"
+#
+#          userSearch:
+#            baseDN: "dc=example,dc=ops"
+#            filter: "(objectClass=person)"
+#            username: sAMAccountName
+#            idAttr: sAMAccountName
+#            emailAttr: mail
+#            nameAttr: displayName
+#
+#          groupSearch:
+#            baseDN: "ou=Example Org.,dc=example,dc=ops"
+#            filter: "(objectClass=group)"
+#            userMatchers:
+#            - userAttr: DN
+#              groupAttr: member
+#            nameAttr: cn
+#  rbac:
+#    policy.default: role:readonly
+#    policy.csv: |
+#      # maps LDAP group `DevopsTeam` to role:admin
+#      g, DevopsTeam, role:admin
+#
