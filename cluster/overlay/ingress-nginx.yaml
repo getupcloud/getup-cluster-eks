@@ -10,6 +10,10 @@ spec:
       config:
         use-proxy-protocol: "true"
 
+      extraArgs:
+        enable-ssl-passthrough: "false"
+        #default-ssl-certificate: ingress-nginx/default-ssl-certificate ## <namespace>/<secret_name
+
       service:
         enabled: true
         type: LoadBalancer
