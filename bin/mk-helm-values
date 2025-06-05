@@ -39,7 +39,7 @@ def indent(s, n=2):
 
 print('output "helm-values" {')
 print('  description = "Output suitable for helm chart values from getupcloud/cluster."')
-print('  sensitive = true')
+print('  sensitive   = true')
 print('  value = ', end='')
 print(indent(json.dumps(outputs, indent=2, separators=(',', ' : '))))
 print('}')
