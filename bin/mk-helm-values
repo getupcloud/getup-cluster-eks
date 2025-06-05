@@ -13,8 +13,8 @@ output_tf_files = sys.argv[1:]
 outputs = {
     'cluster': {
         'cluster_name': '${var.cluster_name}',
-        'default_storage_class_name': '${lookup(var.overlay, "default_storage_class_name","")}',
-        'default_ingress_class_name': '${lookup(var.overlay, "default_ingress_class_name","")}'
+        'default_storage_class_name': '${lookup(var.overlay, "default_storage_class_name", "")}',
+        'default_ingress_class_name': '${lookup(var.overlay, "default_ingress_class_name", "")}'
     }
 }
 values = {}
@@ -41,5 +41,5 @@ print('output "helm-values" {')
 print('  description = "Output suitable for helm chart values from getupcloud/cluster."')
 print('  sensitive = true')
 print('  value = ', end='')
-print(indent(json.dumps(outputs, indent=2)))
+print(indent(json.dumps(outputs, indent=2, separators=(',', ' : '))))
 print('}')
