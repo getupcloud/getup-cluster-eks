@@ -140,6 +140,9 @@ plan: $(HELM_VALUES_TF) validate-vars
 apply:
 	$(TERRAFORM) apply -auto-approve terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_APPLY_ARGS)
 
+fmt:
+	$(TERRAFORM) fmt $(TERRAFORM_ARGS) $(TERRAFORM_FMT_ARGS)
+
 ## Overlay
 overlay: clean-output $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
 	@echo Processing overlays
@@ -156,10 +159,10 @@ $(TFVARS_OVERLAY_JSON): $(ALL_TFVARS)
 	bin/tfvars2overlay $^ > $@
 
 ## Helm Overlay
+
 overlay-helm: manifests
 
-fmt:
-	$(TERRAFORM) fmt $(TERRAFORM_ARGS) $(TERRAFORM_FMT_ARGS)
+## Git
 
 commit:
 	if git status --porcelain | grep -vE '^(\?\?|!!)'; then
