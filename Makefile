@@ -3,7 +3,7 @@ include Makefile.conf
 -include .env
 
 # General variables
-ROOT_DIR              := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
+ROOT_DIR              := $(abspath $(dir $(firstword $(MAKEFILE_LIST))))
 TERRAFORM             ?= terraform
 TF_LOG_PATH           ?= terraform.log
 TF_LOG                ?= DEBUG
@@ -30,7 +30,8 @@ VALUES_CUSTOM_YAML    := values-custom.yaml
 HELM_TEMPLATE_CMD     := helm template cluster cluster-chart --no-hooks --disable-openapi-validation --set cluster.clusterProvider=$(FLAVOR)
 
 # Update vars
-UPSTREAM_CLUSTER_DIR  ?= ../getup-cluster-$(FLAVOR)/
+UPSTREAM_GIT_REPO     ?= https://github.com/getupcloud/getup-cluster-$(FLAVOR).git
+UPSTREAM_DIR          := $(ROOT_DIR)/.upstream
 MANIFESTS_BASE        := cluster/base
 MANIFESTS_OVERLAY     := cluster/overlay cluster/kustomization.yaml
 ## TODO: handle modules.yaml during update
@@ -154,9 +155,8 @@ $(TFVARS_OVERLAY_JSON): $(ALL_TFVARS)
 	echo Generating $@
 	bin/tfvars2overlay $^ > $@
 
-#
-# Support targets
-#
+## Helm Overlay
+overlay-helm: manifests
 
 fmt:
 	$(TERRAFORM) fmt $(TERRAFORM_ARGS) $(TERRAFORM_FMT_ARGS)
@@ -251,9 +251,17 @@ flux-res-ks fresks:
 # TODO: update from remote repo, not filesystem
 #
 
-.PHONY: update update-%
+.PHONY: update update-% sync-upstream
 
-update: update-common update-terraform update-manifests
+$(UPSTREAM_DIR):
+	@echo 'Syncing upstream: $(UPSTREAM_GIT_REPO)'
+	git clone $(UPSTREAM_GIT_REPO) $(UPSTREAM_DIR)
+
+sync-upstream: $(UPSTREAM_DIR)
+	@echo 'Syncing upstream: $(UPSTREAM_GIT_REPO)'
+	cd $(UPSTREAM_DIR) && git pull origin main --tags
+
+update: sync-upstream update-common update-terraform update-manifests
 	@echo
 	echo "--> Execute 'make $(UPDATE_OVERLAY_TARGET)' to see diff for overlay files <--"
 
@@ -264,33 +272,28 @@ update-version:
 	sed=$$(type gsed &>/dev/null && echo gsed || echo sed)
 	$$sed -i -e '/source/s/ref=v.*"/ref=v'$$v'"/g' main-*tf
 
-update-common: from ?= $(UPSTREAM_CLUSTER_DIR)
 update-common:
 	@echo 'Checking common files'
-	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
+	cd $(UPSTREAM_DIR) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
 		$(COMMON_FILES) $(ROOT_DIR)
 
-update-terraform: from ?= $(UPSTREAM_CLUSTER_DIR)
 update-terraform: update-common
 	@echo 'Checking terraform files'
-	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
+	cd $(UPSTREAM_DIR) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
 		$(MODULES_TF) $(COMMON_TF) $(ROOT_DIR)
 
-update-manifests: from ?= $(UPSTREAM_CLUSTER_DIR)
 update-manifests: update-common
 	@echo 'Checking manifest files'
-	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
+	cd $(UPSTREAM_DIR) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
 		$(MANIFESTS_BASE) $(ROOT_DIR)
 
-update-overlay: from ?= $(UPSTREAM_CLUSTER_DIR)
 update-overlay:
 	@echo 'Checking overlay files'
-	$(foreach source,$(MANIFESTS_OVERLAY),diff -prNu --color=always $(source) $(UPSTREAM_CLUSTER_DIR)/$(source) || true;)
+	$(foreach source,$(MANIFESTS_OVERLAY),diff -prNu --color=always $(source) $(UPSTREAM_DIR)/$(source) || true;)
 
-update-overlay-meld: from ?= $(UPSTREAM_CLUSTER_DIR)
 update-overlay-meld:
 	@echo 'Checking overlay files (using meld)'
-	$(foreach source,$(MANIFESTS_OVERLAY),meld --newtab $(source) $(UPSTREAM_CLUSTER_DIR)/$(source) || true;)
+	$(foreach source,$(MANIFESTS_OVERLAY),meld --newtab $(source) $(UPSTREAM_DIR)/$(source) || true;)
 
 ########################################################
 
