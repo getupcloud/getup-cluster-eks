@@ -154,8 +154,9 @@ $(TFVARS_OVERLAY_JSON): $(ALL_TFVARS)
 	echo Generating $@
 	bin/tfvars2overlay $^ > $@
 
-## Helm Overlay
-overlay-helm: manifests
+#
+# Support targets
+#
 
 fmt:
 	$(TERRAFORM) fmt $(TERRAFORM_ARGS) $(TERRAFORM_FMT_ARGS)
