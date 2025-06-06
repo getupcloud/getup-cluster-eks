@@ -61,6 +61,11 @@ spec:
 
       #dnsPolicy: ClusterFirstWithHostNet
 
+      ingressClassResource:
+        enabled: true
+        name: nginx
+        default: true
+
       config:
         #use-proxy-protocol: "true"
 

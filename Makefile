@@ -33,11 +33,12 @@ HELM_TEMPLATE_CMD     := helm template cluster cluster-chart --no-hooks --disabl
 UPSTREAM_CLUSTER_DIR  ?= ../getup-cluster-$(FLAVOR)/
 MANIFESTS_BASE        := cluster/base
 MANIFESTS_OVERLAY     := cluster/overlay cluster/kustomization.yaml
-MODULES               := $(shell yq '.modules[]' <modules.yaml) ## TODO: handle modules.yaml during update
-MODULES_TF            := $(foreach m,$(MODULES),main-$(m).tf variables-$(m).tf outputs-$(m).tf moved-$(m).tf terraform-$(m).auto.tfvars.example)
-COMMONS_TF            := variables-customer.tf terraform-customer.auto.tfvars.example variables-customer.tf
+## TODO: handle modules.yaml during update
+MODULES               := $(shell yq '.modules[]' <modules.yaml)
+MODULES_TF            := $(foreach m,$(MODULES),main-$(m).tf variables-$(m).tf outputs-$(m).tf moved-$(m).tf terraform-$(m).auto.tfvars.example helm-values-$(m).yaml.example)
+COMMON_TF             := variables-customer.tf terraform-customer.auto.tfvars.example variables-customer.tf
 COMMON_FILES          := Makefile Makefile.conf bin .gitleaks.toml
-UPDATE_OVERLAY_TARGET ?= update-overlay # or update-overlay-meld
+UPDATE_OVERLAY_TARGET ?= update-overlay
 
 ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -4 -s https://ifconfig.me)/32"]'
@@ -272,7 +273,7 @@ update-terraform: from ?= $(UPSTREAM_CLUSTER_DIR)
 update-terraform: update-common
 	@echo 'Checking terraform files'
 	cd $(from) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
-		$(MODULES_TF) $(COMMONS_TF) $(ROOT_DIR)
+		$(MODULES_TF) $(COMMON_TF) $(ROOT_DIR)
 
 update-manifests: from ?= $(UPSTREAM_CLUSTER_DIR)
 update-manifests: update-common
