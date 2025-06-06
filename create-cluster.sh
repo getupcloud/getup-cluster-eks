@@ -16,7 +16,7 @@ if [ -d "$repo" ]; then
   exit 1
 fi
 
-git clone git@github.com:getupcloud/getup-cluster-doks.git $repo
+git clone git@github.com:getupcloud/getup-cluster-eks.git $repo
 cd $repo
 
 git remote remove origin
