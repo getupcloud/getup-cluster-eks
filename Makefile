@@ -54,10 +54,10 @@ all help:
 	echo
 	echo "Terraform commands"
 	echo "  init          Executes 'terraform init'"
+	echo "  plan          Executes 'terraform plan'"
 	echo "  validate      Executes 'terraform validate'"
 	echo "  fmt           Executes 'terraform fmt'"
 	echo "  apply         Executes 'terraform apply'"
-	echo "  validate      Executes 'terraform validate'"
 	echo
 	echo "Git commands"
 	echo "  overlay      Updates ./clustetr/overlay using data from terraform output and tfvars"
