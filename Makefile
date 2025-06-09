@@ -38,7 +38,7 @@ MANIFESTS_OVERLAY     := cluster/overlay cluster/kustomization.yaml
 MODULES               := $(shell yq '.modules[]' <modules.yaml)
 MODULES_TF            := $(foreach m,$(MODULES),main-$(m).tf variables-$(m).tf outputs-$(m).tf moved-$(m).tf terraform-$(m).auto.tfvars.example helm-values-$(m).yaml.example)
 MODULES_MAIN_TF       := $(foreach m,$(MODULES),main-$(m).tf)
-COMMON_TF             := variables-customer.tf terraform-customer.auto.tfvars.example variables-customer.tf
+COMMON_TF             := variables-customer.tf terraform-customer.auto.tfvars.example variables-auth.tf
 COMMON_FILES          := Makefile Makefile.conf bin .gitleaks.toml
 UPDATE_OVERLAY_TARGET ?= update-overlay
 
