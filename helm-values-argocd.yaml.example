@@ -55,4 +55,3 @@
 #    policy.csv: |
 #      # maps LDAP group `DevopsTeam` to role:admin
 #      g, DevopsTeam, role:admin
-#
