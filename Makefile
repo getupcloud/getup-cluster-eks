@@ -37,6 +37,7 @@ MANIFESTS_OVERLAY     := cluster/overlay cluster/kustomization.yaml
 ## TODO: handle modules.yaml during update
 MODULES               := $(shell yq '.modules[]' <modules.yaml)
 MODULES_TF            := $(foreach m,$(MODULES),main-$(m).tf variables-$(m).tf outputs-$(m).tf moved-$(m).tf terraform-$(m).auto.tfvars.example helm-values-$(m).yaml.example)
+MODULES_MAIN_TF       := $(foreach m,$(MODULES),main-$(m).tf)
 COMMON_TF             := variables-customer.tf terraform-customer.auto.tfvars.example variables-customer.tf
 COMMON_FILES          := Makefile Makefile.conf bin .gitleaks.toml
 UPDATE_OVERLAY_TARGET ?= update-overlay
@@ -50,21 +51,28 @@ endif
 
 .PHONY: all help
 all help:
-	@echo Available targets
+	@:
+	echo "Available targets"
+	echo "================="
 	echo
 	echo "Terraform commands"
+	echo "------------------"
 	echo "  init          Executes 'terraform init'"
-	echo "  plan          Executes 'terraform plan'"
 	echo "  validate      Executes 'terraform validate'"
 	echo "  fmt           Executes 'terraform fmt'"
+	echo "  plan          Executes 'terraform plan'"
 	echo "  apply         Executes 'terraform apply'"
 	echo
 	echo "Git commands"
+	echo "------------"
 	echo "  overlay      Updates ./clustetr/overlay using data from terraform output and tfvars"
 	echo "  commit       Executes 'git commit' using default message"
+	echo "  pull         Executes 'git pull'"
 	echo "  push         Executes 'git push'"
+	echo "  update       Update modules, manifests and support files (Makefile-related) from remote upstream"
 	echo
 	echo "Flux commands"
+	echo "-------------"
 	echo "  flux-rec-sg    Reconcile GitRepository/flux-system"
 	echo "  flux-rec-ks    Reconcile Kustomization/flux-system"
 	echo "  flux-sus-sg    Suspend GitRepository/flux-system"
@@ -73,7 +81,7 @@ all help:
 	echo "  flux-res-ks    Resume Kustomization/flux-system"
 	echo
 	echo "Pre-defined reconcile flows"
-	echo
+	echo "---------------------------"
 	echo "  reconcile        $(FLOW_RECONCILE)"
 	echo "  full-reconcile   $(FLOW_FULL_RECONCILE)"
 
@@ -99,7 +107,7 @@ clean-all: clean
 	rm -rf .terraform
 
 versions.tf: versions.tf.example
-	@true
+	@:
 	if [ -e $@ ]; then
 		tput setaf 1
 		echo "The file $< is newer than $@. Please update $@ manually."
@@ -115,7 +123,8 @@ versions.tf: versions.tf.example
 	exit 2
 
 .git/hooks/pre-commit: bin/pre-commit
-	@ln -sf ../../$< $@
+	@:
+	ln -sf ../../$< $@
 	git config hooks.gitleaks true
 	if ! which gitleaks &>/dev/null; then
 		echo "Please install 'gitleaks' from https://github.com/gitleaks/gitleaks first."
@@ -123,35 +132,34 @@ versions.tf: versions.tf.example
 		exit 2
 	fi
 
-init: .git/hooks/pre-commit versions.tf validate-vars init-unsafe
+init: .git/hooks/pre-commit versions.tf validate-vars validate-modules init-unsafe
 
-init-unsafe: versions.tf validate-vars
+init-unsafe: versions.tf validate-vars validate-modules
 	$(TERRAFORM) init $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
 
-init-upgrade: validate-vars
+init-upgrade: validate-vars validate-modules
 	$(TERRAFORM) init -upgrade $(TERRAFORM_ARGS) $(TERRAFORM_INIT_ARGS)
 
-validate: $(HELM_VALUES_TF) validate-vars
+validate: $(HELM_VALUES_TF) validate-vars validate-modules
 	$(TERRAFORM) validate $(TERRAFORM_ARGS) $(TERRAFORM_VALIDATE_ARGS)
 
-plan: $(HELM_VALUES_TF) validate-vars
+plan: $(HELM_VALUES_TF) validate-vars validate-modules
 	$(TERRAFORM) plan -out terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_PLAN_ARGS)
 
 apply:
 	$(TERRAFORM) apply -auto-approve terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_APPLY_ARGS)
 
-fmt:
-	$(TERRAFORM) fmt $(TERRAFORM_ARGS) $(TERRAFORM_FMT_ARGS)
-
 ## Overlay
 overlay: clean-output $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON)
-	@echo Processing overlays
+	@:
+	echo Processing overlays
 	find cluster/overlay -type f -name '*.yaml' -o -name '*.yml' | sort -u | while read file; do
 		bin/overlay "$$file" $(OUTPUT_OVERLAY_JSON) $(TFVARS_OVERLAY_JSON) >"$${file}.tmp" && mv "$${file}.tmp" "$$file" || exit 1
 	done
 
 $(OUTPUT_OVERLAY_JSON): $(OUTPUT_JSON)
-	@echo Generating $@
+	@:
+	echo Generating $@
 	bin/output2overlay $^ > $@
 
 $(TFVARS_OVERLAY_JSON): $(ALL_TFVARS)
@@ -159,10 +167,10 @@ $(TFVARS_OVERLAY_JSON): $(ALL_TFVARS)
 	bin/tfvars2overlay $^ > $@
 
 ## Helm Overlay
-
 overlay-helm: manifests
 
-## Git
+fmt:
+	$(TERRAFORM) fmt $(TERRAFORM_ARGS) $(TERRAFORM_FMT_ARGS)
 
 commit:
 	if git status --porcelain | grep -vE '^(\?\?|!!)'; then
@@ -182,20 +190,30 @@ migrate-state:
 #
 # Validations
 #
-.PHONY: validate-vars is-tree-clean
+.PHONY: validate-vars validate-modules is-tree-clean
 
 validate-vars:
-	@if [ -z "$(CLUSTER_NAME)" ]; then
+	@:
+	if [ -z "$(CLUSTER_NAME)" ]; then
 		echo "Missing required var: CLUSTER_NAME"
 		exit 1
 	fi
+
+validate-modules: $(MODULES_MAIN_TF)
+
+$(MODULES_MAIN_TF):
+	@:
+	echo '--> Module $@ missing but still present in modules.yaml'
+	echo '--> Recover it or remove from modules.yaml'
+	exit 2
 
 kustomize:
 	kustomize build cluster/ -o $(KUSTOMIZE_BUILD)
 
 is-tree-clean:
 ifneq ($(force), true)
-	@if git status --porcelain | grep '^[^?]'; then
+	@:
+	if git status --porcelain | grep '^[^?]'; then
 		git status;
 		echo -e "\n>>> Tree is not clean. Please commit and try again <<<\n";
 		exit 1;
@@ -206,7 +224,8 @@ endif
 # Outputs
 #
 $(OUTPUT_JSON): $(ALL_TF) $(ALL_TFVARS)
-	@echo Generating $@
+	@:
+	echo Generating $@
 	$(TERRAFORM) output -json $(TERRAFORM_ARGS) $(TERRAFORM_OUTPUT_ARGS) > $@
 
 output: $(OUTPUT_JSON)
@@ -218,11 +237,13 @@ output: $(OUTPUT_JSON)
 .PHONY: manifests cluster2/%.yaml
 
 $(HELM_VALUES_TF): $(filter-out $(HELM_VALUES_TF),$(wildcard $(ALL_TF) $(ALL_TFVARS)))
-	@echo Building $@ from:
+	@:
+	echo Building $@ from:
 	python bin/mk-helm-values $(OUTPUTS_TF) | tr -d '\\' > $@
 
 $(VALUES_TERRAFORM_YAML): $(OUTPUT_JSON) $(HELM_VALUES_TF)
-	@echo Building $@ from $(OUTPUT_JSON)
+	@:
+	echo Building $@ from $(OUTPUT_JSON)
 	python bin/tf2values2 $(OUTPUT_JSON) | yq -P > $@
 
 cluster2/%.yaml: $(VALUES_TERRAFORM_YAML) $(VALUES_CUSTOM_YAML)
@@ -257,15 +278,18 @@ flux-res-ks fresks:
 .PHONY: update update-% sync-upstream
 
 $(UPSTREAM_DIR):
-	@echo 'Syncing upstream: $(UPSTREAM_GIT_REPO)'
+	@:
+	echo 'Syncing upstream: $(UPSTREAM_GIT_REPO)'
 	git clone $(UPSTREAM_GIT_REPO) $(UPSTREAM_DIR)
 
 sync-upstream: $(UPSTREAM_DIR)
-	@echo 'Syncing upstream: $(UPSTREAM_GIT_REPO)'
+	@:
+	echo 'Syncing upstream: $(UPSTREAM_GIT_REPO)'
 	cd $(UPSTREAM_DIR) && git pull origin main --tags
 
 update: sync-upstream update-common update-terraform update-manifests
-	@echo
+	@:
+	echo
 	echo "--> Execute 'make $(UPDATE_OVERLAY_TARGET)' to see diff for overlay files <--"
 
 # this exists just to allow to update versions only, without touching anything else
@@ -276,26 +300,31 @@ update-version:
 	$$sed -i -e '/source/s/ref=v.*"/ref=v'$$v'"/g' main-*tf
 
 update-common:
-	@echo 'Checking common files'
+	@:
+	echo 'Checking common files'
 	cd $(UPSTREAM_DIR) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
 		$(COMMON_FILES) $(ROOT_DIR)
 
 update-terraform: update-common
-	@echo 'Checking terraform files'
+	@:
+	echo 'Checking terraform files'
 	cd $(UPSTREAM_DIR) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
 		$(MODULES_TF) $(COMMON_TF) $(ROOT_DIR)
 
 update-manifests: update-common
-	@echo 'Checking manifest files'
+	@:
+	echo 'Checking manifest files'
 	cd $(UPSTREAM_DIR) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
 		$(MANIFESTS_BASE) $(ROOT_DIR)
 
 update-overlay:
-	@echo 'Checking overlay files'
+	@:
+	echo 'Checking overlay files'
 	$(foreach source,$(MANIFESTS_OVERLAY),diff -prNu --color=always $(source) $(UPSTREAM_DIR)/$(source) || true;)
 
 update-overlay-meld:
-	@echo 'Checking overlay files (using meld)'
+	@:
+	echo 'Checking overlay files (using meld)'
 	$(foreach source,$(MANIFESTS_OVERLAY),meld --newtab $(source) $(UPSTREAM_DIR)/$(source) || true;)
 
 ########################################################
@@ -312,7 +341,8 @@ destroy-cluster:
 	$(TERRAFORM) destroy $(TERRAFORM_ARGS) $(TERRAFORM_DESTROY_ARGS)
 
 destroy: destroy-cluster-resources destroy-cluster
-	@echo 'Use "$(MAKE) destroy-cluster-resources-auto-approve" to destroy without asking.'
+	@:
+	echo 'Use "$(MAKE) destroy-cluster-resources-auto-approve" to destroy without asking.'
 
 # WARNING: NO CONFIRMATION ON DESTROY
 destroy-cluster-resources-auto-approve:
