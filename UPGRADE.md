@@ -9,7 +9,7 @@ terraform destroy -target module.eks.module.karpenter
 helm uninstall -n karpenter karpenter
 helm uninstall -n karpenter karpenter-crd
 make update
-sed -i -e 's/karpenter_version.*/karpenter_version = "1.5.0"/' terraform-eks.tfvars
+sed -i -e 's/karpenter_version.*/karpenter_version = "1.5.0"/' terraform-eks.auto.tfvars
 make init plan apply overlay commit push flux-rec-sg
 
 kubectl delete pod -n getup -l app=teleport-agent
