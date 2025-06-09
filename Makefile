@@ -31,7 +31,7 @@ HELM_TEMPLATE_CMD     := helm template cluster cluster-chart --no-hooks --disabl
 
 # Update vars
 UPSTREAM_GIT_REPO     ?= https://github.com/getupcloud/getup-cluster-$(FLAVOR).git
-UPSTREAM_DIR          := $(ROOT_DIR)/.upstream
+UPSTREAM_DIR          := .upstream
 MANIFESTS_BASE        := cluster/base
 MANIFESTS_OVERLAY     := cluster/overlay cluster/kustomization.yaml
 ## TODO: handle modules.yaml during update
