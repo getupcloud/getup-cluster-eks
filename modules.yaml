@@ -3,8 +3,8 @@ modules:
 - cert-manager
 - ecr-credentials-sync
 - eks
-- external-secrets-operator
 - external-dns
+- external-secrets-operator
 - flux
 - istio
 - loki
