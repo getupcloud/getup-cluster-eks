@@ -49,7 +49,8 @@ update istiod \
     Service/istiod \
     Deployment/istiod \
     HorizontalPodAutoscaler/istiod \
-    MutatingWebhookConfiguration/istio-sidecar-injector
+    MutatingWebhookConfiguration/istio-sidecar-injector \
+    ValidatingWebhookConfiguration/istio-validator-istio-system
 
 update istio-ingressgateway \
     Service/istio-ingressgateway \
