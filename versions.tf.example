@@ -3,7 +3,7 @@
 #    versions \
 #    eks \
 #    all \
-#    v2.1.5 \
+#    v2.1.6 \
 #    modules/eks/eks/versions.tf \
 #    modules/eks/external-secrets-operator/versions.tf \
 #    modules/eks/external-dns/versions.tf \
