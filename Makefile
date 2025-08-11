@@ -1,3 +1,5 @@
+all: help
+
 include Makefile.conf
 -include Makefile.local
 -include .env
