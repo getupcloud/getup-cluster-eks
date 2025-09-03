@@ -3,19 +3,19 @@
 #    versions \
 #    eks \
 #    all \
-#    v2.1.8 \
-#    modules/eks/eks/versions.tf \
-#    modules/eks/external-secrets-operator/versions.tf \
-#    modules/eks/external-dns/versions.tf \
-#    modules/eks/rds/versions.tf \
-#    modules/eks/vpc_peering/versions.tf \
-#    modules/eks/ecr-credentials-sync/versions.tf \
+#    v2.2.0 \
 #    modules/eks/cert-manager/versions.tf \
+#    modules/eks/ecr-credentials-sync/versions.tf \
+#    modules/eks/eks/versions.tf \
+#    modules/eks/external-dns/versions.tf \
+#    modules/eks/external-secrets-operator/versions.tf \
+#    modules/eks/flux/versions.tf \
+#    modules/eks/loki/versions.tf \
+#    modules/eks/opencost/versions.tf \
+#    modules/eks/rds/versions.tf \
 #    modules/eks/tempo/versions.tf \
 #    modules/eks/velero/versions.tf \
-#    modules/eks/flux/versions.tf \
-#    modules/eks/opencost/versions.tf \
-#    modules/eks/loki/versions.tf
+#    modules/eks/vpc_peering/versions.tf
 
 terraform {
   required_version = "~> 1.12"
@@ -33,9 +33,14 @@ terraform {
       version = "~> 5.34"
     }
 
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.10"
+    flux = {
+      source  = "fluxcd/flux"
+      version = "~> 1.2"
+    }
+
+    github = {
+      source  = "integrations/github"
+      version = "~> 5.18"
     }
 
     helm = {
@@ -48,19 +53,14 @@ terraform {
       version = "~> 2.0"
     }
 
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.10"
+    }
+
     null = {
       source  = "hashicorp/null"
       version = "~> 3.0"
-    }
-
-    flux = {
-      source  = "fluxcd/flux"
-      version = "~> 1.2"
-    }
-
-    github = {
-      source  = "integrations/github"
-      version = "~> 5.18"
     }
 
   }
