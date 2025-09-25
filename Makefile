@@ -48,6 +48,7 @@ ifeq ($(AUTO_LOCAL_IP),true)
   TERRAFORM_ARGS += -var cluster_endpoint_public_access_cidrs='["$(shell curl -4 -s https://ifconfig.me)/32"]'
 endif
 
+SHELL = /bin/bash
 .ONESHELL:
 .EXPORT_ALL_VARIABLES:
 
@@ -144,6 +145,13 @@ init-upgrade: validate-vars validate-modules
 
 validate: $(HELM_VALUES_TF) validate-vars validate-modules
 	$(TERRAFORM) validate $(TERRAFORM_ARGS) $(TERRAFORM_VALIDATE_ARGS)
+	for module in $(MODULES); do
+		[ -e terraform-$${module}.auto.tfvars ] || continue
+		echo $$module:
+		sed -ne 's/^variable "\([^"]\+\)".*/\1/p' variables-$${module}.tf | sort -u | while read var; do
+			grep -qw $$var terraform-$${module}.auto.tfvars || echo "- $$var"
+		done
+	done
 
 plan: $(HELM_VALUES_TF) validate-vars validate-modules
 	$(TERRAFORM) plan -out terraform.tfplan $(TERRAFORM_ARGS) $(TERRAFORM_PLAN_ARGS)
@@ -241,12 +249,12 @@ output: $(OUTPUT_JSON)
 $(HELM_VALUES_TF): $(filter-out $(HELM_VALUES_TF),$(wildcard $(ALL_TF) $(ALL_TFVARS)))
 	@:
 	echo Building $@ from:
-	python bin/mk-helm-values $(OUTPUTS_TF) | tr -d '\\' > $@
+	python3 bin/mk-helm-values $(OUTPUTS_TF) | tr -d '\\' > $@
 
 $(VALUES_TERRAFORM_YAML): $(OUTPUT_JSON) $(HELM_VALUES_TF)
 	@:
 	echo Building $@ from $(OUTPUT_JSON)
-	python bin/tf2values2 $(OUTPUT_JSON) | yq -P > $@
+	python3 bin/tf2values2 $(OUTPUT_JSON) | yq -P > $@
 
 cluster2/%.yaml: $(VALUES_TERRAFORM_YAML) $(VALUES_CUSTOM_YAML)
 	$(HELM_TEMPLATE_CMD) --values values-terraform.yaml --values values-custom.yaml --set mode.$*=true > $@
@@ -337,7 +345,7 @@ update-overlay-meld:
 .PHONY: destroy destroy-%
 
 destroy-cluster-resources:
-	python bin/destroy-cluster-resources
+	python3 bin/destroy-cluster-resources
 
 destroy-cluster:
 	$(TERRAFORM) destroy $(TERRAFORM_ARGS) $(TERRAFORM_DESTROY_ARGS)
@@ -348,7 +356,7 @@ destroy: destroy-cluster-resources destroy-cluster
 
 # WARNING: NO CONFIRMATION ON DESTROY
 destroy-cluster-resources-auto-approve:
-	python bin/destroy-cluster-resources --confirm-delete-cluster-resources
+	python3 bin/destroy-cluster-resources --confirm-delete-cluster-resources
 
 # WARNING: NO CONFIRMATION ON DESTROY
 destroy-cluster-auto-approve: REGION ?= $(shell awk '/^region/{print $$3}' terraform-*.auto.tfvars | tr -d '"')
