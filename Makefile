@@ -309,7 +309,7 @@ update-version:
 	sed=$$(type gsed &>/dev/null && echo gsed || echo sed)
 	$$sed -i -e '/source/s/ref=v.*"/ref=v'$$v'"/g' main-*tf
 
-update-common:
+update-common: sync-upstream
 	@:
 	echo 'Checking common files'
 	cd $(UPSTREAM_DIR) && rsync -av --omit-dir-times --info=all0,name1 --out-format='--> %f' --relative --ignore-missing-args \
