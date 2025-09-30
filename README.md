@@ -155,8 +155,8 @@ make help                # print help
 make reconcile           # run simple reconcile: clean-output plan apply overlay commit push
 make full-reconcile      # run full reconcile: clean-output pull init validate plan apply kubeconfig overlay commit push
 make fmt                 # run terraform fmt
-make upgrade             # run terraform init --upgrade 
-make validate            # run terraform validate 
+make init-upgrade        # run terraform init --upgrade
+make validate            # run terraform validate
 make kubeconfig          # download the kubeconfig file for kubectl
 make output              # run terraform output
 make destroy             # destroy kubernetes cluster resources and EKS
