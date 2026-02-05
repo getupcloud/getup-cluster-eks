@@ -37,7 +37,7 @@ UPSTREAM_DIR          := .upstream
 MANIFESTS_BASE        := cluster/base
 MANIFESTS_OVERLAY     := cluster/overlay cluster/kustomization.yaml
 ## TODO: handle modules.yaml during update
-MODULES               := $(shell yq '.modules[]' <modules.yaml)
+MODULES               := $(shell yq -r '.modules[]' <modules.yaml)
 MODULES_TF            := $(foreach m,$(MODULES),main-$(m).tf variables-$(m).tf outputs-$(m).tf moved-$(m).tf terraform-$(m).auto.tfvars.example helm-values-$(m).yaml.example)
 MODULES_MAIN_TF       := $(foreach m,$(MODULES),main-$(m).tf)
 COMMON_TF             := variables-customer.tf terraform-customer.auto.tfvars.example variables-auth.tf
