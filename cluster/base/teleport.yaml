@@ -26,6 +26,26 @@ spec:
   targetNamespace: getup
   values:
     proxyAddr: getup.teleport.sh:443
+    roles: kube,app,discovery
+    enterprise: true
 
     podSecurityPolicy:
       enabled: false
+      
+    kubernetesDiscovery:
+    - types:
+      - app
+      namespaces:
+      - monitoring
+      labels:
+        teleport.io/app: ""
+
+    highAvailability:
+      replicaCount: 2
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 1
+
+    updater:
+      enabled: true
+      releaseChannel: "stable/cloud"

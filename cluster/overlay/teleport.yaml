@@ -13,3 +13,5 @@ spec:
       customer: #output:{customer_name}
       region: #output:{aws_region}
       sla: #output:{cluster_sla}
+      env: #output:{cluster_environment}
+      internal-name: #output:{cluster_internal_name}
