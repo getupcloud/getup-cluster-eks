@@ -49,3 +49,31 @@ spec:
     updater:
       enabled: true
       releaseChannel: "stable/cloud"
+
+## RBAC para executar scans de segurança - sem necessidade de permissões de escrita
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: teleport-k8s-full-readonly
+rules:
+  # Concede leitura em TODOS os recursos (namespaced e cluster-scoped, incluindo Secrets e Nodes)
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
+  # Concede leitura em endpoints não-recursos (ex: /healthz, /version, /metrics)
+  - nonResourceURLs: ["*"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: teleport-k8s-full-readonly-binding
+subjects:
+  - kind: Group
+    name: teleport-k8s-readonly # Mesmo grupo definido na Role do Teleport
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: teleport-k8s-full-readonly
+  apiGroup: rbac.authorization.k8s.io
