@@ -56,6 +56,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: teleport-k8s-full-readonly
+  annotations:
+    owner: getupcloud
 rules:
   # Concede leitura em TODOS os recursos (namespaced e cluster-scoped, incluindo Secrets e Nodes)
   - apiGroups: ["*"]
@@ -69,6 +71,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: teleport-k8s-full-readonly-binding
+  annotations:
+    owner: getupcloud
 subjects:
   - kind: Group
     name: teleport-k8s-readonly # Mesmo grupo definido na Role do Teleport
