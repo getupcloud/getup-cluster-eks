@@ -70,7 +70,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: teleport-k8s-full-readonly-binding
+  name: teleport-k8s-full-readonly
   annotations:
     owner: getupcloud
 subjects:
